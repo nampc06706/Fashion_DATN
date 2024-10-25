@@ -145,7 +145,14 @@ export default function OrderTab({ accountId: initialAccountId }) {
                 <span className="font-semibold text-gray-800">Tên người nhận:</span>
                 <span className="text-gray-700">{selectedOrder.address.fullname || "Tên khách hàng"}</span>
               </div>
-
+              <div className="flex justify-between items-center border-b-2 pb-2">
+                <span className="font-semibold text-gray-800">Số điện thoại:</span>
+                <span className="text-gray-700">0{selectedOrder.address.phone || "Tên khách hàng"}</span>
+              </div>
+              <div className="flex justify-between items-center border-b-2 pb-2">
+                <span className="font-semibold text-gray-800">Ghi chú:</span>
+                <span className="text-gray-700">{selectedOrder.note || "Tên khách hàng"}</span>
+              </div>
               <div className="flex justify-between items-center border-b-2 pb-2">
                 <span className="font-semibold text-gray-800">Địa chỉ giao hàng:</span>
                 <span className="text-gray-700">{`${selectedOrder.address.province}, ${selectedOrder.address.district}, ${selectedOrder.address.ward}, ${selectedOrder.address.note}`}</span>
@@ -183,6 +190,7 @@ export default function OrderTab({ accountId: initialAccountId }) {
                   </div>
                 ))}
               </div>
+
 
 
               {/* Tổng tiền và phí giao hàng */}

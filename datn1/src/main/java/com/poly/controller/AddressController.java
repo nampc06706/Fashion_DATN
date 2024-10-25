@@ -140,6 +140,24 @@ public class AddressController {
 	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 	    }
 	}
+	
+	// Lấy địa chỉ mặc định theo accountId
+    @GetMapping("/{accountId}/default")
+    public ResponseEntity<Address> getDefaultAddress(@PathVariable Integer accountId) {
+    	
+    	Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+	    if (authentication == null || !authentication.isAuthenticated()) {
+	        logger.error("Người dùng chưa xác thực.");
+	        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+	    }
+
+	    logger.info("Người dùng hiện tại: {}, với quyền: {}", authentication.getName(),
+	            authentication.getAuthorities());
+	    
+        Address defaultAddress = addressService.getDefaultAddressByAccountId(accountId);
+        return ResponseEntity.ok(defaultAddress);
+    }
 
 
 }

@@ -7,6 +7,7 @@ import Cookies from 'js-cookie';
 import { jwtDecode } from "jwt-decode";
 
 export default function ProductView() {
+  const [cartItems, setCartItems] = useState(JSON.parse(Cookies.get('cart') || '[]'));
   const { id } = useParams();
   const [productDetails, setProductDetails] = useState(null);
   const [src, setSrc] = useState("");
@@ -155,14 +156,12 @@ export default function ProductView() {
 
       if (existingItem) {
         // Cập nhật quantity
-        existingItem.quantity += item.quantity;
-
-        // Cập nhật ID từ phản hồi nếu có
-        existingItem.id = item.id || existingItem.id; // Chỉ cập nhật nếu ID có
+        existingItem.quantity = parseInt(existingItem.quantity, 10) + parseInt(item.quantity, 10);
       } else {
         // Thêm mới mục vào giỏ hàng
         cartItems.push(item);
       }
+
       // Lưu lại giỏ hàng vào cookie
       Cookies.set('cart', JSON.stringify(cartItems), { expires: 7 });
     };
