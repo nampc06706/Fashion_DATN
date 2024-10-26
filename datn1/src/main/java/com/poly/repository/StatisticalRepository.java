@@ -25,17 +25,14 @@ public interface StatisticalRepository extends JpaRepository<StatisticalDTO, Int
 			+ "where Status = 1;", nativeQuery = true)
 	double sumTotalPrice();
 	
-	@Query(value = "SELECT \r\n"
-			+ "	orderid as id,\r\n"
-			+ "	MONTH(Date) AS Month,\r\n"
-			+ "	YEAR(Date) AS Year,\r\n"
+	@Query(value = "SELECT orders.id,\r\n"
+			+ "    MONTH(Date) AS Month,\r\n"
+			+ "    YEAR(Date) AS Year,\r\n"
 			+ "    SUM(Price * Quantity) AS Total\r\n"
 			+ "FROM orderdetails\r\n"
-			+ "inner join orders on OrderID = orders.id\r\n"
-			+ "where Status = 1\r\n"
-			+ "GROUP BY\r\n"
-			+ "YEAR(Date), MONTH(Date)\r\n"
-			+ "ORDER BY\r\n"
-			+ "Year, Month;",nativeQuery = true)
+			+ "INNER JOIN orders ON OrderID = orders.id\r\n"
+			+ "WHERE Status = 1\r\n"
+			+ "GROUP BY YEAR(Date), MONTH(Date),orders.id\r\n"
+			+ "ORDER BY Year, Month;",nativeQuery = true)
 	List<StatisticalDTO> fetchMonthlySalesData();	
 }
