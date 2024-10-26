@@ -182,5 +182,24 @@ public class AddressService {
 			logger.info("Địa chỉ ID {} đã bị xóa thành công.", addressId);
 		}
 	}
+	
+	// Phương thức để lấy địa chỉ mặc định theo accountId
+    public Address getDefaultAddressByAccountId(Integer accountId) {
+        // Kiểm tra xem tài khoản có tồn tại không
+        Account account = accountRepository.findById(accountId).orElseThrow(() -> {
+            logger.error("Tài khoản không tồn tại với ID: {}", accountId);
+            return new RuntimeException("Tài khoản không tồn tại");
+        });
+
+        // Lấy địa chỉ mặc định của tài khoản
+        Address defaultAddress = addressRepository.findByAccountIdAndIsdefaultTrue(accountId);
+        if (defaultAddress == null) {
+            logger.error("Không tìm thấy địa chỉ mặc định cho tài khoản ID: {}", accountId);
+            throw new RuntimeException("Không tìm thấy địa chỉ mặc định");
+        }
+
+        logger.info("Đã lấy địa chỉ mặc định cho tài khoản ID {}", accountId);
+        return defaultAddress;
+    }
 
 }

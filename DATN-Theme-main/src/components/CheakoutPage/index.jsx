@@ -7,8 +7,10 @@ import LayoutHomeFive from "../Partials/LayoutHomeFive";
 import { jwtDecode } from 'jwt-decode';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useNavigate } from 'react-router-dom';
 
 export default function CheckoutPage() {
+  const navigate = useNavigate();
   const [shippingMethods, setShippingMethods] = useState([]);
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [cartItems, setCartItems] = useState([]);
@@ -21,6 +23,7 @@ export default function CheckoutPage() {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null);
   const [shippingFee, setShippingFee] = useState(0); // Phí vận chuyển
   const [totalAmount, setTotalAmount] = useState(0); // Tổng tiền
+  const [note, setNote] = useState("");
   const [showNewAddressForm, setShowNewAddressForm] = useState(false);
   const [newAddress, setNewAddress] = useState({
     fullname: '',
@@ -208,9 +211,6 @@ export default function CheckoutPage() {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
   };
 
-  const handleAddressChange = (id) => {
-    setSelectedAddressId(selectedAddressId === id ? null : id);
-  };
   const handlePaymentChange = (id) => {
     setSelectedPaymentMethod(selectedPaymentMethod === id ? null : id);
   };
@@ -246,7 +246,7 @@ export default function CheckoutPage() {
       addressId: selectedAddressId,
       paymentId: selectedPaymentMethod,
       shippingMethodId: selectedShippingMethod,
-      note: "",
+      note: note, // Sử dụng giá trị note từ state
       cartItems: cartItems.map(item => ({
         id: item.id || null,
         accountId: userInfo.accountId,
@@ -277,6 +277,9 @@ export default function CheckoutPage() {
         window.location.href = vnpayUrl; // Chuyển hướng đến trang thanh toán VNPAY
       } else {
         toast.success("Đặt hàng thành công!"); // Thông báo thành công
+        setTimeout(() => {
+          navigate('/profile#order'); // Chuyển trang sau 2 giây
+        }, 1000); // 2000ms = 2 giây
         // Reset lại trạng thái sau khi đặt hàng thành công
 
         // Xóa sản phẩm khỏi giỏ hàng
@@ -311,6 +314,7 @@ export default function CheckoutPage() {
   };
 
   // Kiểm tra và cập nhật địa chỉ mặc định
+  // Kiểm tra và cập nhật địa chỉ mặc định
   const handleSetDefaultAddress = async (addressId) => {
     if (!userInfo || !token) {
       toast.error("Bạn cần đăng nhập để thực hiện thao tác này.");
@@ -339,11 +343,41 @@ export default function CheckoutPage() {
           isdefault: address.id === addressId,
         }))
       );
+
+      // Gọi lại fetchDefaultAddress để đảm bảo rằng chúng ta có dữ liệu mới nhất
+      fetchDefaultAddress(); // Cập nhật lại địa chỉ mặc định từ server
     } catch (error) {
       console.error("Lỗi khi đặt địa chỉ mặc định:", error.message);
       toast.error("Có lỗi xảy ra khi đặt địa chỉ mặc định.");
     }
   };
+
+  // Hàm lấy địa chỉ mặc định
+  const fetchDefaultAddress = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8080/api/user/addresses/${userInfo.accountId}/default`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        withCredentials: true,
+      });
+      if (response.data) {
+        setSelectedAddressId(response.data.id); // Đặt địa chỉ mặc định
+      }
+    } catch (error) {
+      console.error("Lỗi khi lấy địa chỉ mặc định:", error.message);
+      toast.error("Không thể lấy địa chỉ mặc định.");
+    }
+  };
+
+  // Gọi hàm này khi component load để lấy địa chỉ mặc định
+  useEffect(() => {
+    if (userInfo && token) {
+      fetchDefaultAddress();
+    }
+  }, [userInfo, token]);
+
 
 
 
@@ -487,11 +521,14 @@ export default function CheckoutPage() {
                   <div className="modal-content">
                     <form>
                       <InputCom
+                        value={note}
+                        inputHandler={(e) => setNote(e.target.value)} // Gán hàm này cho inputHandler
                         label="Ghi chú*"
                         name="note"
                         placeholder=""
                         inputClasses="w-full h-[50px]"
                       />
+
                     </form>
                   </div>
                 </div>

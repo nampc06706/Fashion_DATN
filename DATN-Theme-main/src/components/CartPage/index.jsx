@@ -7,7 +7,8 @@ import ProductsTable from "./ProductsTable";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
 
 export default function CardPage({ cart = true }) {
@@ -77,28 +78,38 @@ export default function CardPage({ cart = true }) {
   }
 
   const handleCheckout = async () => {
+    // Kiểm tra nếu không có token
+    if (!token) {
+      toast.warning("Vui lòng đăng nhập để thực hiện thanh toán.");
+      //navigate('/login'); // Điều hướng đến trang đăng nhập nếu không có token
+      return;
+    }
+
     // Phân tích giỏ hàng từ cookie
     const cartData = JSON.parse(Cookies.get('cart') || '[]');
-  
+
     // Lọc các sản phẩm được chọn
     const selectedItems = cartData.filter(item => item.isSelected);
     console.log(selectedItems); // In ra để kiểm tra sản phẩm đã chọn
-  
+
     // Kiểm tra xem có sản phẩm nào được chọn không
     if (selectedItems.length === 0) {
       toast.warning("Vui lòng chọn ít nhất một sản phẩm để thanh toán.");
       return;
     }
-  
-    // Thực hiện thanh toán ở đây
+
+    // Điều hướng đến trang thanh toán nếu các điều kiện trên đều thỏa mãn
     navigate('/checkout');
   };
-  
-  
-  
+
+
+
+
 
   return (
+
     <LayoutHomeFive childrenClasses={cart ? "pt-0 pb-0" : ""}>
+
       {cartItems.length === 0 ? (
         <div className="cart-page-wrapper w-full">
           <div className="container-x mx-auto">
@@ -160,6 +171,8 @@ export default function CardPage({ cart = true }) {
           </div>
         </div>
       )}
+      <ToastContainer autoClose={3000} />
     </LayoutHomeFive>
+
   );
 }

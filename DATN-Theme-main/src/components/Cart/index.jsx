@@ -20,18 +20,43 @@ export default function Cart({ className, type, accountId }) {
     }
   }
 
-  useEffect(() => {
-    const savedCart = Cookies.get('cart');
-    if (savedCart) {
-      try {
-        const parsedCart = JSON.parse(savedCart);
-        setCartItems(parsedCart);
-      } catch (error) {
-        console.error("Error parsing cart from cookie:", error);
-      }
+  // Tải giỏ hàng từ cookies
+  const loadCartFromCookies = () => {
+    const cookieCart = Cookies.get('cart');
+    const cartList = cookieCart ? JSON.parse(cookieCart) : [];
+    setCartItems(cartList);
+    setLoading(false); // Đặt loading thành false sau khi đã tải giỏ hàng từ cookies
+  };
+
+  // Định nghĩa hàm fetchCartFromDatabase
+  const fetchCartFromDatabase = async () => {
+    if (!accountId) return;
+
+    try {
+      const response = await axios.get(`http://localhost:8080/api/guest/carts`, {
+        params: { accountId: accountId },
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const cartData = response.data || [];
+      setCartItems(cartData);
+      Cookies.set('cart', JSON.stringify(cartData), { expires: 7 });
+    } catch (error) {
+      console.error("Error fetching cart from database:", error);
+      setError("Could not fetch cart information.");
     }
+  };
+
+  useEffect(() => {
+    loadCartFromCookies(); // Gọi hàm để tải giỏ hàng từ cookies
   }, []);
 
+  useEffect(() => {
+    if (token) {
+      fetchCartFromDatabase(); // Tải giỏ hàng từ cơ sở dữ liệu nếu có token
+    } else {
+      loadCartFromCookies(); // Nếu không có token, tải giỏ hàng từ cookies
+    }
+  }, [accountId, token]);
 
   useEffect(() => {
     const fetchProductDetails = async () => {
@@ -62,32 +87,15 @@ export default function Cart({ className, type, accountId }) {
       }
     };
 
-    fetchProductDetails();
+    fetchProductDetails(); // Tải chi tiết sản phẩm khi giỏ hàng có item
   }, [cartItems, token]);
-
-  useEffect(() => {
-    if (!accountId) return;
-
-    const fetchCartFromDatabase = async () => {
-      try {
-        const response = await axios.get(`http://localhost:8080/api/guest/carts`, {
-          params: { accountId: accountId },
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        const cartData = response.data || [];
-        setCartItems(cartData);
-        Cookies.set('cart', JSON.stringify(cartData), { expires: 7 });
-      } catch (error) {
-        console.error("Error fetching cart from database:", error);
-        setError("Could not fetch cart information.");
-      }
-    };
-
-    fetchCartFromDatabase();
-  }, [accountId, token]);
 
   if (loading) {
     return <div className="text-center p-4">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center p-4 text-red-500">{error}</div>;
   }
 
   const formatPriceVND = (price) => {
