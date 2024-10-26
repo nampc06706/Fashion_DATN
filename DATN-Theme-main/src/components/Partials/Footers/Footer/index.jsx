@@ -14,7 +14,7 @@ export default function Footer({ type }) {
                 <img
                   width="152"
                   height="36"
-                  src={`/assets/images/logo-3.svg`}
+                  src={`/assets/images/logo-8.png`}
                   alt="logo"
                 />
               </a>

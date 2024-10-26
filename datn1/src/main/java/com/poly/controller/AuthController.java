@@ -6,13 +6,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.poly.config.JwtTokenProvider;
+import com.poly.dto.AccountDTO;
+import com.poly.dto.AccountUpdateDTO;
 import com.poly.entity.Account;
 import com.poly.entity.Authorities;
 import com.poly.service.AccountService;
@@ -127,6 +134,46 @@ public class AuthController {
         }
     }
 
+    
+    @GetMapping("/account/info")
+    public ResponseEntity<?> getAccountInfo(@RequestHeader("Authorization") String authorizationHeader) {
+        try {
+            // Lấy token từ header và tách ra
+            String token = authorizationHeader.substring(7); // Bỏ qua "Bearer " trong header
+            String username = jwtTokenProvider.getUsernameFromToken(token);
+
+            // Tìm tài khoản dựa trên username
+            Account account = accountService.findByUsername(username);
+            if (account == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Account not found");
+            }
+
+            // Trả về thông tin tài khoản
+            return ResponseEntity.ok(account);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token or account not found");
+        }
+    }
+    
+ // API cập nhật tài khoản user phía client
+    @PutMapping("/user/{id}")
+    public AccountDTO updateAccount(
+            @PathVariable Integer id,
+            @RequestParam(required = false) String fullname,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String phone,
+            @RequestParam(required = false) MultipartFile image) {
+        
+        AccountUpdateDTO accountUpdateDTO = new AccountUpdateDTO();
+        accountUpdateDTO.setFullname(fullname);
+        accountUpdateDTO.setEmail(email);
+        accountUpdateDTO.setPhone(phone);
+        accountUpdateDTO.setImage(image); // Truyền MultipartFile vào DTO
+
+        return accountService.updateAccount2(id, accountUpdateDTO);
+    }
+
+    
 
     public static class RegisterRequest {
         private String fullname;

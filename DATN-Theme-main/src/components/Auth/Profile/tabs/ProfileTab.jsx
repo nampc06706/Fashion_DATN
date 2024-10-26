@@ -1,21 +1,112 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import InputCom from "../../../Helpers/InputCom";
+import axios from 'axios';
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode';
 
 export default function ProfileTab() {
-  const [profileImg, setprofileImg] = useState(null);
+  const [profileImg, setProfileImg] = useState(null);
+  const [accountInfo, setAccountInfo] = useState({});
   const profileImgInput = useRef(null);
-  const browseprofileImg = () => {
+
+  const browseProfileImg = () => {
     profileImgInput.current.click();
   };
+
   const profileImgChangHandler = (e) => {
     if (e.target.value !== "") {
       const imgReader = new FileReader();
       imgReader.onload = (event) => {
-        setprofileImg(event.target.result);
+        setProfileImg(event.target.result);
       };
       imgReader.readAsDataURL(e.target.files[0]);
     }
   };
+
+  useEffect(() => {
+    const token = Cookies.get("token");
+
+    if (token) {
+      let accountId;
+
+      try {
+        const userInfo = jwtDecode(token); // Giải mã token
+        accountId = userInfo.accountId; // Lấy accountId từ thông tin người dùng
+
+        // Kiểm tra xem accountId có hợp lệ không
+        if (!accountId) {
+          console.error("accountId không có trong token");
+          return; // Thoát nếu accountId không hợp lệ
+        }
+      } catch (error) {
+        console.error("Lỗi giải mã token:", error);
+        return; // Thoát nếu có lỗi
+      }
+
+      // Gọi API để lấy thông tin tài khoản
+      axios.get('http://localhost:8080/api/account/info', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then(response => {
+          setAccountInfo(response.data); // Lưu thông tin tài khoản vào state
+          //console.log(response.data);
+          // Cập nhật đường dẫn hình ảnh
+          const imagePath = `/assets/images/${response.data.image}`; // Giả sử hình ảnh nằm trong thư mục public/assets/images
+          setProfileImg(imagePath || '/assets/images/edit-profileimg.jpg'); // Hình ảnh mặc định
+          //console.log('Profile Image:', imagePath); // Kiểm tra đường dẫn hình ảnh
+        })
+        .catch(error => {
+          console.error("Có lỗi xảy ra khi lấy thông tin tài khoản:", error);
+        });
+    }
+  }, []); // Chỉ chạy một lần khi component mount
+
+  const handleUpdateProfile = () => {
+    const token = Cookies.get("token");
+    const accountId = accountInfo.id; // Lấy id từ thông tin tài khoản
+
+    // Tạo FormData để upload ảnh
+    const formData = new FormData();
+    const imageFile = profileImgInput.current.files[0]; // Lấy file ảnh từ input
+
+    // Thêm file ảnh nếu có
+    if (imageFile) {
+        formData.append('image', imageFile); // Thêm file ảnh
+    }
+
+    // Thêm thông tin tài khoản vào FormData
+    formData.append('fullname', accountInfo.fullname);
+    formData.append('email', accountInfo.email);
+    formData.append('phone', accountInfo.phone);
+    // Thêm các trường khác nếu cần thiết
+
+    // Gửi yêu cầu PUT tới API
+    axios.put(`http://localhost:8080/api/user/${accountId}`, formData, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data', // Đặt Content-Type cho FormData
+        },
+    })
+    .then(response => {
+        console.log("Cập nhật thành công:", response.data);
+        // Có thể làm mới thông tin tài khoản hoặc thông báo cho người dùng
+    })
+    .catch(error => {
+        console.error("Có lỗi xảy ra khi cập nhật thông tin:", error);
+    });
+};
+
+const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setAccountInfo(prevState => ({
+        ...prevState,
+        [name]: value, // Cập nhật thông tin tài khoản dựa trên input
+    }));
+};
+
+
   return (
     <>
       <div className="flex space-x-8">
@@ -23,74 +114,46 @@ export default function ProfileTab() {
           <div className="input-item flex space-x-2.5 mb-8">
             <div className="w-1/2 h-full">
               <InputCom
-                label="Full Name*"
+                label="Họ và tên*"
+                name="fullname"
                 placeholder="Demo Name"
                 type="text"
                 inputClasses="h-[50px]"
+                value={accountInfo.fullname || ''}
+                inputHandler={handleInputChange}
               />
+
             </div>
           </div>
           <div className="input-item flex space-x-2.5 mb-8">
             <div className="w-1/2 h-full">
               <InputCom
+                name="email"
                 label="Email*"
-                placeholder="demoemial@gmail.com"
+                placeholder="demoemail@gmail.com"
                 type="email"
                 inputClasses="h-[50px]"
+                value={accountInfo.email || ''} // Hiển thị email
+                inputHandler={handleInputChange}
               />
             </div>
             <div className="w-1/2 h-full">
               <InputCom
-                label="Phone Number*"
+                label="Số điện thoại*"
+                name="phone"
                 placeholder="012 3  *******"
                 type="text"
                 inputClasses="h-[50px]"
-              />
-            </div>
-          </div>
-          <div className="input-item mb-8">
-            <div className="w-full">
-              <InputCom
-                label="Country*"
-                placeholder="country"
-                type="text"
-                inputClasses="h-[50px]"
-              />
-            </div>
-          </div>
-          <div className="input-item mb-8">
-            <div className="w-full">
-              <InputCom
-                label="Address*"
-                placeholder="your address here"
-                type="text"
-                inputClasses="h-[50px]"
-              />
-            </div>
-          </div>
-          <div className="input-item flex space-x-2.5 mb-8">
-            <div className="w-1/2 h-full">
-              <InputCom
-                label="Town / City*"
-                placeholder=""
-                type="text"
-                inputClasses="h-[50px]"
-              />
-            </div>
-            <div className="w-1/2 h-full">
-              <InputCom
-                label="Postcode / ZIP*"
-                placeholder=""
-                type="text"
-                inputClasses="h-[50px]"
+                value={accountInfo.phone || ''} // Hiển thị số điện thoại
+                inputHandler={handleInputChange}
               />
             </div>
           </div>
         </div>
         <div className="flex-1">
-          <div className="update-logo w-full mb-9">
-            <h1 className="text-xl tracking-wide font-bold text-qblack flex items-center mb-2">
-            Cập nhật hồ sơ
+          <div className="update-logo w-full mb-9 flex flex-col items-center"> {/* Center all items */}
+            <h1 className="text-xl tracking-wide font-bold text-qblack mb-2">
+              Cập nhật hồ sơ
               <span className="ml-1">
                 <svg
                   width="20"
@@ -107,29 +170,31 @@ export default function ProfileTab() {
                 </svg>
               </span>
             </h1>
-            <p className="text-sm text-qgraytwo mb-5 ">
-            Hồ sơ có kích thước tối thiểu
+            <p className="text-sm text-qgraytwo mb-5 text-center"> {/* Center the text */}
+              Hồ sơ có kích thước tối thiểu
               <span className="ml-1 text-qblack">300x300</span>. Gif cũng có tác dụng.
               <span className="ml-1 text-qblack">Tối đa 5mb</span>.
             </p>
-            <div className="flex xl:justify-center justify-start">
+            <div className="flex justify-center"> {/* Center the image container */}
               <div className="relative">
-                <div className="sm:w-[198px] sm:h-[198px] w-[199px] h-[199px] rounded-full overflow-hidden relative">
+                <div className="w-[198px] h-[198px] rounded-full overflow-hidden flex items-center justify-center">
                   <img
-                    src={profileImg || `/assets/images/edit-profileimg.jpg`}
-                    alt=""
-                    className="object-cover w-full h-full"
+                    src={profileImg || '/assets/images/edit-profileimg.jpg'} // Hình ảnh mặc định nếu không có hình ảnh cá nhân
+                    alt="Profile"
+                    className="object-cover w-full h-full" // Giữ nguyên tỷ lệ và không giới hạn max
+                    style={{ imageRendering: 'auto' }} // Cải thiện chất lượng hình ảnh
                   />
                 </div>
+
                 <input
                   ref={profileImgInput}
-                  onChange={(e) => profileImgChangHandler(e)}
+                  onChange={profileImgChangHandler}
                   type="file"
                   className="hidden"
                 />
                 <div
-                  onClick={browseprofileImg}
-                  className="w-[32px] h-[32px] absolute bottom-7 sm:right-0 right-[105px]  bg-qblack rounded-full cursor-pointer"
+                  onClick={browseProfileImg}
+                  className="w-[32px] h-[32px] absolute bottom-7 right-0 bg-qblack rounded-full cursor-pointer flex items-center justify-center"
                 >
                   <svg
                     width="32"
@@ -139,30 +204,24 @@ export default function ProfileTab() {
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
-                      d="M16.5147 11.5C17.7284 12.7137 18.9234 13.9087 20.1296 15.115C19.9798 15.2611 19.8187 15.4109 19.6651 15.5683C17.4699 17.7635 15.271 19.9587 13.0758 22.1539C12.9334 22.2962 12.7948 22.4386 12.6524 22.5735C12.6187 22.6034 12.5663 22.6296 12.5213 22.6296C11.3788 22.6334 10.2362 22.6297 9.09365 22.6334C9.01498 22.6334 9 22.6034 9 22.536C9 21.4009 9 20.2621 9.00375 19.1271C9.00375 19.0746 9.02997 19.0109 9.06368 18.9772C10.4123 17.6249 11.7609 16.2763 13.1095 14.9277C14.2295 13.8076 15.3459 12.6913 16.466 11.5712C16.4884 11.5487 16.4997 11.5187 16.5147 11.5Z"
-                      fill="white"
-                    />
-                    <path
-                      d="M20.9499 14.2904C19.7436 13.0842 18.5449 11.8854 17.3499 10.6904C17.5634 10.4694 17.7844 10.2446 18.0054 10.0199C18.2639 9.76139 18.5261 9.50291 18.7884 9.24443C19.118 8.91852 19.5713 8.91852 19.8972 9.24443C20.7251 10.0611 21.5492 10.8815 22.3771 11.6981C22.6993 12.0165 22.7105 12.4698 22.3996 12.792C21.9238 13.2865 21.4443 13.7772 20.9686 14.2717C20.9648 14.2792 20.9536 14.2867 20.9499 14.2904Z"
+                      d="M16.5147 0C7.39562 0 0 7.39562 0 16.5147C0 25.6337 7.39562 32.0283 16.5147 32.0283C25.6337 32.0283 32.0283 25.6337 32.0283 16.5147C32.0283 7.39562 24.6326 0 16.5147 0ZM23.0145 21.6823L19.2964 24.6109C18.9351 24.8975 18.3675 24.6798 18.3675 24.2344V21.0181L14.9735 21.0181C14.4256 21.0181 14 20.5917 14 20.0365L14 16.8292C14 16.2739 14.4256 15.8475 14.9735 15.8475L19.2964 15.8475L18.3675 13.7859C18.0256 13.2248 18.243 12.6572 18.6798 12.3153L24.6295 8.89568C25.0063 8.64984 25.6352 8.88563 25.843 9.42594L27.2393 13.1531C27.4471 13.6934 27.2286 14.261 26.7927 14.6222L23.0145 21.6823Z"
                       fill="white"
                     />
                   </svg>
                 </div>
+
               </div>
             </div>
           </div>
+          <div className="flex justify-end mt-10">
+            <button
+              onClick={handleUpdateProfile} // Gọi hàm cập nhật thông tin khi nhấn nút
+              className="bg-qblack hover:bg-qgray rounded text-white py-2 px-5">
+              Cập nhật
+            </button>
+          </div>
         </div>
-      </div>
-      <div className="action-area flex space-x-4 items-center">
-        <button type="button" className="text-sm text-qred font-semibold">
-          Hủy
-        </button>
-        <button
-          type="button"
-          className="w-[164px] h-[50px] bg-qblack text-white text-sm"
-        >
-          Cập nhật hồ sơ
-        </button>
+
       </div>
     </>
   );

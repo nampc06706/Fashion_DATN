@@ -80,8 +80,12 @@ public class Account implements Serializable {
         return "Account{" +
                "id=" + id +
                ", username='" + username + '\'' +
-               ", // thêm các thuộc tính khác mà bạn muốn hiển thị, nhưng không gọi authorities" +
-               '}';
+               ", fullname='" + fullname + '\'' +
+               ", email='" + email + '\'' +
+               ", phone='" + phone + '\'' +
+               ", image='" + image + '\'' +
+               ", activated=" + activated +
+               '}'; // Thêm các thuộc tính khác mà bạn muốn hiển thị
     }
 
 }

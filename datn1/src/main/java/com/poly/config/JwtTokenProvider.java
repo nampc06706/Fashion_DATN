@@ -2,7 +2,6 @@ package com.poly.config;
 
 import java.util.Date;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -31,6 +30,11 @@ public class JwtTokenProvider {
         this.userDetailsService = userDetailsService;
     }
 
+ // Phương thức mới để lấy username từ token
+    public String getUsernameFromToken(String token) {
+        return getClaims(token).getSubject();
+    }
+    
     public Authentication getAuthentication(String token) {
         Claims claims = getClaims(token);
         String username = claims.getSubject();

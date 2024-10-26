@@ -20,7 +20,7 @@ import ReviewTab from "./tabs/ReviewTab";
 import SupportTab from "./tabs/SupportTab";
 import WishlistTab from "./tabs/WishlistTab";
 import Cookies from 'js-cookie';
-import { jwtDecode } from 'jwt-decode'; // Đảm bảo bạn đã cài đặt jwt-decode
+import { jwtDecode } from 'jwt-decode'; 
 
 export default function Profile() {
   const location = useLocation();

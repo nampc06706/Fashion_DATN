@@ -29,35 +29,35 @@ public class UserAdminController {
 	  @Autowired
 	    private AccountService accountService;
 	  
-	 private static final Logger logger = LoggerFactory.getLogger(AddressController.class);
-	 @PreAuthorize("hasAnyAuthority('ADMIN')")
-	 @GetMapping
-	    public ResponseEntity<List<AccountDTO>> getAllAccounts() {
-	        List<AccountDTO> accounts = accountService.getAllAccounts();
-	        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-	    	  if (authentication == null || !authentication.isAuthenticated()) {
-		             logger.error("Authentication is null or not authenticated.");
-		             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null); // Trả về 403 nếu không xác thực
-		         }
-	    	     logger.info("Người dùng hiện tại: {}, với quyền: {}", authentication.getName(), authentication.getAuthorities());
-	        return ResponseEntity.ok(accounts);
-	    }
-	 
-	 
-	
-	 @PreAuthorize("hasAnyAuthority('ADMIN')")
-	    @PutMapping("/{id}")
-	    public ResponseEntity<AccountDTO> updateAccount(
-	            @PathVariable Integer id, 
-	            @RequestBody AccountUpdateDTO accountUpdateDTO) {
-	        AccountDTO updatedAccount = accountService.updateAccount(id, accountUpdateDTO);
-	        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-	    	  if (authentication == null || !authentication.isAuthenticated()) {
-		             logger.error("Authentication is null or not authenticated.");
-		             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null); // Trả về 403 nếu không xác thực
-		         }
-	    	     logger.info("Người dùng hiện tại: {}, với quyền: {}", authentication.getName(), authentication.getAuthorities());
-	    	     
-	        return ResponseEntity.ok(updatedAccount);
-	    }
+//	 private static final Logger logger = LoggerFactory.getLogger(AddressController.class);
+//	 @PreAuthorize("hasAnyAuthority('ADMIN')")
+//	 @GetMapping
+//	    public ResponseEntity<List<AccountDTO>> getAllAccounts() {
+//	        List<AccountDTO> accounts = accountService.getAllAccounts();
+//	        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//	    	  if (authentication == null || !authentication.isAuthenticated()) {
+//		             logger.error("Authentication is null or not authenticated.");
+//		             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null); // Trả về 403 nếu không xác thực
+//		         }
+//	    	     logger.info("Người dùng hiện tại: {}, với quyền: {}", authentication.getName(), authentication.getAuthorities());
+//	        return ResponseEntity.ok(accounts);
+//	    }
+//	 
+//	 
+//	
+//	 @PreAuthorize("hasAnyAuthority('ADMIN')")
+//	    @PutMapping("/{id}")
+//	    public ResponseEntity<AccountDTO> updateAccount(
+//	            @PathVariable Integer id, 
+//	            @RequestBody AccountUpdateDTO accountUpdateDTO) {
+//	        AccountDTO updatedAccount = accountService.updateAccount(id, accountUpdateDTO);
+//	        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//	    	  if (authentication == null || !authentication.isAuthenticated()) {
+//		             logger.error("Authentication is null or not authenticated.");
+//		             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null); // Trả về 403 nếu không xác thực
+//		         }
+//	    	     logger.info("Người dùng hiện tại: {}, với quyền: {}", authentication.getName(), authentication.getAuthorities());
+//	    	     
+//	        return ResponseEntity.ok(updatedAccount);
+//	    }
 }

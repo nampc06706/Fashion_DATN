@@ -1,11 +1,28 @@
 import React from "react";
+import Cookies from "js-cookie";
+import {jwtDecode} from 'jwt-decode'; // Chỉ cần import một lần
 
 export default function Dashboard() {
+
+  // Lấy thông tin người dùng từ cookie
+  const token = Cookies.get("token");
+  let username = "";
+
+  if (token) {
+    try {
+      const decodedToken = jwtDecode(token); // Giải mã token
+      username = decodedToken.sub || ""; // Lấy username từ trường sub (subject)
+      console.log("profile" ,decodedToken)
+    } catch (error) {
+      console.error("Lỗi khi giải mã token:", error);
+    }
+  }
+
   return (
     <>
       <div className="welcome-msg w-full">
         <div>
-          <p className="text-qblack text-lg">Xin chào Shovo</p>
+          <p className="text-qblack text-lg">Xin chào {username}</p>
           <h1 className="font-bold text-[24px] text-qblack">
           Chào mừng đến với hồ sơ của bạn
           </h1>
@@ -99,88 +116,6 @@ export default function Dashboard() {
           <span className="text-[40px] text-white group-hover:text-qblacktext font-bold leading-none mt-1 block">
             656
           </span>
-        </div>
-      </div>
-      <div className="dashboard-info mt-8 flex justify-between items-center bg-primarygray px-7 py-7">
-        <div className="">
-          <p className="title text-[22px] font-semibold">
-          Thông tin cá nhân
-          </p>
-          <div className="mt-5">
-            <table>
-              <tr className="inline-flex mb-5">
-                <td className="text-base text-qgraytwo w-[100px] block">
-                  <div>Tên:</div>
-                </td>
-                <td className="text-base text-qblack font-medium">
-                  Shuvo khan
-                </td>
-              </tr>
-              <tr className="inline-flex mb-5">
-                <td className="text-base text-qgraytwo w-[100px] block">
-                  <div>Email:</div>
-                </td>
-                <td className="text-base text-qblack font-medium">
-                  rafiqulislamsuvobd@gmail.com
-                </td>
-              </tr>
-              <tr className="inline-flex mb-5">
-                <td className="text-base text-qgraytwo w-[100px] block">
-                  <div>Số điện thoại:</div>
-                </td>
-                <td className="text-base text-qblack font-medium">
-                  01792166627
-                </td>
-              </tr>
-              
-            </table>
-          </div>
-        </div>
-        <div className="w-[1px] h-[164px] bg-[#E4E4E4]"></div>
-        <div className="ml-6">
-          <p className="title text-[22px] font-semibold">Thông tin cửa hàng</p>
-          <div className="mt-5">
-            <table>
-              <tr className="inline-flex mb-5">
-                <td className="text-base text-qgraytwo w-[100px] block">
-                  <div>Name:</div>
-                </td>
-                <td className="text-base text-qblack font-medium">
-                  Shuvo khan
-                </td>
-              </tr>
-              <tr className="inline-flex mb-5">
-                <td className="text-base text-qgraytwo w-[100px] block">
-                  <div>Email:</div>
-                </td>
-                <td className="text-base text-qblack font-medium">
-                  rafiqulislamsuvobd@gmail.com
-                </td>
-              </tr>
-              <tr className="inline-flex mb-5">
-                <td className="text-base text-qgraytwo w-[100px] block">
-                  <div>Phone:</div>
-                </td>
-                <td className="text-base text-qblack font-medium">
-                  01792166627
-                </td>
-              </tr>
-              <tr className="inline-flex mb-5">
-                <td className="text-base text-qgraytwo w-[100px] block">
-                  <div>City:</div>
-                </td>
-                <td className="text-base text-qblack font-medium">
-                  Dhaka,Bangladesh
-                </td>
-              </tr>
-              <tr className="inline-flex mb-5">
-                <td className="text-base text-qgraytwo w-[100px] block">
-                  <div>Zip:</div>
-                </td>
-                <td className="text-base text-qblack font-medium">4040</td>
-              </tr>
-            </table>
-          </div>
         </div>
       </div>
     </>
