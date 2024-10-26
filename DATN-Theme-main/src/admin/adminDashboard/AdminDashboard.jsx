@@ -25,6 +25,7 @@ const StatisticsPage = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
 
+  const uniqueYears = Array.from(new Set(monthlySales.map(item => parseInt(item.year, 10))));
 
   const statistics = {
     totalProducts: sumProduct,
@@ -92,6 +93,7 @@ const StatisticsPage = () => {
           withCredentials: true,
         });
         setMonthlySales(monthlySaleResponse.data);
+        console.log(monthlySaleResponse.data);
 
       } catch (error) {
         console.error("Lỗi khi lấy dữ liệu thống kê:", error);
@@ -104,18 +106,20 @@ const StatisticsPage = () => {
     fetchOrderCount();
   }, [token]);
 
+  // Giả sử monthlySales chứa dữ liệu doanh thu của nhiều năm
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
-  // Dữ liệu cho biểu đồ
-
-  const inputData = monthlySales;
+  // Lọc dữ liệu theo năm đã chọn
+  const filteredData = monthlySales.filter(item => parseInt(item.year, 10) === selectedYear);
 
   // Khởi tạo mảng doanh thu cho 12 tháng
   const revenueByMonth = new Array(12).fill(0);
 
-  // Điền doanh thu vào từng tháng từ dữ liệu đầu vào
-  inputData.forEach(item => {
-    const monthIndex = parseInt(item.month) - 1; // Chuyển đổi tháng từ 1-12 sang chỉ số 0-11
-    revenueByMonth[monthIndex] = parseFloat(item.total); // Chuyển đổi tổng doanh thu thành số thực
+
+  // Điền doanh thu vào từng tháng từ dữ liệu đã lọc
+  filteredData.forEach(item => {
+    const monthIndex = parseInt(item.month) - 1;
+    revenueByMonth[monthIndex] = parseFloat(item.total);
   });
 
   // Cập nhật chartData
@@ -127,7 +131,7 @@ const StatisticsPage = () => {
     ],
     datasets: [
       {
-        label: 'Doanh thu (VND)',
+        label: `Doanh thu (VND) - ${selectedYear}`,
         data: revenueByMonth,
         backgroundColor: 'rgba(75, 192, 192, 0.6)',
         borderColor: 'rgba(75, 192, 192, 1)',
@@ -135,6 +139,7 @@ const StatisticsPage = () => {
       },
     ],
   };
+
   // Tùy chỉnh cho biểu đồ
   const chartOptions = {
     responsive: true,
@@ -142,13 +147,11 @@ const StatisticsPage = () => {
       y: {
         beginAtZero: true,
         ticks: {
-          callback: (value) => value.toLocaleString() + ' VND', // Định dạng y-axis
+          callback: (value) => value.toLocaleString() + ' VND',
         },
       },
     },
   };
-
-  console.log(chartData);
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -180,7 +183,17 @@ const StatisticsPage = () => {
       <div className="mt-10 bg-white shadow-lg rounded-lg p-6">
         <h2 className="text-xl font-semibold mb-4">Biểu đồ doanh thu</h2>
         <div className="h-100"> {/* Thay đổi chiều cao tại đây */}
-          <Bar data={chartData} options={chartOptions} />
+          <div>
+            {/* Bộ chọn năm */}
+            <select value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))}>
+              {uniqueYears.map(year => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
+
+            {/* Biểu đồ */}
+            <Bar data={chartData} options={chartOptions} />
+          </div>
         </div>
       </div>
     </div>
