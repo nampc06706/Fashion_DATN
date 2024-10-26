@@ -20,12 +20,15 @@ const StatisticsPage = () => {
 
   const [sumOrder, setSumOrder] = useState(0);
   const [sumProduct, setSumProduct] = useState(0);
+  const [sumTotalPrice, setSumTotalPrice] = useState(0);
+  const [monthlySales, setMonthlySales] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
 
+
   const statistics = {
     totalProducts: sumProduct,
-    totalRevenue: 2500000,
+    totalRevenue: sumTotalPrice,
     totalOrders: sumOrder,
   };
 
@@ -48,44 +51,74 @@ const StatisticsPage = () => {
         return;
       }
 
+      setLoading(true); // Bắt đầu loading
       try {
-        const response = await axios.get(`http://localhost:8080/api/admin/statistical/count-order`, {
+        // Gọi API để lấy số đơn hàng
+        const orderResponse = await axios.get(`http://localhost:8080/api/admin/statistical/count-order`, {
           headers: {
             'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
           },
           withCredentials: true,
         });
-        setSumOrder(response.data); // Giả sử API trả về tổng số đơn hàng
-      } catch (error) {
-        console.error("Lỗi khi lấy tổng số đơn hàng:", error);
-        setError("Có lỗi xảy ra. Vui lòng thử lại sau.");
-      } finally {
-        setLoading(false);
-      }
+        setSumOrder(orderResponse.data);
 
-      try {
-        const response = await axios.get(`http://localhost:8080/api/admin/statistical/count-product`, {
+        // Gọi API để lấy số sản phẩm
+        const productResponse = await axios.get(`http://localhost:8080/api/admin/statistical/count-product`, {
           headers: {
             'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
           },
           withCredentials: true,
         });
-        setSumProduct(response.data); // Giả sử API trả về tổng số đơn hàng
+        setSumProduct(productResponse.data);
+
+        // Gọi API để lấy tổng doanh thu
+        const priceResponse = await axios.get(`http://localhost:8080/api/admin/statistical/sum-total-price`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true,
+        });
+        setSumTotalPrice(priceResponse.data);
+
+        // Gọi API để lấy doanh thu hàng tháng
+        const monthlySaleResponse = await axios.get(`http://localhost:8080/api/admin/statistical/fetch-monthly-sales`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true,
+        });
+        setMonthlySales(monthlySaleResponse.data);
+
       } catch (error) {
-        console.error("Lỗi khi lấy Tổng số sản phẩm:", error);
+        console.error("Lỗi khi lấy dữ liệu thống kê:", error);
         setError("Có lỗi xảy ra. Vui lòng thử lại sau.");
       } finally {
-        setLoading(false);
+        setLoading(false); // Kết thúc loading
       }
-
     };
 
     fetchOrderCount();
-  }, [userInfo, token]);
+  }, [token]);
+
 
   // Dữ liệu cho biểu đồ
+
+  const inputData = monthlySales;
+
+  // Khởi tạo mảng doanh thu cho 12 tháng
+  const revenueByMonth = new Array(12).fill(0);
+
+  // Điền doanh thu vào từng tháng từ dữ liệu đầu vào
+  inputData.forEach(item => {
+    const monthIndex = parseInt(item.month) - 1; // Chuyển đổi tháng từ 1-12 sang chỉ số 0-11
+    revenueByMonth[monthIndex] = parseFloat(item.total); // Chuyển đổi tổng doanh thu thành số thực
+  });
+
+  // Cập nhật chartData
   const chartData = {
     labels: [
       'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4',
@@ -95,18 +128,13 @@ const StatisticsPage = () => {
     datasets: [
       {
         label: 'Doanh thu (VND)',
-        data: [
-          400000, 500000, 300000, 600000,
-          700000, 800000, 900000, 1000000,
-          1100000, 1200000, 1300000, 1400000
-        ],
+        data: revenueByMonth,
         backgroundColor: 'rgba(75, 192, 192, 0.6)',
         borderColor: 'rgba(75, 192, 192, 1)',
         borderWidth: 1,
       },
     ],
   };
-
   // Tùy chỉnh cho biểu đồ
   const chartOptions = {
     responsive: true,
@@ -119,6 +147,8 @@ const StatisticsPage = () => {
       },
     },
   };
+
+  console.log(chartData);
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -134,7 +164,9 @@ const StatisticsPage = () => {
         {/* Card 2: Tổng doanh thu */}
         <div className="bg-white shadow-lg rounded-lg p-6 flex flex-col items-center justify-center">
           <h2 className="text-xl font-semibold">Tổng doanh thu</h2>
-          <p className="text-3xl font-bold text-green-600">{statistics.totalRevenue.toLocaleString()} VND</p>
+          <p className="text-3xl font-bold text-green-600">
+            {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(statistics.totalRevenue)}
+          </p>
         </div>
 
         {/* Card 3: Tổng số đơn hàng */}
@@ -156,3 +188,6 @@ const StatisticsPage = () => {
 };
 
 export default StatisticsPage;
+
+
+

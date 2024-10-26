@@ -13,4 +13,7 @@ import lombok.NoArgsConstructor;
 public class StatisticalDTO {
 	@Id
 	private Integer id;
+	double Total;
+	int Month;
+	int Year;
 }

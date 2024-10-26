@@ -2,11 +2,14 @@ package com.poly.service;
 
 
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.poly.dto.StatisticalDTO;
 import com.poly.repository.StatisticalRepository;
 
 
@@ -20,8 +23,16 @@ public class StatisticalService {
         return StatisticalRepository.countOrdersWithStatusOne();
     }
 	
-	public Integer getTotalProduct() {
+	public int getTotalProduct() {
         return StatisticalRepository.getTotalProduct();
+    }
+	
+	public double getTotalPrice() {
+        return StatisticalRepository.sumTotalPrice();
+    }
+	
+	public List<StatisticalDTO> fetchMonthlySalesData() {
+        return StatisticalRepository.fetchMonthlySalesData();
     }
 
 }
