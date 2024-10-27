@@ -15,14 +15,14 @@ export default function TopBar({ className }) {
             <div className="topbar-nav">
               <ul className="flex space-x-6">
                 <li>
-                  <Link to="/">
+                  <Link to="/profile">
                     <span className="text-xs leading-6 text-qblack font-500">
                     Tài khoản
                     </span>
                   </Link>
                 </li>
                 <li>
-                  <Link to="/tracking-order">
+                  <Link to="/profile#order">
                     <span className="text-xs leading-6 text-qblack font-500">
                     Theo dõi đơn hàng
                     </span>
@@ -42,27 +42,23 @@ export default function TopBar({ className }) {
                 <div className="country-select flex space-x-1 items-center">
                   <div>
                     <img
-                      src={`/assets/images/country-logo-16x16.png`}
+                      src={`/assets/images/vietnam.webp`}
                       width="16"
                       height="16"
-                      alt="country logo"
+                      alt="vietnam logo"
                       className="overflow-hidden rounded-full"
                     />
                   </div>
                   <Selectbox
                     className="w-fit"
-                    datas={["United State", "Bangladesh", "India"]}
+                    datas={["Việt Nam", "English"]}
                   />
                   <div>
                     <Arrow className="fill-current qblack" />
                   </div>
                 </div>
                 <div className="currency-select flex space-x-1 items-center">
-                  <Selectbox className="w-fit" datas={["USD", "BDT"]} />
-                  <Arrow className="fill-current qblack" />
-                </div>
-                <div className="language-select flex space-x-1 items-center">
-                  <Selectbox className="w-fit" datas={["Bangla", "english"]} />
+                  <Selectbox className="w-fit" datas={["VND", "DOLLAR"]} />
                   <Arrow className="fill-current qblack" />
                 </div>
               </div>

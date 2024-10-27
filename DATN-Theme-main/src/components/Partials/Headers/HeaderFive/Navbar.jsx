@@ -54,7 +54,7 @@ export default function Navbar({ className }) {
             setUser(null);
           }
         } else {
-          console.log('No token found in cookie.');
+          //console.log('No token found in cookie.');
           setUser(null);
         }
       } catch (error) {
@@ -208,13 +208,13 @@ export default function Navbar({ className }) {
                         </div>
                       </a>
                     </li>
-                    
+
                     <li className="category-item ">
                       <a href="#">
                         <div className="flex justify-between items-center px-5 h-10 bg-white hover:bg-qh2-green transition-all duration-300 ease-in-out cursor-pointer text-qblack hover:text-white">
                           <div className="flex items-center space-x-6">
                             <span>
-                            <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd"><path d="M22 9.74l-2 1.02v7.24c-1.007 2.041-5.606 3-8.5 3-3.175 0-7.389-.994-8.5-3v-7.796l-3-1.896 12-5.308 11 6.231v8.769l1 3h-3l1-3v-8.26zm-18 1.095v6.873c.958 1.28 4.217 2.292 7.5 2.292 2.894 0 6.589-.959 7.5-2.269v-6.462l-7.923 4.039-7.077-4.473zm-1.881-2.371l9.011 5.694 9.759-4.974-8.944-5.066-9.826 4.346z"/></svg>
+                              <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd"><path d="M22 9.74l-2 1.02v7.24c-1.007 2.041-5.606 3-8.5 3-3.175 0-7.389-.994-8.5-3v-7.796l-3-1.896 12-5.308 11 6.231v8.769l1 3h-3l1-3v-8.26zm-18 1.095v6.873c.958 1.28 4.217 2.292 7.5 2.292 2.894 0 6.589-.959 7.5-2.269v-6.462l-7.923 4.039-7.077-4.473zm-1.881-2.371l9.011 5.694 9.759-4.974-8.944-5.066-9.826 4.346z" /></svg>
                             </span>
                             <span className="text-xs font-400">
                               Nón
@@ -255,7 +255,7 @@ export default function Navbar({ className }) {
                         <div className=" flex justify-between items-center px-5 h-10 bg-white hover:bg-qh2-green transition-all duration-300 ease-in-out cursor-pointer text-qblack hover:text-white">
                           <div className="flex items-center space-x-6">
                             <span>
-                              <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd"><path d="M9.082 2.303c.299-1.286 1.468-2.303 2.918-2.303 1.487 0 2.639 1.057 2.923 2.316 1.701.422 3.117 1.306 4.056 2.81.748 1.199 1.054 2.393 1.553 6.089 1.002.265 1.634.865 1.912 1.76.263.846.516 3.591.554 5.029.035 1.473-.395 2.64-1.881 3.131l-.01.003c-.498 3.078-3.527 2.848-4.527 2.859-1.444.009-2.692-.004-4.576-.011-1.198.004-5.325.013-5.804-.016-1.984-.158-3.03-1.228-3.297-2.829-1.144-.363-1.904-1.3-1.904-2.805 0-1.27.205-3.603.482-5.056.233-1.083.886-1.775 1.994-2.067.47-3.648.804-5.189 1.868-6.588.951-1.251 2.245-1.956 3.739-2.322m-2.827 4.823c-.436 1.241-.839 4.666-.991 5.915-.331.02-.67.032-1.004.062-.688.073-.765.255-.845.727-.274 1.602-.413 3.459-.415 4.565.01.593.204.797.695.887.156.027.929.09 1.1.105.083 2.411.128 2.588 2.649 2.611 1.335.008 4.56-.011 4.56-.011 2.637.01 3.49.021 4.862.008 2.281-.022 2.273-.42 2.347-2.607.332-.029.664-.053.995-.091.836-.118.812-.542.784-1.39-.04-1.277-.184-2.807-.425-4.195-.068-.341-.178-.486-.569-.57-.274-.062-.97-.085-1.252-.102-.124-1-.548-4.579-.991-5.852-.877-2.523-3.084-3.19-5.777-3.19-2.65 0-4.843.628-5.723 3.128m11.746 10.863c-.012 1.923-.901 2.937-2.888 2.998-2.073.019-4.144.021-6.217 0-1.896-.061-2.854-1.164-2.896-2.928v-4.068h12.001v3.998zm-7-2.998h-4c0 1.036-.023 2.071.001 3.106.045 1.318.711 1.85 1.915 1.89 2.059.021 4.118.019 6.176 0 1.383-.043 1.895-.565 1.909-2.001v-2.995h-4.001v2.998c0 .551-.449 1-1 1-.552 0-1-.449-1-1v-2.998zm.446-8.196c-1.944.149-2.953.773-3.213 5.208-.062.632-.961.629-1-.019.013-.702.153-1.945.351-2.804.359-1.542 1.033-2.742 2.543-3.185.974-.286 2.781-.285 3.749 0 1.455.426 2.133 1.555 2.496 3.037.244 1 .392 2.656.366 3.016-.084.582-.895.593-.993.01-.306-3.096-.336-5.126-3.255-5.267l.676 2.335c.166.75-.405 1.455-1.166 1.455-.751 0-1.319-.688-1.171-1.43l.617-2.356zm.554 1.994c.33 0 .598.268.598.597 0 .33-.268.598-.598.598-.33 0-.597-.268-.597-.598 0-.329.267-.597.597-.597m1.791-6.683c-.328-.659-.995-1.107-1.797-1.107-.814.01-1.46.46-1.783 1.102 1.082-.133 2.448-.141 3.58.005"/></svg>
+                              <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd"><path d="M9.082 2.303c.299-1.286 1.468-2.303 2.918-2.303 1.487 0 2.639 1.057 2.923 2.316 1.701.422 3.117 1.306 4.056 2.81.748 1.199 1.054 2.393 1.553 6.089 1.002.265 1.634.865 1.912 1.76.263.846.516 3.591.554 5.029.035 1.473-.395 2.64-1.881 3.131l-.01.003c-.498 3.078-3.527 2.848-4.527 2.859-1.444.009-2.692-.004-4.576-.011-1.198.004-5.325.013-5.804-.016-1.984-.158-3.03-1.228-3.297-2.829-1.144-.363-1.904-1.3-1.904-2.805 0-1.27.205-3.603.482-5.056.233-1.083.886-1.775 1.994-2.067.47-3.648.804-5.189 1.868-6.588.951-1.251 2.245-1.956 3.739-2.322m-2.827 4.823c-.436 1.241-.839 4.666-.991 5.915-.331.02-.67.032-1.004.062-.688.073-.765.255-.845.727-.274 1.602-.413 3.459-.415 4.565.01.593.204.797.695.887.156.027.929.09 1.1.105.083 2.411.128 2.588 2.649 2.611 1.335.008 4.56-.011 4.56-.011 2.637.01 3.49.021 4.862.008 2.281-.022 2.273-.42 2.347-2.607.332-.029.664-.053.995-.091.836-.118.812-.542.784-1.39-.04-1.277-.184-2.807-.425-4.195-.068-.341-.178-.486-.569-.57-.274-.062-.97-.085-1.252-.102-.124-1-.548-4.579-.991-5.852-.877-2.523-3.084-3.19-5.777-3.19-2.65 0-4.843.628-5.723 3.128m11.746 10.863c-.012 1.923-.901 2.937-2.888 2.998-2.073.019-4.144.021-6.217 0-1.896-.061-2.854-1.164-2.896-2.928v-4.068h12.001v3.998zm-7-2.998h-4c0 1.036-.023 2.071.001 3.106.045 1.318.711 1.85 1.915 1.89 2.059.021 4.118.019 6.176 0 1.383-.043 1.895-.565 1.909-2.001v-2.995h-4.001v2.998c0 .551-.449 1-1 1-.552 0-1-.449-1-1v-2.998zm.446-8.196c-1.944.149-2.953.773-3.213 5.208-.062.632-.961.629-1-.019.013-.702.153-1.945.351-2.804.359-1.542 1.033-2.742 2.543-3.185.974-.286 2.781-.285 3.749 0 1.455.426 2.133 1.555 2.496 3.037.244 1 .392 2.656.366 3.016-.084.582-.895.593-.993.01-.306-3.096-.336-5.126-3.255-5.267l.676 2.335c.166.75-.405 1.455-1.166 1.455-.751 0-1.319-.688-1.171-1.43l.617-2.356zm.554 1.994c.33 0 .598.268.598.597 0 .33-.268.598-.598.598-.33 0-.597-.268-.597-.598 0-.329.267-.597.597-.597m1.791-6.683c-.328-.659-.995-1.107-1.797-1.107-.814.01-1.46.46-1.783 1.102 1.082-.133 2.448-.141 3.58.005" /></svg>
                             </span>
                             <span className="text-xs font-400">
                               Ba lô
@@ -291,13 +291,13 @@ export default function Navbar({ className }) {
                         </div>
                       </a>
                     </li>
-                    
+
                     <li className="category-item ">
                       <a href="#">
                         <div className="flex justify-between items-center px-5 h-10 bg-white hover:bg-qh2-green transition-all duration-300 ease-in-out cursor-pointer text-qblack hover:text-white">
                           <div className="flex items-center space-x-6">
                             <span>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M8 24l2.674-9h-9.674l16-15-2.674 9h8.674l-15 15zm-1.586-11h6.912l-1.326 4 5.739-6h-6.065l1.304-4-6.564 6z"/></svg>
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M8 24l2.674-9h-9.674l16-15-2.674 9h8.674l-15 15zm-1.586-11h6.912l-1.326 4 5.739-6h-6.065l1.304-4-6.564 6z" /></svg>
                             </span>
                             <span className="text-xs font-400">
                               Phụ Kiện
@@ -392,38 +392,39 @@ export default function Navbar({ className }) {
                                 <li>
                                   <a href="#">
                                     <span className="text-qgray text-sm font-400 border-b border-transparent hover:border-qyellow hover:text-qyellow">
-                                      Horizonral Thumbnail
+                                      Hình ảnh ngang
                                     </span>
                                   </a>
                                 </li>
                                 <li>
                                   <a href="#">
                                     <span className="text-qgray text-sm font-400 border-b border-transparent hover:border-qyellow hover:text-qyellow">
-                                      Vertical Thumbnail
+                                      Hình ảnh dọc
                                     </span>
                                   </a>
                                 </li>
                                 <li>
                                   <a href="#">
                                     <span className="text-qgray text-sm font-400 border-b border-transparent hover:border-qyellow hover:text-qyellow">
-                                      Gallery Thumbnail
+                                      Bộ sưu tập hình ảnh
                                     </span>
                                   </a>
                                 </li>
                                 <li>
                                   <a href="#">
                                     <span className="text-qgray text-sm font-400 border-b border-transparent hover:border-qyellow hover:text-qyellow">
-                                      Sticky Summary
+                                      Tóm tắt nổi bật
                                     </span>
                                   </a>
                                 </li>
                               </ul>
                             </div>
                           </div>
+
                           <div>
                             <div className="category">
                               <h1 className="text-[13px] font-700 text-qblack uppercase mb-[13px]">
-                                Polular Category
+                                Danh mục phổ biến
                               </h1>
                             </div>
                             <div className="category-items">
@@ -431,40 +432,41 @@ export default function Navbar({ className }) {
                                 <li>
                                   <a href="#">
                                     <span className="text-qgray text-sm font-400 border-b border-transparent hover:border-qyellow hover:text-qyellow">
-                                      Phone & Tablet
+                                      Áo Sơ Mi Công Sở
                                     </span>
                                   </a>
                                 </li>
                                 <li>
                                   <a href="#">
                                     <span className="text-qgray text-sm font-400 border-b border-transparent hover:border-qyellow hover:text-qyellow">
-                                      Gaming & Sports
+                                    Áo Thun Công Sở
                                     </span>
                                   </a>
                                 </li>
                                 <li>
                                   <a href="#">
                                     <span className="text-qgray text-sm font-400 border-b border-transparent hover:border-qyellow hover:text-qyellow">
-                                      Home Appliance
+                                    Quần Tây Công Sở
                                     </span>
                                   </a>
                                 </li>
                                 <li>
                                   <a href="#">
                                     <span className="text-qgray text-sm font-400 border-b border-transparent hover:border-qyellow hover:text-qyellow">
-                                      Fashion Clothes
+                                      Quần áo thời trang
                                     </span>
                                   </a>
                                 </li>
                               </ul>
                             </div>
                           </div>
+
                         </div>
                         <div className="thumbnil w-[348px] h-full">
                           <div className="w-full h-[235px]">
                             <img
                               width=""
-                              src={`/assets/images/mega-menu-thumb.jpg`}
+                              src={`/assets/images/banner-4.png`}
                               alt=""
                               className="w-full h-full object-contain"
                             />

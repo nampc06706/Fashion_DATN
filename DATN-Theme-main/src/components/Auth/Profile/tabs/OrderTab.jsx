@@ -32,14 +32,14 @@ export default function OrderTab({ accountId: initialAccountId }) {
               Authorization: `Bearer ${token}`,
             },
           });
-          console.log(response.data);
+         // console.log(response.data);
           setOrders(response.data);
         } catch (error) {
           console.error("Lỗi khi lấy đơn hàng:", error);
           alert("Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại.");
         }
       } else {
-        console.log("Không có accountId.");
+        //console.log("Không có accountId.");
       }
     };
 
@@ -151,7 +151,7 @@ export default function OrderTab({ accountId: initialAccountId }) {
               </div>
               <div className="flex justify-between items-center border-b-2 pb-2">
                 <span className="font-semibold text-gray-800">Ghi chú:</span>
-                <span className="text-gray-700">{selectedOrder.note || "Tên khách hàng"}</span>
+                <span className="text-gray-700">{selectedOrder.note || "Không có ghi chú"}</span>
               </div>
               <div className="flex justify-between items-center border-b-2 pb-2">
                 <span className="font-semibold text-gray-800">Địa chỉ giao hàng:</span>

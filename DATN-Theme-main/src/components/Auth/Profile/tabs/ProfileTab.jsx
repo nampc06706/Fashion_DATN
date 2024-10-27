@@ -3,6 +3,7 @@ import InputCom from "../../../Helpers/InputCom";
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
+import { ToastContainer, toast } from 'react-toastify'; // Import toast
 
 export default function ProfileTab() {
   const [profileImg, setProfileImg] = useState(null);
@@ -30,82 +31,72 @@ export default function ProfileTab() {
       let accountId;
 
       try {
-        const userInfo = jwtDecode(token); // Giải mã token
-        accountId = userInfo.accountId; // Lấy accountId từ thông tin người dùng
+        const userInfo = jwtDecode(token);
+        accountId = userInfo.accountId;
 
-        // Kiểm tra xem accountId có hợp lệ không
         if (!accountId) {
           console.error("accountId không có trong token");
-          return; // Thoát nếu accountId không hợp lệ
+          return;
         }
       } catch (error) {
         console.error("Lỗi giải mã token:", error);
-        return; // Thoát nếu có lỗi
+        return;
       }
 
-      // Gọi API để lấy thông tin tài khoản
       axios.get('http://localhost:8080/api/account/info', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
         .then(response => {
-          setAccountInfo(response.data); // Lưu thông tin tài khoản vào state
-          //console.log(response.data);
-          // Cập nhật đường dẫn hình ảnh
-          const imagePath = `/assets/images/${response.data.image}`; // Giả sử hình ảnh nằm trong thư mục public/assets/images
-          setProfileImg(imagePath || '/assets/images/edit-profileimg.jpg'); // Hình ảnh mặc định
-          //console.log('Profile Image:', imagePath); // Kiểm tra đường dẫn hình ảnh
+          setAccountInfo(response.data);
+          const imagePath = `/assets/images/${response.data.image}`;
+          setProfileImg(imagePath || '/assets/images/edit-profileimg.jpg');
         })
         .catch(error => {
           console.error("Có lỗi xảy ra khi lấy thông tin tài khoản:", error);
         });
     }
-  }, []); // Chỉ chạy một lần khi component mount
+  }, []);
 
   const handleUpdateProfile = () => {
     const token = Cookies.get("token");
-    const accountId = accountInfo.id; // Lấy id từ thông tin tài khoản
+    const accountId = accountInfo.id;
 
-    // Tạo FormData để upload ảnh
     const formData = new FormData();
-    const imageFile = profileImgInput.current.files[0]; // Lấy file ảnh từ input
+    const imageFile = profileImgInput.current.files[0];
 
-    // Thêm file ảnh nếu có
     if (imageFile) {
-        formData.append('image', imageFile); // Thêm file ảnh
+      formData.append('image', imageFile);
     }
 
-    // Thêm thông tin tài khoản vào FormData
     formData.append('fullname', accountInfo.fullname);
     formData.append('email', accountInfo.email);
     formData.append('phone', accountInfo.phone);
-    // Thêm các trường khác nếu cần thiết
 
-    // Gửi yêu cầu PUT tới API
     axios.put(`http://localhost:8080/api/user/${accountId}`, formData, {
-        headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data', // Đặt Content-Type cho FormData
-        },
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data',
+      },
     })
-    .then(response => {
+      .then(response => {
         console.log("Cập nhật thành công:", response.data);
-        // Có thể làm mới thông tin tài khoản hoặc thông báo cho người dùng
-    })
-    .catch(error => {
+        toast.success("Cập nhật thông tin thành công!"); // Thông báo thành công
+      })
+      .catch(error => {
         console.error("Có lỗi xảy ra khi cập nhật thông tin:", error);
-    });
-};
+        toast.error("Có lỗi xảy ra khi cập nhật thông tin."); // Thông báo lỗi
+      });
+  };
 
-const handleInputChange = (e) => {
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
     setAccountInfo(prevState => ({
-        ...prevState,
-        [name]: value, // Cập nhật thông tin tài khoản dựa trên input
+      ...prevState,
+      [name]: value,
     }));
-};
-
+  };
 
   return (
     <>
@@ -221,7 +212,7 @@ const handleInputChange = (e) => {
             </button>
           </div>
         </div>
-
+        <ToastContainer />
       </div>
     </>
   );

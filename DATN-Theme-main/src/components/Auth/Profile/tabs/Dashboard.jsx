@@ -12,7 +12,7 @@ export default function Dashboard() {
     try {
       const decodedToken = jwtDecode(token); // Giải mã token
       username = decodedToken.sub || ""; // Lấy username từ trường sub (subject)
-      console.log("profile" ,decodedToken)
+      //console.log("profile" ,decodedToken)
     } catch (error) {
       console.error("Lỗi khi giải mã token:", error);
     }

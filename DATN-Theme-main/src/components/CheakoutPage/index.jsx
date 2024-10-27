@@ -298,8 +298,8 @@ export default function CheckoutPage() {
         // Kiểm tra mã lỗi
         if (error.response.status === 400) {
           // Thông báo lỗi 400 cụ thể
-          const errorMessage = error.response.data.message || "Có lỗi xảy ra với đơn hàng."; // Lấy thông điệp lỗi từ phản hồi
-          toast.error(`Lỗi 400: ${errorMessage}`); // Thông báo lỗi 400
+          const errorMessage = error.response.data.message || "Không đủ hàng trong kho để hoàn tất đơn hàng, vui lòng liên hệ 098765432 để được hỗ trợ.!"; // Lấy thông điệp lỗi từ phản hồi
+          toast.error(`Lỗi: ${errorMessage}`); // Thông báo lỗi 400
         } else if (error.response.data.message.includes("Insufficient stock")) {
           // Thông báo khi hết số lượng trong kho
           toast.error("Không đủ hàng trong kho để hoàn tất đơn hàng.");

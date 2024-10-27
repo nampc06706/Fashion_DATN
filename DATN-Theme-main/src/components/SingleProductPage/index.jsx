@@ -42,7 +42,7 @@ export default function SingleProductPage() {
   useEffect(() => {
     const fetchRatings = async () => {
       if (!userInfo) {
-        toast.error("Không tìm thấy thông tin người dùng."); // Hiển thị thông báo lỗi
+        //toast.error("Không tìm thấy thông tin người dùng."); // Hiển thị thông báo lỗi
         setLoading(false);
         return;
       }
@@ -238,20 +238,13 @@ export default function SingleProductPage() {
                   className="grid xl:grid-cols-4 lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 xl:gap-[30px] gap-5"
                 >
                   <DataIteration datas={data.products} startLength={5} endLength={9}>
-                    {({ datas }) => (
-                      <>
-                        {datas && datas.length > 0 ? (
-                          datas.map((item, index) => (
-                            <div key={item.id || index} className="item">
-                              <ProductCardStyleOne datas={item} />
-                            </div>
-                          ))
-                        ) : (
-                          <p>No products available</p> // Hiển thị thông báo nếu không có sản phẩm
-                        )}
-                      </>
+                    {({ data }) => (
+                      <div key={data.id} className="item">
+                        <ProductCardStyleOne datas={data} />
+                      </div>
                     )}
                   </DataIteration>
+
                 </div>
               </div>
             </div>

@@ -6,7 +6,7 @@ import ThinLove from "../../../Helpers/icons/ThinLove";
 import ThinPeople from "../../../Helpers/icons/ThinPeople";
 import SearchBox from "../../../Helpers/SearchBox";
 import { Link, useNavigate } from "react-router-dom";
-import {jwtDecode} from 'jwt-decode'; // Chỉ cần import một lần
+import { jwtDecode } from 'jwt-decode'; // Chỉ cần import một lần
 
 export default function Middlebar({ className }) {
   const navigate = useNavigate();
@@ -31,6 +31,11 @@ export default function Middlebar({ className }) {
     window.location.reload();
     navigate("/login");
   };
+
+  // Lấy số lượng sản phẩm trong giỏ hàng và danh sách yêu thích từ cookie
+  const cart = Cookies.get('cart') ? JSON.parse(Cookies.get('cart')) : []; // Lấy dữ liệu giỏ hàng
+
+  const cartCount = cart.length; // Số lượng sản phẩm trong giỏ hàng
 
   return (
     <div className={`w-full h-[86px] bg-white ${className}`}>
@@ -57,9 +62,6 @@ export default function Middlebar({ className }) {
                     <ThinLove />
                   </span>
                 </a>
-                <span className="w-[18px] h-[18px] rounded-full bg-qh5-bwhite absolute -top-2.5 -right-2.5 flex justify-center items-center text-[9px] text-qblack">
-                  1
-                </span>
               </div>
               <div className="cart-wrapper group relative py-4">
                 <div className="cart relative cursor-pointer">
@@ -68,9 +70,11 @@ export default function Middlebar({ className }) {
                       <ThinBag />
                     </span>
                   </a>
-                  <span className="w-[18px] h-[18px] rounded-full bg-qh5-bwhite absolute -top-2.5 -right-2.5 flex justify-center items-center text-[9px] text-qblack">
-                    15
-                  </span>
+                  {cartCount > 0 && (
+                    <span className="w-[18px] h-[18px] rounded-full bg-qh5-bwhite absolute -top-2.5 -right-2.5 flex justify-center items-center text-[9px] text-qblack">
+                      {cartCount}
+                    </span>
+                  )}
                 </div>
                 <Cart className="absolute -right-[45px] top-11 z-50 hidden group-hover:block" />
               </div>

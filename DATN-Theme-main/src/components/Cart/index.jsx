@@ -8,7 +8,7 @@ export default function Cart({ className, type, accountId }) {
   const [products, setProducts] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const [hasProductsInCart, setHasProductsInCart] = useState(false);
   const token = Cookies.get('token');
   let userInfo;
 
@@ -27,6 +27,8 @@ export default function Cart({ className, type, accountId }) {
     setCartItems(cartList);
     setLoading(false); // Đặt loading thành false sau khi đã tải giỏ hàng từ cookies
   };
+
+  
 
   // Định nghĩa hàm fetchCartFromDatabase
   const fetchCartFromDatabase = async () => {
@@ -90,6 +92,56 @@ export default function Cart({ className, type, accountId }) {
     fetchProductDetails(); // Tải chi tiết sản phẩm khi giỏ hàng có item
   }, [cartItems, token]);
 
+
+  const handleRemoveItem = async (id) => {
+    //console.log("ID sản phẩm cần xóa:", id);
+    // Cập nhật giỏ hàng trong trạng thái local
+    const updatedCartItems = cartItems.filter(item => item.id !== id);
+    //console.log(updatedCartItems)
+    setCartItems(updatedCartItems); // Cập nhật trạng thái giỏ hàng
+    Cookies.set('cart', JSON.stringify(updatedCartItems), { expires: 7 }); // Lưu giỏ hàng vào cookie
+
+    // Lấy thông tin người dùng từ cookie
+    const userInfo = JSON.parse(Cookies.get('user') || '{}'); // Sử dụng '{}' nếu cookie không tồn tại
+    const accountId = userInfo?.accountId; // Lấy accountId từ userInfo
+    //console.log("accountId:", accountId);
+
+    // Nếu người dùng đã đăng nhập
+    if (accountId) {
+      try {
+        // Gọi API xóa sản phẩm
+        const response = await axios.delete(`http://localhost:8080/api/guest/carts/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true, // Đảm bảo rằng cookie được gửi
+        });
+
+        // Kiểm tra trạng thái phản hồi
+        if (response.status === 204) {
+          // Chỉ cập nhật khi xóa thành công
+          setCartItems(updatedCartItems);
+          Cookies.set('cart', JSON.stringify(updatedCartItems), { expires: 7 });
+          //console.log("Xóa sản phẩm thành công và đã cập nhật giỏ hàng.");
+        }
+        else {
+          console.error("Lỗi khi xóa sản phẩm:", response.status);
+        }
+      } catch (error) {
+        // Log chi tiết lỗi
+        console.error("Lỗi khi xóa mục khỏi cơ sở dữ liệu:", error.response?.data || error.message);
+      }
+    } else {
+      //console.log("Người dùng chưa đăng nhập, không thể xóa sản phẩm.");
+    }
+  };
+
+  // Cập nhật trạng thái hasProductsInCart dựa trên giỏ hàng của bạn
+useEffect(() => {
+  // Kiểm tra nếu giỏ hàng có sản phẩm
+  setHasProductsInCart(cartItems && cartItems.length > 0);
+}, [cartItems]); // cartItems là dữ liệu giỏ hàng
+
+
+
   if (loading) {
     return <div className="text-center p-4">Loading...</div>;
   }
@@ -144,7 +196,9 @@ export default function Cart({ className, type, accountId }) {
                         <p className="quantity text-[12px]">SL: {item.quantity}</p>
                       </div>
                     </div>
-                    <button className="ml-2 text-gray-400 hover:text-qred">
+                    <button
+                      onClick={() => handleRemoveItem(item.id)}
+                      className="ml-2 text-gray-400 hover:text-qred">
                       <svg
                         width="8"
                         height="8"
@@ -172,10 +226,15 @@ export default function Cart({ className, type, accountId }) {
           </span>
         </div>
         <div className="product-action-btn">
-          <a href="#" className="block w-full text-center py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+          <a
+            href="#"
+            className={`block w-full text-center py-2 rounded ${hasProductsInCart ? "bg-yellow-500 text-white hover:bg-yellow-600" : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+              }`}
+          >
             MUA NGAY
           </a>
         </div>
+
       </div>
     </div>
   );

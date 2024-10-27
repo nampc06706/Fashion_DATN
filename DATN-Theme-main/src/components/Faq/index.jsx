@@ -9,9 +9,9 @@ export default function Faq() {
       <div className="faq-page-wrapper w-full mb-10">
         <div className="page-title w-full">
           <PageTitle
-            title="Frequently Asked Questions"
+            title="Câu Hỏi Thường Gặp"
             breadcrumb={[
-              { name: "home", path: "/" },
+              { name: "Trang chủ", path: "/" },
               { name: "FAQ", path: "/faq" },
             ]}
           />
@@ -22,39 +22,29 @@ export default function Faq() {
           <div className="main-wrapper w-full lg:flex lg:space-x-[30px]">
             <div className="lg:w-1/2 w-full mb-10 lg:mb-0">
               <h1 className="text-qblack font-bold text-[22px] mb-4">
-                Frequently asked questions
+                Câu Hỏi Thường Gặp
               </h1>
               <div className="flex flex-col space-y-7 justify-between">
                 <Accodion
-                  title="01. How does information technology work?"
-                  des="There are many variations of passages of Lorem Ipsum available into the 
-but the majority have suffered alteration in some form, by injecte find to a
-humour, or randomised words"
+                  title="01. Công nghệ thông tin hoạt động như thế nào?"
+                  des="Có nhiều biến thể của các đoạn văn bản Lorem Ipsum có sẵn, nhưng phần lớn đã trải qua sự thay đổi ở một số hình thức, bằng cách tiêm một chút hài hước hoặc các từ ngẫu nhiên."
                 />
                 <Accodion
                   init
-                  title="02. How can I become IT manager?"
-                  des="There are many variations of passages of Lorem Ipsum available into the 
-but the majority have suffered alteration in some form, by injecte find to a
-humour, or randomised words"
+                  title="02. Làm thế nào để tôi trở thành quản lý CNTT?"
+                  des="Có nhiều biến thể của các đoạn văn bản Lorem Ipsum có sẵn, nhưng phần lớn đã trải qua sự thay đổi ở một số hình thức, bằng cách tiêm một chút hài hước hoặc các từ ngẫu nhiên."
                 />
                 <Accodion
-                  title="03. What are the latest trends in IT?"
-                  des="There are many variations of passages of Lorem Ipsum available into the 
-but the majority have suffered alteration in some form, by injecte find to a
-humour, or randomised words"
+                  title="03. Những xu hướng mới nhất trong CNTT là gì?"
+                  des="Có nhiều biến thể của các đoạn văn bản Lorem Ipsum có sẵn, nhưng phần lớn đã trải qua sự thay đổi ở một số hình thức, bằng cách tiêm một chút hài hước hoặc các từ ngẫu nhiên."
                 />
                 <Accodion
-                  title="04. How long should a business plan be?"
-                  des="There are many variations of passages of Lorem Ipsum available into the 
-but the majority have suffered alteration in some form, by injecte find to a
-humour, or randomised words"
+                  title="04. Một kế hoạch kinh doanh nên dài bao lâu?"
+                  des="Có nhiều biến thể của các đoạn văn bản Lorem Ipsum có sẵn, nhưng phần lớn đã trải qua sự thay đổi ở một số hình thức, bằng cách tiêm một chút hài hước hoặc các từ ngẫu nhiên."
                 />
                 <Accodion
-                  title="05. How work the support policy?"
-                  des="There are many variations of passages of Lorem Ipsum available into the 
-but the majority have suffered alteration in some form, by injecte find to a
-humour, or randomised words"
+                  title="05. Chính sách hỗ trợ hoạt động như thế nào?"
+                  des="Có nhiều biến thể của các đoạn văn bản Lorem Ipsum có sẵn, nhưng phần lớn đã trải qua sự thay đổi ở một số hình thức, bằng cách tiêm một chút hài hước hoặc các từ ngẫu nhiên."
                 />
               </div>
             </div>
@@ -62,7 +52,7 @@ humour, or randomised words"
               <div className="bg-white sm:p-10 p-5">
                 <div className="title flex flex-col items-center">
                   <h1 className="lg:text-[34px] text-xl font-bold text-qblack">
-                    Have Any Qustion
+                    Bạn có câu hỏi nào không?
                   </h1>
                   <span className="-mt-2 block">
                     <svg
@@ -84,7 +74,7 @@ humour, or randomised words"
                 <div className="inputs mt-5">
                   <div className="mb-4">
                     <InputCom
-                      label="Frist Name*"
+                      label="Tên*"
                       placeholder="Demo Name"
                       name="first_name"
                       inputClasses="h-[50px]"
@@ -92,7 +82,7 @@ humour, or randomised words"
                   </div>
                   <div className="mb-4">
                     <InputCom
-                      label="Email Address*"
+                      label="Địa chỉ Email*"
                       placeholder="info@quomodosoft.com"
                       name="email"
                       inputClasses="h-[50px]"
@@ -100,17 +90,17 @@ humour, or randomised words"
                   </div>
                   <div className="mb-5">
                     <h6 className="input-label text-qgray capitalize text-[13px] font-normal block mb-2 ">
-                      Message*
+                      Tin nhắn*
                     </h6>
                     <textarea
-                      placeholder="Type your message here"
+                      placeholder="Nhập tin nhắn của bạn ở đây"
                       className="w-full h-[105px] focus:ring-0 focus:outline-none p-3 border border-qgray-border placeholder:text-sm"
                     ></textarea>
                   </div>
                   <div>
                     <a href="#">
                       <div className="black-btn text-sm font-semibold w-full h-[50px] flex justify-center items-center">
-                        <span>Send Now</span>
+                        <span>Gửi Ngay</span>
                       </div>
                     </a>
                   </div>

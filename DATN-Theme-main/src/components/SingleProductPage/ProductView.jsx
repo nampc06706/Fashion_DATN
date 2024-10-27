@@ -297,9 +297,6 @@ export default function ProductView() {
                 <Star key={index} />
               ))}
             </div>
-            <span className="text-[13px] font-normal text-qblack">
-              No reviews
-            </span>
           </div>
 
           <div className="flex space-x-2 items-center mb-7">

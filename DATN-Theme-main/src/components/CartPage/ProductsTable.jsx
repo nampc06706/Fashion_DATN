@@ -56,7 +56,7 @@ export default function ProductsTable({ onSelectedTotalChange, accountId }) {
         setProducts(productDetails);
       } catch (error) {
         console.error("Error fetching product information:", error);
-        setError("Could not fetch product information.");
+        //setError("Could not fetch product information.");
       } finally {
         setLoading(false);
       }
@@ -79,7 +79,7 @@ export default function ProductsTable({ onSelectedTotalChange, accountId }) {
         Cookies.set('cart', JSON.stringify(cartData), { expires: 7 });
       } catch (error) {
         console.error("Error fetching cart from database:", error);
-        setError("Could not fetch cart information.");
+        //setError("Could not fetch cart information.");
       }
     };
 

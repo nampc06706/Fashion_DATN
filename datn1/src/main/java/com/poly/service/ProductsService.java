@@ -319,6 +319,19 @@ public class ProductsService {
 	    // Xóa sản phẩm
 	    productsRepository.deleteById(productId);
 	}
+	
+	// Thêm phương thức để lấy tất cả danh mục
+	public List<CategoryDTO> getAllCategories() {
+	    // Lấy tất cả các danh mục từ repository
+	    List<Category> categories = categoryRepository.findAll();
+	    
+	    // Chuyển đổi sang CategoryDTO
+	    return categories.stream()
+	            .map(category -> new CategoryDTO(category.getId(), category.getName()))
+	            .collect(Collectors.toList());
+	}
+
+	
 
 
 

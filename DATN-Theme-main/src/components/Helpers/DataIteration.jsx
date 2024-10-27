@@ -13,20 +13,22 @@ function DataIteration({ datas = [], startLength = 0, endLength = datas.length, 
   return (
     <>
       {datas.slice(startLength, endLength).map((value, index) => {
-
         if (!value || typeof value !== 'object' || !value.hasOwnProperty('id')) {
           console.error('Data item is not valid or does not have an id:', value);
           return null;
         }
 
         try {
-          return children({ data: value, index });
+          return (
+            <React.Fragment key={value.id || index}>
+              {children({ data: value, index })}
+            </React.Fragment>
+          );
         } catch (error) {
           console.error('Error rendering children with data:', error);
           return null;
         }
       })}
-
     </>
   );
 }

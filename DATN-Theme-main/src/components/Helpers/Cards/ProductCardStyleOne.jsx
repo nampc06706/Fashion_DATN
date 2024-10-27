@@ -1,6 +1,5 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import Compair from "../icons/Compair";
 import QuickViewIco from "../icons/QuickViewIco";
 import Star from "../icons/Star";
 import ThinLove from "../icons/ThinLove";
@@ -17,6 +16,7 @@ export default function ProductCardStyleOne({ data = {}, type = 1 }) {
     }
   };
 
+  //console.log(data)
   const formatPrice = (price) => {
     if (price) {
       // Chuyển đổi giá thành số nguyên (loại bỏ phần thập phân) và định dạng với phân cách hàng nghìn

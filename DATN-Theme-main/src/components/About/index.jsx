@@ -53,7 +53,7 @@ export default function About() {
       <div className="about-page-wrapper w-full">
         <div className="title-area w-full">
           <PageTitle
-            title="About Us"
+            title="Về Chúng Tôi"
             breadcrumb={[
               { name: "home", path: "/" },
               { name: "About us", path: "/about" },
@@ -66,38 +66,24 @@ export default function About() {
             <div className="w-full min-h-[665px] lg:flex lg:space-x-12 items-center pb-10 lg:pb-0">
               <div className="md:w-[570px] w-full md:h-[560px] h-auto rounded overflow-hidden my-5 lg:my-0">
                 <img
-                  src={`/assets/images/about-banner.png`}
+                  src={`/assets/images/product-img-23.jpg`}
                   alt="about"
                   className="w-full h"
                 />
               </div>
               <div className="content flex-1">
                 <h1 className="text-[18px] font-medium text-qblack mb-2.5">
-                  What is e-commerce business?
+                  Kinh doanh thương mại điện tử là gì?
                 </h1>
-                <p className="text-[15px] text-qgraytwo leading-7 mb-2.5">
-                  Lorem Ipsum is simply dummy text of the printing and
-                  typesetting industry. Lorem Ipsum has been the industry's
-                  standard dummy text ever since the 1500s, when an unknown
-                  printer took a galley of type and scrambled it to make a type
-                  specimen book. It has survived not only five centuries but
-                  also the on leap into electronic typesetting.
-                </p>
+
                 <ul className="text-[15px] text-qgraytwo leading-7 list-disc ml-5 mb-5">
-                  <li>slim body with metal cover</li>
-                  <li>
-                    latest Intel Core i5-1135G7 processor (4 cores / 8 threads)
-                  </li>
-                  <li>8GB DDR4 RAM and fast 512GB PCIe SSD</li>
-                  <li>
-                    NVIDIA GeForce MX350 2GB GDDR5 graphics card backlit
-                    keyboard
-                  </li>
+                  <li>Thiết kế thanh lịch và hiện đại, phù hợp với môi trường văn phòng</li>
                 </ul>
+
 
                 <Link to="/contact">
                   <div className="w-[121px] h-10">
-                    <span className="yellow-btn">Contact Us</span>
+                    <span className="yellow-btn">Liên hệ</span>
                   </div>
                 </Link>
               </div>
@@ -108,7 +94,7 @@ export default function About() {
         <div className="customer-feedback w-full bg-white py-[60px]">
           <div className="title flex justify-center mb-5">
             <h1 className="text-[30px] font-semibold text-qblack">
-              Customers Feedback
+              Phản hồi của khách hàng
             </h1>
           </div>
           <div className="feedback-slider-wrapper w-vw relative overflow-hidden">
@@ -557,9 +543,9 @@ export default function About() {
                 </div>
                 <div>
                   <p className="text-black text-[15px] font-700 tracking-wide mb-1 uppercase">
-                    Free Shipping
+                  Miễn phí vận chuyển
                   </p>
-                  <p className="text-sm text-qblack">When ordering over $100</p>
+                  <p className="text-sm text-qblack">Khi đặt hàng trên 500k</p>
                 </div>
               </div>
             </div>
@@ -592,10 +578,10 @@ export default function About() {
                 </div>
                 <div>
                   <p className="text-black text-[15px] font-700 tracking-wide mb-1 uppercase">
-                    Free Return
+                  Trả lại miễn phí
                   </p>
                   <p className="text-sm text-qblack">
-                    Get Return within 30 days
+                  Nhận lại trong vòng 3 ngày
                   </p>
                 </div>
               </div>
@@ -637,10 +623,10 @@ export default function About() {
                 </div>
                 <div>
                   <p className="text-black text-[15px] font-700 tracking-wide mb-1 uppercase">
-                    Secure Payment
+                  Thanh toán an toàn
                   </p>
                   <p className="text-sm text-qblack">
-                    100% Secure Online Payment
+                  Thanh toán trực tuyến an toàn 100%
                   </p>
                 </div>
               </div>
@@ -693,10 +679,10 @@ export default function About() {
                 </div>
                 <div>
                   <p className="text-black text-[15px] font-700 tracking-wide mb-1 uppercase">
-                    Best Quality
+                  Chất lượng tốt nhất
                   </p>
                   <p className="text-sm text-qblack">
-                    Original Product Guarenteed
+                  Sản phẩm chính hãng được đảm bảo
                   </p>
                 </div>
               </div>
@@ -708,7 +694,7 @@ export default function About() {
           <div className="container-x mx-auto">
             <div className="blog-post-title flex justify-center items-cente mb-[30px]">
               <h1 className="text-3xl font-semibold text-qblack">
-                My Latest News
+              Tin tức mới nhất của tôi
               </h1>
             </div>
 
