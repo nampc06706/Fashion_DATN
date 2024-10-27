@@ -11,6 +11,7 @@ const ProductManagementPage = () => {
   const [showForm, setShowForm] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentProduct, setCurrentProduct] = useState(null);
+  const [categories, setCategories] = useState([]);
 
   const [newProduct, setNewProduct] = useState({
     name: '',
@@ -48,8 +49,16 @@ const ProductManagementPage = () => {
           },
           withCredentials: true,
         });
+
+        const responseCategory = await axios.get(`http://localhost:8080/api/admin/categoryadmin`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          withCredentials: true,
+        });
+        setCategories(responseCategory.data);
         setProducts(response.data);
-        console.log("product data: ", response.data)
       } catch (error) {
         console.error("Lỗi khi lấy dữ liệu sản phẩm:", error);
         setError("Có lỗi xảy ra. Vui lòng thử lại sau.");
@@ -74,14 +83,14 @@ const ProductManagementPage = () => {
     setIsEditMode(true);
     setShowForm(true);
   };
-  
+
   const updateProduct = async (id, productData) => {
     const token = Cookies.get('token');
     if (!token) {
       console.error("Không có token xác thực.");
       return;
     }
-  
+
     try {
       const response = await axios.put(`http://localhost:8080/api/admin/products/${id}`, {
         ...productData,
@@ -100,7 +109,7 @@ const ProductManagementPage = () => {
       throw error;
     }
   };
-  
+
 
   const handleFormSubmit = async () => {
     if (isEditMode && currentProduct) {
@@ -126,15 +135,13 @@ const ProductManagementPage = () => {
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
-
-    if (name === 'categoryName') {
-      // Nếu trường nhập là tên của category, cập nhật đối tượng category
+    if (name === 'categoryId') {
+      // Khi chọn một category mới, chỉ cập nhật ID của category
       setNewProduct((prev) => ({
         ...prev,
-        category: { ...prev.category, name: value }, // Giữ lại id và cập nhật tên
+        category: { ...prev.category, id: value },
       }));
     } else {
-      // Đối với các trường khác, chỉ cần cập nhật giá trị tương ứng
       setNewProduct((prev) => ({
         ...prev,
         [name]: value,
@@ -211,13 +218,19 @@ const ProductManagementPage = () => {
               </div>
               <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2">Loại sản phẩm</label>
-                <input
-                  type="text"
-                  name="categoryName" // Đổi tên trường để phù hợp với hàm handleFormChange
-                  value={newProduct.category.name} // Đảm bảo category là đối tượng với thuộc tính name
+                <select
+                  name="categoryId"
+                  value={newProduct.category.id || ''}
                   onChange={handleFormChange}
                   className="w-full border border-gray-300 p-2 rounded-lg"
-                />
+                >
+                  <option value="">Chọn loại sản phẩm</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="mb-4">
