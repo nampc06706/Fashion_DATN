@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
-
+import { useNavigate } from 'react-router-dom';
 export default function Cart({ className, type, accountId }) {
+  const navigate = useNavigate();
   const [cartItems, setCartItems] = useState([]);
   const [products, setProducts] = useState({});
   const [loading, setLoading] = useState(true);
@@ -28,7 +29,7 @@ export default function Cart({ className, type, accountId }) {
     setLoading(false); // Đặt loading thành false sau khi đã tải giỏ hàng từ cookies
   };
 
-  
+
 
   // Định nghĩa hàm fetchCartFromDatabase
   const fetchCartFromDatabase = async () => {
@@ -135,10 +136,36 @@ export default function Cart({ className, type, accountId }) {
   };
 
   // Cập nhật trạng thái hasProductsInCart dựa trên giỏ hàng của bạn
-useEffect(() => {
-  // Kiểm tra nếu giỏ hàng có sản phẩm
-  setHasProductsInCart(cartItems && cartItems.length > 0);
-}, [cartItems]); // cartItems là dữ liệu giỏ hàng
+  useEffect(() => {
+    // Kiểm tra nếu giỏ hàng có sản phẩm
+    setHasProductsInCart(cartItems && cartItems.length > 0);
+  }, [cartItems]); // cartItems là dữ liệu giỏ hàng
+
+  const handleCheckout = async () => {
+    const token = Cookies.get("token");
+    
+    // Kiểm tra nếu không có token
+    if (!token) {
+      toast.warning("Vui lòng đăng nhập để thực hiện thanh toán.");
+      return;
+    }
+  
+    // Lấy dữ liệu giỏ hàng từ cookie
+    const cartData = JSON.parse(Cookies.get('cart') || '[]');
+  
+    // Đánh dấu tất cả sản phẩm là đã chọn
+    const updatedCartData = cartData.map(item => ({
+      ...item,
+      isSelected: true
+    }));
+  
+    // Lưu lại giỏ hàng đã cập nhật vào cookie
+    Cookies.set('cart', JSON.stringify(updatedCartData));
+  
+    // Điều hướng đến trang thanh toán
+    navigate('/checkout');
+  };
+  
 
 
 
@@ -226,14 +253,18 @@ useEffect(() => {
           </span>
         </div>
         <div className="product-action-btn">
-          <a
-            href="#"
-            className={`block w-full text-center py-2 rounded ${hasProductsInCart ? "bg-yellow-500 text-white hover:bg-yellow-600" : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+          <button
+            onClick={handleCheckout}
+            disabled={!hasProductsInCart} // Vô hiệu hóa nút nếu giỏ hàng trống
+            className={`block w-full text-center py-2 rounded ${hasProductsInCart
+              ? "bg-yellow-500 text-white hover:bg-yellow-600"
+              : "bg-gray-200 text-gray-700 cursor-not-allowed"
               }`}
           >
             MUA NGAY
-          </a>
+          </button>
         </div>
+
 
       </div>
     </div>
