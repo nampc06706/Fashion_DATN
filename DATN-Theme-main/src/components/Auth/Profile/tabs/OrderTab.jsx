@@ -47,7 +47,7 @@ export default function OrderTab({ accountId: initialAccountId }) {
           console.log(sortedOrders)
         } catch (error) {
           console.error("Lỗi khi lấy đơn hàng:", error);
-          alert("Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại.");
+          //alert("Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại.");
         }
       } else {
         console.warn("Không có accountId.");

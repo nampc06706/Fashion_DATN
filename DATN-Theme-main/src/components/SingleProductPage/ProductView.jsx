@@ -195,17 +195,30 @@ export default function ProductView() {
 
 
   const addFavourite = async () => {
+    const token = Cookies.get('token');
+    
     if (!userInfo) {
       toast.error('Bạn cần đăng nhập để yêu thích sản phẩm này.');
       return;
     }
-
+  
+    if (!selectedSize) {
+      toast.error('Vui lòng chọn kích cỡ.');
+      return;
+    }
+  
+    const selectedSizeInfo = availableSizes.find(size => size.name === selectedSize);
+    if (!selectedSizeInfo) {
+      toast.error('Kích cỡ không hợp lệ.');
+      return;
+    }
+  
     const favouriteData = {
-      sizeId: id,          // ID của kích thước sản phẩm
+      sizeId: selectedSizeInfo.id,
       accountId: userInfo.accountId,
-      quantity: quantity,  // Sử dụng giá trị quantity từ state
+      quantity: parseInt(quantity, 10),
     };
-
+  
     try {
       const response = await axios.post(
         'http://localhost:8080/api/user/favourites',
@@ -216,7 +229,7 @@ export default function ProductView() {
           },
         }
       );
-
+  
       if (response.status === 201) {
         toast.success('Sản phẩm đã được thêm vào danh sách yêu thích!');
       }
@@ -230,6 +243,7 @@ export default function ProductView() {
       }
     }
   };
+  
   const changeImgHandler = (image) => {
     setSrc(image);
   };
