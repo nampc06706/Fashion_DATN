@@ -44,7 +44,7 @@ export default function PasswordTab() {
               className="input-label text-qgray text-sm block mb-2.5"
               htmlFor="old_password"
             >
-              Old Password*
+              Mật khẩu cũ*
             </label>
             <div className="input-wrapper border border-[#E8E8E8] w-full  h-[58px] overflow-hidden relative ">
               <input
@@ -115,7 +115,7 @@ export default function PasswordTab() {
               className="input-label text-qgray text-sm block mb-2.5"
               htmlFor="old_password"
             >
-              Password*
+              Mật khẩu*
             </label>
             <div className="input-wrapper border border-[#E8E8E8] w-full  h-[58px] overflow-hidden relative ">
               <input
@@ -186,7 +186,7 @@ export default function PasswordTab() {
               className="input-label text-qgray text-sm block mb-2.5"
               htmlFor="old_password"
             >
-              Re-enter Password*
+              Nhập lại mật khẩu*
             </label>
             <div className="input-wrapper border border-[#E8E8E8] w-full  h-[58px] overflow-hidden relative ">
               <input
@@ -257,13 +257,13 @@ export default function PasswordTab() {
               <div className="w-[180px] h-[50px]">
                 <button type="button" className="yellow-btn">
                   <div className="w-full text-sm font-semibold">
-                    Upldate Password
+                    Cập nhật mật khẩu
                   </div>
                 </button>
               </div>
               <button type="button">
                 <div className="w-full text-sm font-semibold text-qblack mb-5 sm:mb-0">
-                  Cancel
+                  Hủy bỏ
                 </div>
               </button>
             </div>

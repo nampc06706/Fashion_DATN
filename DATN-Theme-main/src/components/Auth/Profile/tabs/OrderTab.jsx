@@ -23,6 +23,11 @@ export default function OrderTab({ accountId: initialAccountId }) {
     }
   }, [token]);
 
+  const formatDateArray = (dateArray) => {
+    const [year, month, day, hour, minute, second] = dateArray;
+    return new Date(year, month - 1, day, hour, minute, second); // `month - 1` vì tháng trong Date bắt đầu từ 0
+  };
+
   useEffect(() => {
     const fetchOrders = async () => {
       if (accountId) {
@@ -32,20 +37,26 @@ export default function OrderTab({ accountId: initialAccountId }) {
               Authorization: `Bearer ${token}`,
             },
           });
-         // console.log(response.data);
-          setOrders(response.data);
+
+          // Sắp xếp đơn hàng theo ngày mới nhất
+          const sortedOrders = response.data.sort((a, b) =>
+            formatDateArray(b.date) - formatDateArray(a.date)
+          );
+
+          setOrders(sortedOrders);
+          console.log(sortedOrders)
         } catch (error) {
           console.error("Lỗi khi lấy đơn hàng:", error);
-          alert("Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại.");
+          //alert("Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại.");
         }
       } else {
-        //console.log("Không có accountId.");
+        console.warn("Không có accountId.");
       }
     };
 
     fetchOrders();
   }, [accountId, token]);
-
+  
   const handleOpenModal = (order) => {
     setSelectedOrder(order);
     setModalOpen(true);
