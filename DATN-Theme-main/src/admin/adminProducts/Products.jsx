@@ -180,12 +180,17 @@ const ProductManagementPage = () => {
       const reader = new FileReader();
       reader.onload = () => {
         const updatedImages = [...newProduct.images];
-        updatedImages[index] = reader.result; // Cập nhật hình ảnh tại vị trí đã chọn
+        updatedImages[index] = {
+          image: reader.result, // URL tạm thời để hiển thị hình ảnh
+          fileName: file.name,  // Lưu tên file để hiển thị trong input text
+        };
+
         setNewProduct({ ...newProduct, images: updatedImages });
       };
       reader.readAsDataURL(file);
     }
   };
+
 
 
 
@@ -256,19 +261,34 @@ const ProductManagementPage = () => {
                 <label className="block text-gray-700 text-sm font-bold mb-2">Hình ảnh</label>
                 {newProduct.images.map((imageObj, index) => (
                   <div key={index} className="mb-2 flex items-center">
+                    {/* Hiển thị ảnh, khi ấn vào sẽ mở hộp thoại chọn file */}
                     <img
                       src={`/assets/images/${imageObj.image}`}
                       alt={`Product image ${index + 1}`}
-                      className="w-20 h-20 object-cover rounded mr-2"
+                      className="w-20 h-20 object-cover rounded mr-2 cursor-pointer"
+                      onClick={() => document.getElementById(`fileInput-${index}`).click()} // Khi nhấn vào ảnh, mở input file tương ứng
                     />
+
+                    {/* Input để hiển thị tên file, không cho phép chỉnh sửa */}
+                    <input
+                      type="text"
+                      value={imageObj.image || ''}
+                      readOnly
+                      className="border border-gray-300 p-2 rounded-lg w-full mr-2"
+                    />
+
+                    {/* Input file được ẩn, chỉ hiện khi click vào ảnh */}
                     <input
                       type="file"
                       accept="image/*"
-                      onChange={(e) => handleFileChange(e)}
-                      className="border border-gray-300 p-2 rounded-lg w-full"
+                      id={`fileInput-${index}`} // Đặt id duy nhất cho mỗi input file
+                      style={{ display: "none" }} // Ẩn input file
+                      onChange={(e) => handleFileChange(e, index)} // Cập nhật hình ảnh khi chọn file mới
                     />
                   </div>
                 ))}
+
+
               </div>
               <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2">Kích thước và số lượng</label>

@@ -200,5 +200,13 @@ public class OrdersService {
 
 	    return orders; // Trả về danh sách đơn hàng cùng với chi tiết của chúng
 	}
+	
+	public List<Orders> getAllOrders() {
+        return ordersRepository.findAll();
+    }
+	
+	public int updateOrderStatusById(int orderId,String status) {
+        return ordersRepository.updateOrderStatusById(orderId,status);
+    }
 
 }
