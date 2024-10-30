@@ -8,7 +8,6 @@ import IcoDashboard from "./icons/IcoDashboard";
 import IcoLove from "./icons/IcoLove";
 import IcoPassword from "./icons/IcoPassword";
 import IcoPeople from "./icons/IcoPeople";
-import IcoReviewHand from "./icons/IcoReviewHand";
 import AddressesTab from "./tabs/AddressesTab";
 import Dashboard from "./tabs/Dashboard";
 import OrderTab from "./tabs/OrderTab";

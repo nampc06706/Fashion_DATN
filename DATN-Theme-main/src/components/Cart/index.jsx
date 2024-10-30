@@ -12,7 +12,7 @@ export default function Cart({ className, type, accountId }) {
   const [hasProductsInCart, setHasProductsInCart] = useState(false);
   const token = Cookies.get('token');
   let userInfo;
-
+ 
   if (token) {
     try {
       userInfo = jwtDecode(token);

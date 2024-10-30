@@ -43,7 +43,7 @@ export default function CheckoutPage() {
       userInfo = jwtDecode(token);
 
     } catch (error) {
-      console.error("Token decoding error:", error);
+      //console.error("Token decoding error:", error);
     }
   }
 
@@ -71,10 +71,10 @@ export default function CheckoutPage() {
           },
           withCredentials: true,
         });
-        console.log(response.data)
+        //console.log(response.data)
         setAddressData(response.data);
       } catch (error) {
-        console.error("Lỗi khi lấy dữ liệu địa chỉ:", error);
+        //console.error("Lỗi khi lấy dữ liệu địa chỉ:", error);
         if (error.response) {
           if (error.response.status === 403) {
             setError("Bạn không có quyền truy cập vào tài nguyên này.");
@@ -114,7 +114,7 @@ export default function CheckoutPage() {
       setShowNewAddressForm(false); // Ẩn form sau khi thêm địa chỉ thành công
       setNewAddress({ fullname: '', phone: '', province: '', district: '', ward: '', note: '', isdefault: false }); // Reset input
     } catch (error) {
-      console.error("Lỗi khi thêm địa chỉ:", error);
+      //console.error("Lỗi khi thêm địa chỉ:", error);
       toast.error("Có lỗi xảy ra khi thêm địa chỉ.");
     }
   };
@@ -152,7 +152,7 @@ export default function CheckoutPage() {
         }, {});
         setProducts(productDetails);
       } catch (error) {
-        console.error("Lỗi khi lấy thông tin sản phẩm:", error);
+        //console.error("Lỗi khi lấy thông tin sản phẩm:", error);
         setError("Không thể lấy thông tin sản phẩm.");
       } finally {
         setLoading(false);
@@ -347,7 +347,7 @@ export default function CheckoutPage() {
       // Gọi lại fetchDefaultAddress để đảm bảo rằng chúng ta có dữ liệu mới nhất
       fetchDefaultAddress(); // Cập nhật lại địa chỉ mặc định từ server
     } catch (error) {
-      console.error("Lỗi khi đặt địa chỉ mặc định:", error.message);
+      //console.error("Lỗi khi đặt địa chỉ mặc định:", error.message);
       toast.error("Có lỗi xảy ra khi đặt địa chỉ mặc định.");
     }
   };
@@ -366,8 +366,8 @@ export default function CheckoutPage() {
         setSelectedAddressId(response.data.id); // Đặt địa chỉ mặc định
       }
     } catch (error) {
-      console.error("Lỗi khi lấy địa chỉ mặc định:", error.message);
-      toast.error("Không thể lấy địa chỉ mặc định.");
+      //console.error("Lỗi khi lấy địa chỉ mặc định:", error.message);
+      //toast.error("Không thể lấy địa chỉ mặc định.");
     }
   };
 

@@ -218,7 +218,7 @@ public class AccountService {
 	    String fileName = System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
 	    
 	    // Đường dẫn tới thư mục mà bạn muốn lưu hình ảnh
-	    String uploadDirectory = "D:\\Java4\\DuAnTotNghiep2024\\Fashion_DATN\\DATN-Theme-main\\public\\assets\\images";
+	    String uploadDirectory = "D:\\Java6\\DuAnTotNghiep2024\\Fashion_DATN\\DATN-Theme-main\\public\\assets\\images";
 	    File directory = new File(uploadDirectory);
 
 	    // Tạo thư mục nếu chưa tồn tại

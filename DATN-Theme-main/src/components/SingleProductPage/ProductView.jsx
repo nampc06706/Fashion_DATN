@@ -195,52 +195,44 @@ export default function ProductView() {
 
 
   const addFavourite = async () => {
-    const token = Cookies.get('token');
-    
-    if (!userInfo) {
+    if (!token || !userInfo) {
       toast.error('Bạn cần đăng nhập để yêu thích sản phẩm này.');
       return;
     }
-  
+
     if (!selectedSize) {
       toast.error('Vui lòng chọn kích cỡ.');
       return;
     }
-  
+
     const selectedSizeInfo = availableSizes.find(size => size.name === selectedSize);
     if (!selectedSizeInfo) {
       toast.error('Kích cỡ không hợp lệ.');
       return;
     }
-  
+
     const favouriteData = {
       sizeId: selectedSizeInfo.id,
       accountId: userInfo.accountId,
       quantity: parseInt(quantity, 10),
     };
-  
+
     try {
       const response = await axios.post(
         'http://localhost:8080/api/user/favourites',
         favouriteData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-  
+
       if (response.status === 201) {
         toast.success('Sản phẩm đã được thêm vào danh sách yêu thích!');
       }
     } catch (error) {
-      if (error.response && error.response.status === 403) {
-        console.error('Lỗi 403: Không có quyền truy cập hoặc token đã hết hạn.', error.response.data);
-        toast.error('Bạn không có quyền yêu thích sản phẩm này.');
-      } else {
-        console.error('Có lỗi xảy ra khi thêm sản phẩm vào yêu thích:', error);
-        toast.error('Không thể thêm sản phẩm vào danh sách yêu thích.');
-      }
+      const errorMessage = error.response?.status === 403 
+        ? 'Bạn không có quyền yêu thích sản phẩm này.' 
+        : 'Không thể thêm sản phẩm vào danh sách yêu thích.';
+      toast.error(errorMessage);
+      console.error('Error adding product to favourites:', error);
     }
   };
   

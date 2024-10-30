@@ -1,21 +1,33 @@
 import { useState, useEffect } from "react";
 
-export default function InputQuantityCom({ initialQuantity }) {
-  // Khởi tạo state quantity từ props
-  const [quantity, setQuantity] = useState(initialQuantity || 1);
+export default function InputQuantityCom({ initialQuantity, id, onQuantityChange }) {
+  const [quantity, setQuantity] = useState(Number(initialQuantity) || 1);
 
-  // Cập nhật quantity khi props thay đổi
   useEffect(() => {
-    setQuantity(initialQuantity || 1);
+    const newQuantity = Number(initialQuantity) || 1; // Đảm bảo chuyển đổi thành số
+    //console.log("Updated Initial Quantity:", newQuantity);
+    setQuantity(newQuantity);
   }, [initialQuantity]);
+  
 
   const increment = () => {
-    setQuantity((prev) => prev + 1);
+    setQuantity((prev) => {
+      const newQuantity = prev + 1;
+      //console.log("Incremented Quantity:", newQuantity);
+      onQuantityChange(id, newQuantity); // Gọi hàm callback với số lượng mới
+      return newQuantity;
+    });
   };
+  
 
   const decrement = () => {
     if (quantity > 1) {
-      setQuantity((prev) => prev - 1);
+      setQuantity((prev) => {
+        const newQuantity = prev - 1;
+        //console.log("Decremented Quantity:", newQuantity);
+        onQuantityChange(id, newQuantity); // Gọi hàm callback với số lượng mới
+        return newQuantity;
+      });
     }
   };
 

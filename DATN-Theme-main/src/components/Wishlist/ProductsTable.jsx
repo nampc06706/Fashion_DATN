@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import axios from 'axios';
-import {jwtDecode} from 'jwt-decode'; // Chắc chắn rằng bạn import jwtDecode từ thư viện
-import InputQuantityCom from "../Helpers/InputQuantityCom"; // Kiểm tra đường dẫn
+import { jwtDecode } from 'jwt-decode';
+import InputQuantityCom from "../Helpers/InputQuantityCom"; // Kiểm tra đường dẫn này nếu gặp lỗi
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'; // Import CSS cho toast
+
 
 export default function ProductsTable({ className, accountId }) {
   const token = Cookies.get('token');
@@ -78,13 +81,49 @@ export default function ProductsTable({ className, accountId }) {
     fetchProductDetails();
   }, [favourites, token]);
 
-  const handleQuantityChange = (id, newQuantity) => {
-  setFavourites(prevFavourites =>
-    prevFavourites.map(item =>
-      item.id === id ? { ...item, quantity: newQuantity } : item
-    )
-  );
-};
+  const handleQuantityChange = async (id, newQuantity) => {
+    // Lưu lại số lượng cũ để tính toán sự thay đổi
+    const previousQuantity = favourites.find(item => item.id === id)?.quantity || 0;
+  
+    const quantityChange = newQuantity - previousQuantity; // Tính toán sự thay đổi
+  
+  
+    try {
+      const response = await axios.put(`http://localhost:8080/api/user/favourites/${id}/quantity`, null, {
+        params: { quantityChange }, // Gửi số lượng thay đổi
+        headers: { Authorization: `Bearer ${token}` }
+      });
+  
+      const updatedFavourite = response.data;
+      setFavourites(prevFavourites =>
+        prevFavourites.map(item =>
+          item.id === id ? { ...item, quantity: updatedFavourite.quantity } : item
+        )
+      );
+  
+      toast.success("Cập nhật số lượng yêu thích thành công!");
+    } catch (error) {
+      //console.error("Lỗi khi cập nhật số lượng yêu thích:", error);
+      toast.error("Không thể cập nhật số lượng.");
+    }
+  };
+  
+
+  const handleRemoveFavourite = async (id) => {
+    try {
+      await axios.delete(`http://localhost:8080/api/user/favourites/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setFavourites(prevFavourites => prevFavourites.filter(item => item.id !== id));
+
+      toast.success("Đã xóa sản phẩm khỏi danh sách yêu thích!");
+    } catch (error) {
+      console.error("Lỗi khi xóa yêu thích:", error);
+      toast.error("Không thể xóa sản phẩm yêu thích.");
+    }
+  };
+
 
   // Tính tổng cộng
   const totalAmount = favourites.reduce((acc, item) => {
@@ -103,6 +142,7 @@ export default function ProductsTable({ className, accountId }) {
 
   return (
     <div className={`w-full ${className || ""}`}>
+      <ToastContainer />
       <div className="relative w-full overflow-x-auto border border-[#EDEDED]">
         <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
           <tbody>
@@ -118,8 +158,8 @@ export default function ProductsTable({ className, accountId }) {
             {favourites.length > 0 ? (
               favourites.map((item) => {
                 const product = products[item.sizeId.product.id] || {};
-                const productPrice = parseFloat(product.price) || 0; // Chuyển đổi thành số
-                const total = item.quantity * productPrice; // Tính tổng cho từng sản phẩm
+                const productPrice = parseFloat(product.price) || 0;
+                const total = item.quantity * productPrice;
                 return (
                   <tr key={item.id} className="bg-white border-b hover:bg-gray-50">
                     <td className="pl-10 py-4">
@@ -128,7 +168,7 @@ export default function ProductsTable({ className, accountId }) {
                           <img
                             src={`/assets/images/${product.firstImage}`}
                             className="w-full h-full object-contain"
-                            alt={product.name || 'Sản phẩm'} // Thêm thuộc tính alt cho hình ảnh
+                            alt={product.name || 'Sản phẩm'}
                           />
                         </div>
                         <div className="flex-1 flex flex-col">
@@ -151,22 +191,27 @@ export default function ProductsTable({ className, accountId }) {
                     </td>
                     <td className="text-center py-4 px-2">
                       <div className="flex space-x-1 items-center justify-center">
-                        <span className="text-[15px] font-normal">{formatPrice(productPrice)}</span> {/* Hiển thị giá */}
+                        <span className="text-[15px] font-normal">{formatPrice(productPrice)}</span>
                       </div>
                     </td>
                     <td className="py-4">
                       <div className="flex justify-center items-center">
-                      <InputQuantityCom initialQuantity={item.quantity} />
+                        <InputQuantityCom
+                          initialQuantity={item.quantity}
+                          id={item.id} // Truyền ID của mục yêu thích
+                          onQuantityChange={handleQuantityChange} // Thêm callback để cập nhật số lượng
+                        />
+                      </div>
+                    </td>
+
+                    <td className="text-right py-4">
+                      <div className="flex space-x-1 items-center justify-center">
+                        <span className="text-[15px] font-normal">{formatPrice(total)}</span>
                       </div>
                     </td>
                     <td className="text-right py-4">
                       <div className="flex space-x-1 items-center justify-center">
-                        <span className="text-[15px] font-normal">{formatPrice(total)}</span> {/* Tính tổng cộng */}
-                      </div>
-                    </td>
-                    <td className="text-right py-4">
-                      <div className="flex space-x-1 items-center justify-center">
-                        <span>
+                        <span onClick={() => handleRemoveFavourite(item.id)} className="cursor-pointer">
                           <svg
                             width="10"
                             height="10"
@@ -176,7 +221,7 @@ export default function ProductsTable({ className, accountId }) {
                           >
                             <path
                               d="M9.7 0.3C9.3 -0.1 8.7 -0.1 8.3 0.3L5 3.6L1.7 0.3C1.3 -0.1 0.7 -0.1 0.3 0.3C-0.1 0.7 -0.1 1.3 0.3 1.7L3.6 5L0.3 8.3C-0.1 8.7 -0.1 9.3 0.3 9.7C0.7 10.1 1.3 10.1 1.7 9.7L5 6.4L8.3 9.7C8.7 10.1 9.3 10.1 9.7 9.7C10.1 9.3 10.1 8.7 9.7 8.3L6.4 5L9.7 1.7C10.1 1.3 10.1 0.7 9.7 0.3Z"
-                              fill="#F35656"
+                              fill="#E07A7A"
                             />
                           </svg>
                         </span>
@@ -188,17 +233,17 @@ export default function ProductsTable({ className, accountId }) {
             ) : (
               <tr>
                 <td colSpan={7} className="text-center py-4">
-                  Chưa có sản phẩm nào trong danh sách yêu thích của bạn.
+                  Không có sản phẩm nào trong danh sách yêu thích.
                 </td>
               </tr>
             )}
-            <tr className="font-bold text-black">
-              <td colSpan={5} className="py-4 text-right">Tổng cộng: </td>
-              <td className="py-4"> __  {formatPrice(totalAmount)}</td>
-              <td></td>
-            </tr>
           </tbody>
         </table>
+        <div className="w-full py-4 flex justify-end">
+          <span className="text-[16px] font-medium">
+            Tổng cộng: {formatPrice(totalAmount)}
+          </span>
+        </div>
       </div>
     </div>
   );

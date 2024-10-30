@@ -3,6 +3,8 @@ import Cookies from 'js-cookie';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import InputQuantityCom from "../../../Helpers/InputQuantityCom";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'; // Import CSS cho toast
 
 export default function WishlistTab({ className, accountId }) {
   const token = Cookies.get('token');
@@ -79,12 +81,76 @@ export default function WishlistTab({ className, accountId }) {
     fetchProductDetails();
   }, [favourites, token]);
 
-  const handleQuantityChange = (id, newQuantity) => {
-    setFavourites(prevFavourites =>
-      prevFavourites.map(item =>
-        item.id === id ? { ...item, quantity: newQuantity } : item
-      )
-    );
+  const handleQuantityChange = async (id, newQuantity) => {
+    // Lưu lại số lượng cũ để tính toán sự thay đổi
+    const previousQuantity = favourites.find(item => item.id === id)?.quantity || 0;
+
+    const quantityChange = newQuantity - previousQuantity; // Tính toán sự thay đổi
+
+
+    try {
+      const response = await axios.put(`http://localhost:8080/api/user/favourites/${id}/quantity`, null, {
+        params: { quantityChange }, // Gửi số lượng thay đổi
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      const updatedFavourite = response.data;
+      setFavourites(prevFavourites =>
+        prevFavourites.map(item =>
+          item.id === id ? { ...item, quantity: updatedFavourite.quantity } : item
+        )
+      );
+
+      toast.success("Cập nhật số lượng yêu thích thành công!");
+    } catch (error) {
+      //console.error("Lỗi khi cập nhật số lượng yêu thích:", error);
+      toast.error("Không thể cập nhật số lượng.");
+    }
+  };
+
+
+  const handleRemoveFavourite = async (id) => {
+    try {
+      await axios.delete(`http://localhost:8080/api/user/favourites/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setFavourites(prevFavourites => prevFavourites.filter(item => item.id !== id));
+
+      toast.success("Đã xóa sản phẩm khỏi danh sách yêu thích!");
+    } catch (error) {
+      console.error("Lỗi khi xóa yêu thích:", error);
+      toast.error("Không thể xóa sản phẩm yêu thích.");
+    }
+  };
+
+  // Hàm xóa tất cả sản phẩm yêu thích
+  const handleRemoveAllFavourites = async () => {
+    try {
+      await axios.delete(`http://localhost:8080/api/user/favourites/removeAll/${accountId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      toast.success("Đã xóa tất cả sản phẩm yêu thích!");
+    } catch (error) {
+      console.error("Lỗi khi xóa tất cả sản phẩm yêu thích:", error);
+      toast.error("Không thể xóa tất cả sản phẩm yêu thích.");
+    }
+  };
+
+  // Hàm thêm tất cả sản phẩm yêu thích vào giỏ hàng
+  const handleAddAllFavouritesToCart = async () => {
+    try {
+      await axios.post(`http://localhost:8080/api/user/favourites/addToCart/${accountId}`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      toast.success("Đã thêm tất cả sản phẩm yêu thích vào giỏ hàng!");
+    } catch (error) {
+      console.error("Lỗi khi thêm tất cả sản phẩm yêu thích vào giỏ hàng:", error.response.data); // Ghi log thông tin lỗi
+      toast.error("Không thể thêm sản phẩm yêu thích vào giỏ hàng.");
+    }
+
   };
 
   // Tính tổng cộng
@@ -105,6 +171,7 @@ export default function WishlistTab({ className, accountId }) {
   return (
     <>
       <div className={`w-full ${className || ""}`}>
+      <ToastContainer />
         <div className="relative w-full overflow-x-auto border border-[#EDEDED]">
           <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
             <tbody>
@@ -114,7 +181,13 @@ export default function WishlistTab({ className, accountId }) {
                   Sản phẩm
                 </td>
                 <td className="py-4 whitespace-nowrap text-center">
-                  Có sẵn
+                  tồn
+                </td>
+                <td className="py-4 whitespace-nowrap text-center">
+                 size
+                </td>
+                <td className="py-4 whitespace-nowrap text-center">
+                  màu
                 </td>
                 <td className="py-4 whitespace-nowrap text-center">Giá</td>
                 <td className="py-4 whitespace-nowrap  text-center">
@@ -142,7 +215,7 @@ export default function WishlistTab({ className, accountId }) {
                           </div>
                           <div className="flex-1 flex flex-col">
                             <p className="font-medium text-[15px] text-qblack">
-                            {product.name || 'Tên sản phẩm'}
+                              {product.name || 'Tên sản phẩm'}
                             </p>
                           </div>
                         </div>
@@ -151,13 +224,23 @@ export default function WishlistTab({ className, accountId }) {
                         <span className="text-[15px] font-normal">({item.sizeId.quantityInStock})</span>
                       </td>
                       <td className="text-center py-4 px-2">
+                        <span className="text-[15px] font-normal">({item.sizeId.name})</span>
+                      </td>
+                      <td className="text-center py-4 px-2">
+                        <span className="text-[15px] font-normal">({item.sizeId.color.name})</span>
+                      </td>
+                      <td className="text-center py-4 px-2">
                         <div className="flex space-x-1 items-center justify-center">
                           <span className="text-[15px] font-normal">{formatPrice(productPrice)}</span>
                         </div>
                       </td>
                       <td className=" py-4">
                         <div className="flex justify-center items-center">
-                          <InputQuantityCom initialQuantity={item.quantity}/>
+                          <InputQuantityCom
+                            initialQuantity={item.quantity}
+                            id={item.id} // Truyền ID của mục yêu thích
+                            onQuantityChange={handleQuantityChange} // Thêm callback để cập nhật số lượng
+                          />
                         </div>
                       </td>
                       <td className="text-right py-4">
@@ -167,7 +250,7 @@ export default function WishlistTab({ className, accountId }) {
                       </td>
                       <td className="text-right py-4">
                         <div className="flex space-x-1 items-center justify-center">
-                          <span>
+                          <span  onClick={() => handleRemoveFavourite(item.id)}>
                             <svg
                               width="10"
                               height="10"
@@ -198,19 +281,19 @@ export default function WishlistTab({ className, accountId }) {
         </div>
       </div>
       {favourites.length > 0 && (
-          <div className="text-right mt-4">
-            <h3 className="text-lg font-semibold">Tổng số tiền: {formatPrice(totalAmount)}</h3>
-          </div>
-        )}
+        <div className="text-right mt-4">
+          <h3 className="text-lg font-semibold">Tổng số tiền: {formatPrice(totalAmount)}</h3>
+        </div>
+      )}
       <div className="w-full mt-[30px] flex sm:justify-end justify-start">
         <div className="sm:flex sm:space-x-[30px] items-center">
-          <button type="button">
+          <button onClick={handleRemoveAllFavourites} type="button">
             <div className="w-full text-sm font-semibold text-qred mb-5 sm:mb-0">
               Xóa tất cả
             </div>
           </button>
           <div className="w-[180px] h-[50px]">
-            <button type="button" className="yellow-btn">
+            <button  onClick={handleAddAllFavouritesToCart} type="button" className="yellow-btn">
               <div className="w-full text-sm font-semibold">
                 Thêm tất cả vào giỏ hàng
               </div>
