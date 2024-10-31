@@ -15,5 +15,7 @@ public class AccountDTO {
 	    private String phone;
 	    private String image;
 	    private boolean activated;
-	    private String roleName;
+	    private String roleName;	    
 }
+
+

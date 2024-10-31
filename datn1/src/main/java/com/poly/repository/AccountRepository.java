@@ -1,9 +1,10 @@
 package com.poly.repository;
 
-
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.poly.entity.Account;
 
@@ -15,8 +16,12 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
     Account findByUsername(String username);
 
     Account findByEmail(String email);
+    
     Account findByPhone(String phone);
-    // Không cần thiết nếu các phương thức trên đã đúng
-    // Optional<Account> findByUsername1(String username);
-    // Optional<Account> findByUsernameAndPassword1(String username, String password);
+
+    @Modifying // Đánh dấu phương thức là sửa đổi dữ liệu
+    @Transactional // Đánh dấu phương thức là giao dịch
+    @Query("UPDATE Account acc SET acc.password = ?1 WHERE acc.email = ?2")
+    int updatePasswordByEmail(String newPassword, String email);
 }
+

@@ -1,5 +1,8 @@
 package com.poly.controller;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,207 +23,292 @@ import org.springframework.web.multipart.MultipartFile;
 import com.poly.config.JwtTokenProvider;
 import com.poly.dto.AccountDTO;
 import com.poly.dto.AccountUpdateDTO;
+import com.poly.dto.Forgotpassword;
 import com.poly.entity.Account;
 import com.poly.entity.Authorities;
 import com.poly.service.AccountService;
+import com.poly.util.EmailUtil;
 
 @RestController
 @RequestMapping("/api")
 @CrossOrigin(origins = "http://localhost:5173")
 public class AuthController {
 
-    @Autowired
-    private AccountService accountService;
+	@Autowired
+	private AccountService accountService;
 
-    @Autowired
-    private JwtTokenProvider jwtTokenProvider;
+	@Autowired
+	private JwtTokenProvider jwtTokenProvider;
 
-    
-    @PostMapping("/guest/takeData")
-    public ResponseEntity<?> layDuLieuGoogle(@RequestBody Account account) {
-        // Kiểm tra thông tin tài khoản trước khi lưu
-        if (account == null || account.getFullname() == null || account.getUsername() == null || account.getEmail() == null) {
-            return ResponseEntity.badRequest().body("Fullname, username, and email are required.");
-        }
+	@Autowired
+	EmailUtil emailUil;
 
+	@PostMapping("/guest/takeData")
+	public ResponseEntity<?> layDuLieuGoogle(@RequestBody Account account) {
+		// Kiểm tra thông tin tài khoản trước khi lưu
+		if (account == null || account.getFullname() == null || account.getUsername() == null
+				|| account.getEmail() == null) {
+			return ResponseEntity.badRequest().body("Fullname, username, and email are required.");
+		}
+
+		try {
+			// Kiểm tra xem tài khoản đã tồn tại hay chưa
+			Account existingAccount = accountService.findByEmail(account.getEmail());
+			if (existingAccount != null) {
+				// Tài khoản đã tồn tại, trả về JWT token
+				String roles = existingAccount.getAuthority().getRole().getName();
+				String token = jwtTokenProvider.generateToken(existingAccount.getUsername(), roles,
+						existingAccount.getId());
+				return ResponseEntity.ok(new JwtResponse(token, roles));
+			}
+
+			// Tạo tài khoản mới nếu chưa tồn tại
+			Account savedAccount = accountService.save(account.getFullname(), account.getUsername(),
+					account.getEmail());
+
+			// Tạo và trả về JWT token cho tài khoản mới
+			String roles = savedAccount.getAuthority().getRole().getName(); // Lấy vai trò từ tài khoản đã lưu
+			String token = jwtTokenProvider.generateToken(savedAccount.getUsername(), roles, savedAccount.getId());
+
+			return ResponseEntity.ok(new JwtResponse(token, roles)); // Trả về thông tin tài khoản mới và token
+		} catch (Exception e) {
+			// Ghi lại lỗi để dễ dàng chẩn đoán
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("Error saving account: " + e.getMessage());
+		}
+	}
+
+//    @PostMapping("	")
+//    public ResponseEntity<?> verifyOtpAndChangePassword(@RequestParam String email, @RequestParam String otp, @RequestParam String newPassword) {
+//        try {
+//            if (accountService.verifyOtpAndAllowPasswordChange(email, otp)) {
+//                // Thực hiện đổi mật khẩu
+//                accountService.updatePassword(email, newPassword);
+//                return ResponseEntity.ok("Mật khẩu đã được thay đổi thành công.");
+//            }
+//        } catch (RuntimeException e) {
+//            return ResponseEntity.badRequest().body(e.getMessage());
+//        }
+//        return ResponseEntity.badRequest().body("Có lỗi xảy ra.");
+//    }// Lưu trữ mã OTP
+	// Lưu trữ mã OTP
+	private static Map<String, Forgotpassword> otpStorage = new HashMap<>();
+
+	// Phương thức kiểm tra định dạng email
+	private boolean isValidEmail(String email) {
+		String emailRegex = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$";
+		return email.matches(emailRegex);
+	}
+
+	@PostMapping("/forgot-password")
+	public ResponseEntity<?> sendOtp(@RequestParam String email) {
+		if (!isValidEmail(email)) {
+			return ResponseEntity.badRequest().body("Địa chỉ email không hợp lệ.");
+		}
+
+		try {
+			String otp = emailUil.sendOtpEmail(email, "Mã OTP của bạn");
+			Forgotpassword forgotPassword = new Forgotpassword(email, otp, LocalDateTime.now());
+			otpStorage.put(email, forgotPassword); // Lưu trữ mã OTP
+
+			// Log để kiểm tra
+			System.out.println("Đã gửi và lưu mã OTP cho email: " + email + ", OTP: " + otp);
+			System.out.println("Nội dung otpStorage sau khi lưu: " + otpStorage); // Log nội dung của otpStorage
+			return ResponseEntity.ok("Mã OTP đã được gửi đến email: " + email);
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("Có lỗi xảy ra khi gửi OTP: " + e.getMessage());
+		}
+	}
+
+	@PostMapping("/verify-otp")
+	public ResponseEntity<?> verifyOtp(@RequestParam String email, @RequestParam String otp) {
+		email = email.trim().toLowerCase(); // Chuẩn hóa email
+		System.out.println("Email: " + email + ", OTP: " + otp); // Kiểm tra log
+		// Kiểm tra xem email có null hay không
+		if (email == null || email.isEmpty()) {
+			return ResponseEntity.badRequest().body("Email không hợp lệ.");
+		}
+		System.out.println("Nội dung hiện tại của otpStorage: " + otpStorage);
+
+		if (!otpStorage.containsKey(email)) {
+			return ResponseEntity.badRequest().body("Không tìm thấy mã OTP cho email này.");
+		}
+
+		try {
+			Forgotpassword forgotPassword = otpStorage.get(email);
+			System.out.println("Mã OTP lưu trữ cho email " + email + ": " + forgotPassword.getOtp());
+
+			// Kiểm tra xem mã OTP đã hết hạn chưa (5 phút)
+			if (LocalDateTime.now().isAfter(forgotPassword.getTimestamp().plusMinutes(5))) {
+				otpStorage.remove(email); // Xóa mã OTP hết hạn
+				return ResponseEntity.badRequest().body("Mã OTP đã hết hạn.");
+			}
+
+			if (forgotPassword.getOtp().equals(otp)) {
+				otpStorage.remove(email); // Xóa mã OTP sau khi xác thực thành công
+				return ResponseEntity.ok("Mã OTP xác thực thành công. Bạn có thể tiếp tục đổi mật khẩu.");
+			} else {
+				return ResponseEntity.badRequest().body("Mã OTP không chính xác.");
+			}
+		} catch (RuntimeException e) {
+			System.err.println("Lỗi khi xác thực OTP: " + e.getMessage());
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
+	}
+	
+	// Endpoint cập nhật mật khẩu sau khi xác thực OTP thành công
+    @PostMapping("/update-password")
+    public ResponseEntity<?> updatePassword(@RequestParam String email, @RequestParam String newPassword) {
         try {
-            // Kiểm tra xem tài khoản đã tồn tại hay chưa
-            Account existingAccount = accountService.findByEmail(account.getEmail());
-            if (existingAccount != null) {
-                // Tài khoản đã tồn tại, trả về JWT token
-                String roles = existingAccount.getAuthority().getRole().getName();
-                String token = jwtTokenProvider.generateToken(existingAccount.getUsername(), roles, existingAccount.getId());
-                return ResponseEntity.ok(new JwtResponse(token, roles));
-            }
-
-            // Tạo tài khoản mới nếu chưa tồn tại
-            Account savedAccount = accountService.save(account.getFullname(), account.getUsername(), account.getEmail());
-
-            // Tạo và trả về JWT token cho tài khoản mới
-            String roles = savedAccount.getAuthority().getRole().getName(); // Lấy vai trò từ tài khoản đã lưu
-            String token = jwtTokenProvider.generateToken(savedAccount.getUsername(), roles, savedAccount.getId());
-
-            return ResponseEntity.ok(new JwtResponse(token, roles)); // Trả về thông tin tài khoản mới và token
-        } catch (Exception e) {
-            // Ghi lại lỗi để dễ dàng chẩn đoán
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error saving account: " + e.getMessage());
+            accountService.updatePassword(email, newPassword);
+            return ResponseEntity.ok("Cập nhật mật khẩu thành công.");
+        } catch (RuntimeException ex) {
+            return ResponseEntity.badRequest().body(ex.getMessage());
         }
     }
 
-    @PostMapping("/signup")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
-        try {
-            // Đăng ký tài khoản mới
-            Account newAccount = accountService.register(
-                registerRequest.getFullname(),
-                registerRequest.getUsername(),
-                registerRequest.getPassword(),
-                registerRequest.getEmail(),
-                registerRequest.getPhone()
-            );
-            return ResponseEntity.status(HttpStatus.CREATED).body(newAccount);
-        } catch (RuntimeException e) {
-            // Ghi log chi tiết để debug
-            System.err.println("Error during registration: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
-    }
+	@PostMapping("/signup")
+	public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
+		try {
+			// Đăng ký tài khoản mới
+			Account newAccount = accountService.register(registerRequest.getFullname(), registerRequest.getUsername(),
+					registerRequest.getPassword(), registerRequest.getEmail(), registerRequest.getPhone());
+			return ResponseEntity.status(HttpStatus.CREATED).body(newAccount);
+		} catch (RuntimeException e) {
+			// Ghi log chi tiết để debug
+			System.err.println("Error during registration: " + e.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+		}
+	}
 
+	@PostMapping("/login")
+	public ResponseEntity<?> login(@RequestParam String username, @RequestParam String password) {
+		try {
+			// Kiểm tra thông tin đăng nhập
 
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestParam String username, @RequestParam String password) {
-        try {
-            // Kiểm tra thông tin đăng nhập
-        	
-            Account account = accountService.login(username, password);
-            
-            // Kiểm tra quyền hạn của tài khoản
-            Authorities authority = account.getAuthority();
-            if (authority != null && authority.getRole() != null) {
-                String role = authority.getRole().getName();
-                
-                // Tạo và trả về JWT token
-                String token = jwtTokenProvider.generateToken(account.getUsername(), role,account.getId());
-                return ResponseEntity.ok(new JwtResponse(token,role ));
-            } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No roles assigned to this account");
-            }
-        } catch (UsernameNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Username not found");
-        } catch (RuntimeException e) {
-            // Ghi log chi tiết để debug
-            //System.err.println("Error during login: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Incorrect password");
-        }
-    }
-    
+			Account account = accountService.login(username, password);
 
-    // Cập nhật JwtResponse để chứa thêm thông tin
-    public static class JwtResponse {
-        private String token;
-        private String role; // Thêm vai trò
+			// Kiểm tra quyền hạn của tài khoản
+			Authorities authority = account.getAuthority();
+			if (authority != null && authority.getRole() != null) {
+				String role = authority.getRole().getName();
 
-        public JwtResponse(String token, String role) {
-            this.token = token;
-            this.role = role;
-        }
+				// Tạo và trả về JWT token
+				String token = jwtTokenProvider.generateToken(account.getUsername(), role, account.getId());
+				return ResponseEntity.ok(new JwtResponse(token, role));
+			} else {
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No roles assigned to this account");
+			}
+		} catch (UsernameNotFoundException e) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Username not found");
+		} catch (RuntimeException e) {
+			// Ghi log chi tiết để debug
+			// System.err.println("Error during login: " + e.getMessage());
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Incorrect password");
+		}
+	}
 
-        public String getToken() {
-            return token;
-        }
+	// Cập nhật JwtResponse để chứa thêm thông tin
+	public static class JwtResponse {
+		private String token;
+		private String role; // Thêm vai trò
 
-        public String getRole() {
-            return role; // Thêm getter cho vai trò
-        }
-    }
+		public JwtResponse(String token, String role) {
+			this.token = token;
+			this.role = role;
+		}
 
-    
-    @GetMapping("/account/info")
-    public ResponseEntity<?> getAccountInfo(@RequestHeader("Authorization") String authorizationHeader) {
-        try {
-            // Lấy token từ header và tách ra
-            String token = authorizationHeader.substring(7); // Bỏ qua "Bearer " trong header
-            String username = jwtTokenProvider.getUsernameFromToken(token);
+		public String getToken() {
+			return token;
+		}
 
-            // Tìm tài khoản dựa trên username
-            Account account = accountService.findByUsername(username);
-            if (account == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Account not found");
-            }
+		public String getRole() {
+			return role; // Thêm getter cho vai trò
+		}
+	}
 
-            // Trả về thông tin tài khoản
-            return ResponseEntity.ok(account);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token or account not found");
-        }
-    }
-    
- // API cập nhật tài khoản user phía client
-    @PutMapping("/user/{id}")
-    public AccountDTO updateAccount(
-            @PathVariable Integer id,
-            @RequestParam(required = false) String fullname,
-            @RequestParam(required = false) String email,
-            @RequestParam(required = false) String phone,
-            @RequestParam(required = false) MultipartFile image) {
-        
-        AccountUpdateDTO accountUpdateDTO = new AccountUpdateDTO();
-        accountUpdateDTO.setFullname(fullname);
-        accountUpdateDTO.setEmail(email);
-        accountUpdateDTO.setPhone(phone);
-        accountUpdateDTO.setImage(image); // Truyền MultipartFile vào DTO
+	@GetMapping("/account/info")
+	public ResponseEntity<?> getAccountInfo(@RequestHeader("Authorization") String authorizationHeader) {
+		try {
+			// Lấy token từ header và tách ra
+			String token = authorizationHeader.substring(7); // Bỏ qua "Bearer " trong header
+			String username = jwtTokenProvider.getUsernameFromToken(token);
 
-        return accountService.updateAccount2(id, accountUpdateDTO);
-    }
+			// Tìm tài khoản dựa trên username
+			Account account = accountService.findByUsername(username);
+			if (account == null) {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Account not found");
+			}
 
-    
+			// Trả về thông tin tài khoản
+			return ResponseEntity.ok(account);
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token or account not found");
+		}
+	}
 
-    public static class RegisterRequest {
-        private String fullname;
-        private String username;
-        private String password;
-        private String email;
-        private String phone;
+	// API cập nhật tài khoản user phía client
+	@PutMapping("/user/{id}")
+	public AccountDTO updateAccount(@PathVariable Integer id, @RequestParam(required = false) String fullname,
+			@RequestParam(required = false) String email, @RequestParam(required = false) String phone,
+			@RequestParam(required = false) MultipartFile image) {
 
-        // Getters and Setters
-        public String getFullname() {
-            return fullname;
-        }
+		AccountUpdateDTO accountUpdateDTO = new AccountUpdateDTO();
+		accountUpdateDTO.setFullname(fullname);
+		accountUpdateDTO.setEmail(email);
+		accountUpdateDTO.setPhone(phone);
+		accountUpdateDTO.setImage(image); // Truyền MultipartFile vào DTO
 
-        public void setFullname(String fullname) {
-            this.fullname = fullname;
-        }
+		return accountService.updateAccount2(id, accountUpdateDTO);
+	}
 
-        public String getUsername() {
-            return username;
-        }
+	public static class RegisterRequest {
+		private String fullname;
+		private String username;
+		private String password;
+		private String email;
+		private String phone;
 
-        public void setUsername(String username) {
-            this.username = username;
-        }
+		// Getters and Setters
+		public String getFullname() {
+			return fullname;
+		}
 
-        public String getPassword() {
-            return password;
-        }
+		public void setFullname(String fullname) {
+			this.fullname = fullname;
+		}
 
-        public void setPassword(String password) {
-            this.password = password;
-        }
+		public String getUsername() {
+			return username;
+		}
 
-        public String getEmail() {
-            return email;
-        }
+		public void setUsername(String username) {
+			this.username = username;
+		}
 
-        public void setEmail(String email) {
-            this.email = email;
-        }
+		public String getPassword() {
+			return password;
+		}
 
-        public String getPhone() {
-            return phone;
-        }
+		public void setPassword(String password) {
+			this.password = password;
+		}
 
-        public void setPhone(String phone) {
-            this.phone = phone;
-        }
-    }
+		public String getEmail() {
+			return email;
+		}
+
+		public void setEmail(String email) {
+			this.email = email;
+		}
+
+		public String getPhone() {
+			return phone;
+		}
+
+		public void setPhone(String phone) {
+			this.phone = phone;
+		}
+	}
 }
