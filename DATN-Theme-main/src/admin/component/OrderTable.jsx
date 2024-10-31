@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import axios from 'axios';
 import { useTable, useSortBy, usePagination } from 'react-table';
 
-const OrderTable = ({ orders, token }) => {
+const OrderTable = ({ orders, token, fetchOrderDetails }) => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [status, setStatus] = useState('');
   const data = useMemo(() => orders, [orders]);
@@ -23,7 +23,24 @@ const OrderTable = ({ orders, token }) => {
       },
       {
         Header: 'Trạng thái',
-        accessor: (row) => (row.status === "1" ? "Đang xử lý" : "Hoàn thành"),
+        accessor: (row) => {
+          switch (row.status) {
+            case "5":
+              return "Chờ xác nhận";
+            case "4":
+              return "Đã xác nhận";
+            case "3":
+              return "Đang vận chuyển";
+            case "2":
+              return "Đang giao";
+            case "1":
+              return "Hoàn thành";
+            case "0":
+              return "Hủy";
+            default:
+              return "Không xác định"; // Nếu trạng thái không thuộc bất kỳ giá trị nào ở trên
+          }
+        },
         id: 'status'
       },
     ],
@@ -58,9 +75,6 @@ const OrderTable = ({ orders, token }) => {
 
   const handleUpdateStatus = async (orderId, status) => {
 
-    console.log(orderId);
-    console.log(status);
-    
     try {
       const response = await axios.put(`http://localhost:8080/api/admin/orders?orderId=${orderId}&status=${status}`, {}, {
         headers: {
@@ -70,18 +84,11 @@ const OrderTable = ({ orders, token }) => {
       });
 
       if (response.status === 200) {
-        console.log(`Cập nhật trạng thái thành công: ${response.data}`);
-        // Có thể gọi một hàm để refresh danh sách đơn hàng hoặc cập nhật trạng thái trong UI
-        // refreshOrders(); // Ví dụ: gọi hàm để cập nhật danh sách đơn hàng
+        fetchOrderDetails();
+        handleCancelForm();
       }
     } catch (error) {
       console.error('Lỗi khi cập nhật trạng thái đơn hàng:', error);
-      if (error.response && error.response.status === 401) {
-        console.error('Bạn không có quyền truy cập.');
-        // Thông báo cho người dùng rằng họ không có quyền
-      } else {
-        // Xử lý lỗi khác nếu cần
-      }
     }
   };
 
@@ -150,7 +157,17 @@ const OrderTable = ({ orders, token }) => {
       {/* Hiển thị chi tiết đơn hàng khi có selectedOrder */}
       {selectedOrder && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50 p-4">
-          <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-2xl overflow-y-auto max-h-[90vh] border border-gray-200">
+          <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-2xl overflow-y-auto max-h-[90vh] border border-gray-200 relative">
+
+            {/* Nút X ở góc trái trên */}
+            <button
+              type="button"
+              onClick={handleCancelForm}  // Đóng modal
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl"
+            >
+              ✕
+            </button>
+
             <h2 className="text-2xl font-bold mb-6 text-gray-800">Chi tiết đơn hàng</h2>
 
             <div className="space-y-4 text-gray-700 mb-6">
@@ -191,30 +208,23 @@ const OrderTable = ({ orders, token }) => {
             <div className="flex justify-end space-x-4 mt-6">
               <button
                 type="button"
-                onClick={null}
-                className="bg-green-500 text-white px-5 py-2 rounded-lg hover:bg-green-600 focus:ring-2 focus:ring-green-300 transition duration-300"
+                onClick={() => handleUpdateStatus(selectedOrder.id, "4")}  // Đã xác nhận
+                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-300"
               >
                 Xác nhận
               </button>
-
               <button
                 type="button"
-                onClick={() => handleUpdateStatus(selectedOrder.id, "0")}
-                className="bg-red-500 text-white px-5 py-2 rounded-lg hover:bg-red-600 focus:ring-2 focus:ring-red-300 transition duration-300"
+                onClick={() => handleUpdateStatus(selectedOrder.id, "0")}  // Hủy
+                className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition duration-300"
               >
                 Hủy đơn
               </button>
-
-              <button
-                type="button"
-                onClick={handleCancelForm}
-                className="bg-gray-500 text-white px-5 py-2 rounded-lg hover:bg-gray-600 focus:ring-2 focus:ring-gray-300 transition duration-300"
-              >
-                Đóng
-              </button>
             </div>
+
           </div>
         </div>
+
       )}
     </div>
   );
