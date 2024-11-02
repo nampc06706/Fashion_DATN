@@ -5,9 +5,11 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -248,50 +250,50 @@ public class AccountService {
 		Optional<Account> optional =  accountRepository.findByEmail(email);
 		return optional.get();
 	}
-//    public AccountDTO updateAccount(Integer id, AccountUpdateDTO accountUpdateDTO) {
-//        // Tìm kiếm tài khoản theo ID
-//        Account account = accountRepository.findById(id)
-//        		  .orElseThrow(() -> new RuntimeException("Vai trò mặc định không tồn tại"));
-//
-//        // Cập nhật các trường
-//        account.setFullname(accountUpdateDTO.getFullname());
-//        account.setEmail(accountUpdateDTO.getEmail());
-//        account.setPhone(accountUpdateDTO.getPhone());
-//        account.setImage(accountUpdateDTO.getImage());
-//        account.setActivated(accountUpdateDTO.isActivated());
-//
-//        // Cập nhật Role nếu có Role mới
-//        if (accountUpdateDTO.getRoleId() != null) {
-//            Roles newRole = rolesRepository.findById(accountUpdateDTO.getRoleId())
-//            		.orElseThrow(() -> new RuntimeException("Không tìm thấy quyền với ID: " + accountUpdateDTO.getRoleId()));
-//                  
-//
-//            Authorities authority = authoritiesRepository.findByAccount(account);
-//            if (authority == null) {
-//                // Tạo mới Authority nếu chưa có
-//                authority = new Authorities();
-//                authority.setAccount(account);
-//            }
-//            authority.setRole(newRole);
-//            authoritiesRepository.save(authority);
-//        }
-//
-//        // Lưu tài khoản đã cập nhật
-//        account = accountRepository.save(account);
-//
-//        // Trả về thông tin tài khoản sau khi cập nhật
-//        return new AccountDTO(account.getId(), account.getUsername(), account.getFullname(),
-//                account.getEmail(), account.getPhone() , account.getImage(), account.isActivated(),
-//                account.getAuthority() != null ? account.getAuthority().getRole().getName() : null);
-//    }
-//    public List<AccountDTO> getAllAccounts() {
-//        return accountRepository.findAll().stream().map(account -> {
-//            Authorities authority = authoritiesRepository.findByAccount(account);
-//            String roleName = authority != null && authority.getRole() != null ? authority.getRole().getName() : null;
-//            return new AccountDTO(account.getId(), account.getUsername(), account.getFullname(), account.getEmail(),
-//                                  account.getPhone(), account.getImage(), account.isActivated(), roleName);
-//        }).collect(Collectors.toList());
-//    }
+   public AccountDTO updateAccount(Integer id, AccountUpdateDTO accountUpdateDTO) {
+       // Tìm kiếm tài khoản theo ID
+       Account account = accountRepository.findById(id)
+       		  .orElseThrow(() -> new RuntimeException("Vai trò mặc định không tồn tại"));
+
+       // Cập nhật các trường
+       account.setFullname(accountUpdateDTO.getFullname());
+       account.setEmail(accountUpdateDTO.getEmail());
+       account.setPhone(accountUpdateDTO.getPhone());
+       account.setImage(accountUpdateDTO.getImage().toString());
+       account.setActivated(accountUpdateDTO.isActivated());
+
+       // Cập nhật Role nếu có Role mới
+       if (accountUpdateDTO.getRoleId() != null) {
+           Roles newRole = rolesRepository.findById(accountUpdateDTO.getRoleId())
+           		.orElseThrow(() -> new RuntimeException("Không tìm thấy quyền với ID: " + accountUpdateDTO.getRoleId()));
+                 
+
+           Authorities authority = authoritiesRepository.findByAccount(account);
+           if (authority == null) {
+               // Tạo mới Authority nếu chưa có
+               authority = new Authorities();
+               authority.setAccount(account);
+           }
+           authority.setRole(newRole);
+           authoritiesRepository.save(authority);
+       }
+
+       // Lưu tài khoản đã cập nhật
+       account = accountRepository.save(account);
+
+       // Trả về thông tin tài khoản sau khi cập nhật
+       return new AccountDTO(account.getId(), account.getUsername(), account.getFullname(),
+               account.getEmail(), account.getPhone() , account.getImage(), account.isActivated(),
+               account.getAuthority() != null ? account.getAuthority().getRole().getName() : null);
+   }
+   public List<AccountDTO> getAllAccounts() {
+       return accountRepository.findAll().stream().map(account -> {
+           Authorities authority = authoritiesRepository.findByAccount(account);
+           String roleName = authority != null && authority.getRole() != null ? authority.getRole().getName() : null;
+           return new AccountDTO(account.getId(), account.getUsername(), account.getFullname(), account.getEmail(),
+                                 account.getPhone(), account.getImage(), account.isActivated(), roleName);
+       }).collect(Collectors.toList());
+   }
 
 	// Lưu trữ mã OTP
 	private static Map<String, Forgotpassword> otpStorage = new HashMap<>();

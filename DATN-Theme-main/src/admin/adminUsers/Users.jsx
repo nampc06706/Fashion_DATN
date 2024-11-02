@@ -1,19 +1,34 @@
 import { useState, useEffect } from 'react';
 import { AiOutlinePlus, AiOutlineEdit, AiOutlineDelete } from 'react-icons/ai';
-
+import Cookies from 'js-cookie';
+import axios from 'axios';
 const UserManagementPage = () => {
   const [users, setUsers] = useState([]); // Danh sách người dùng
   const [showForm, setShowForm] = useState(false);
   const [newUser, setNewUser] = useState({ name: '', email: '', role: '', id: null });
 
+  const token = Cookies.get('token');
+
   // Hàm để thêm dữ liệu tĩnh vào danh sách người dùng
   useEffect(() => {
-    const initialUsers = [
-      { id: 1, name: 'Nguyễn Văn A', email: 'a@example.com', role: 'Quản trị viên' },
-      { id: 2, name: 'Trần Thị B', email: 'b@example.com', role: 'Người dùng' },
-      { id: 3, name: 'Lê Văn C', email: 'c@example.com', role: 'Người dùng' },
-    ];
-    setUsers(initialUsers);
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get(`http://localhost:8080/api/admin/useradmin`, {
+          headers: {
+            'Authorization': `Bearer ${token}`, // Thêm token xác thực
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true, // Để gửi kèm cookie nếu cần
+        });
+        setUsers(response.data); // Cập nhật state `users` từ phản hồi của API
+        console.log(users);
+        
+      } catch (error) {
+        console.error("Lỗi khi gọi API:", error);
+      }
+    };
+
+    fetchUsers();
   }, []);
 
   const handleFormChange = (e) => {
@@ -65,6 +80,7 @@ const UserManagementPage = () => {
           <thead>
             <tr className="bg-gray-500">
               <th className="py-3 px-6 text-left text-sm font-semibold text-white">Tên</th>
+              <th className="py-3 px-6 text-left text-sm font-semibold text-white">Số điện thoại</th>
               <th className="py-3 px-6 text-left text-sm font-semibold text-white">Email</th>
               <th className="py-3 px-6 text-left text-sm font-semibold text-white">Vai trò</th>
               <th className="py-3 px-6 text-left text-sm font-semibold text-white">Hành động</th>
@@ -73,9 +89,10 @@ const UserManagementPage = () => {
           <tbody>
             {users.map((user, index) => (
               <tr key={user.id} className="hover:bg-gray-100">
-                <td className="py-4 px-6 border-b border-gray-200">{user.name}</td>
+                <td className="py-4 px-6 border-b border-gray-200">{user.username}</td>
+                <td className="py-4 px-6 border-b border-gray-200">{user.phone}</td>
                 <td className="py-4 px-6 border-b border-gray-200">{user.email}</td>
-                <td className="py-4 px-6 border-b border-gray-200">{user.role}</td>
+                <td className="py-4 px-6 border-b border-gray-200">{user.roleName}</td>
                 <td className="py-4 px-6 border-b border-gray-200">
                   <button onClick={() => handleEditUser(index)} className="bg-yellow-500 text-white px-3 py-1 rounded-lg hover:bg-yellow-600 transition duration-300 mr-2">
                     <AiOutlineEdit />
@@ -99,7 +116,18 @@ const UserManagementPage = () => {
               <input
                 type="text"
                 name="name"
-                value={newUser.name}
+                value={newUser.username}
+                onChange={handleFormChange}
+                className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700">Số điện thoại</label>
+              <input
+                type="phone"
+                name="phone"
+                value={newUser.phone}
                 onChange={handleFormChange}
                 className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
@@ -121,7 +149,7 @@ const UserManagementPage = () => {
               <input
                 type="text"
                 name="role"
-                value={newUser.role}
+                value={newUser.roleName}
                 onChange={handleFormChange}
                 className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
