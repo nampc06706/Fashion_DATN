@@ -16,4 +16,5 @@ public class StatisticalDTO {
 	double Total;
 	int Month;
 	int Year;
+	int Day;
 }
