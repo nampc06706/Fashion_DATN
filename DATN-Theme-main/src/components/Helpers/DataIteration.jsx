@@ -1,20 +1,21 @@
 import React from 'react';
 
-function DataIteration({ datas = [], startLength = 0, endLength = datas.length, children }) {
-  // Kiểm tra kiểu dữ liệu của datas và endLength
+function DataIteration({ datas = [], startLength = 0, endLength, children }) {
+
+  // Kiểm tra kiểu dữ liệu của datas
   if (!Array.isArray(datas)) {
-    console.error('Provided datas is not an array:', datas);
+    console.error('Dữ liệu được cung cấp không phải là một mảng:', datas);
     return null;
   }
 
-  // Đảm bảo endLength không vượt quá độ dài của mảng
-  endLength = Math.min(endLength, datas.length);
+  const computedEndLength = endLength !== undefined ? Math.min(endLength, datas.length) : datas.length;
+  const slicedData = datas.slice(startLength, computedEndLength);
 
   return (
     <>
-      {datas.slice(startLength, endLength).map((value, index) => {
+      {slicedData.map((value, index) => {
         if (!value || typeof value !== 'object' || !value.hasOwnProperty('id')) {
-          console.error('Data item is not valid or does not have an id:', value);
+          console.error('Mục dữ liệu không hợp lệ hoặc không có id:', value);
           return null;
         }
 
@@ -25,7 +26,7 @@ function DataIteration({ datas = [], startLength = 0, endLength = datas.length, 
             </React.Fragment>
           );
         } catch (error) {
-          console.error('Error rendering children with data:', error);
+          //console.error('Lỗi khi render children với dữ liệu:', error);
           return null;
         }
       })}

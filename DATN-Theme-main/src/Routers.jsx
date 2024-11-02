@@ -32,6 +32,9 @@ import AdminOrderDetails from "./admin/adminOrderDetails/OrderDetails.jsx";
 import AdminUsers from "./admin/adminUsers/Users.jsx";
 import AdminSize from "./admin/adminSize/Size.jsx";
 import AdminColor from "./admin/adminColor/Color.jsx";
+import Forgotpassword from "./components/Auth/Forgotpassword/index.jsx";
+import Otp from "./components/Auth/Forgotpassword/otp.jsx";
+import Newpassword from "./components/Auth/Forgotpassword/newpassword.jsx";
 
 // Tạo một component cho các route admin với layout riêng
 const AdminRoutes = () => (
@@ -69,6 +72,9 @@ export default function Routers() {
       <Route exact path="/contact" element={<Contact />} />
       <Route exact path="/faq" element={<Faq />} />
       <Route exact path="/login" element={<Login />} />
+      <Route exact path="/forgot-password" element={<Forgotpassword />} />
+      <Route exact path="/verify-otp" element={<Otp />} />
+      <Route exact path="/new-password" element={<Newpassword />} />
       <Route exact path="/signup" element={<Signup />} />
       <Route exact path="/profile" element={<Profile />} />
       <Route exact path="/become-saller" element={<BecomeSaller />} />

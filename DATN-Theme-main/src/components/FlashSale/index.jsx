@@ -1,5 +1,5 @@
 import products from "../../data/products.json";
-import ProductCardStyleOne from "../Helpers/Cards/ProductCardStyleOne";
+import ProductCardStyleFlashSale from "../Helpers/Cards/ProductCardStyleFlashSale";
 import CountDown from "../Helpers/CountDown";
 import DataIteration from "../Helpers/DataIteration";
 import LayoutHomeFive from "../Partials/LayoutHomeFive";
@@ -73,7 +73,7 @@ export default function FlashSale() {
               >
                 {({ datas }) => (
                   <div data-aos="fade-up" key={datas.id} className="item">
-                    <ProductCardStyleOne datas={datas} />
+                    <ProductCardStyleFlashSale datas={datas} />
                   </div>
                 )}
               </DataIteration>

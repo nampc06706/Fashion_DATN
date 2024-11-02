@@ -13,7 +13,7 @@ export default function BestSellers({ className }) {
             <img src={`/assets/images/saller-1.png`} alt="" />
           </div>
           <Link to="/saller-page">
-            <p className="text-base font-500 text-center">Shopno BD</p>
+            <p className="text-base font-500 text-center"></p>
           </Link>
         </div>
         <div

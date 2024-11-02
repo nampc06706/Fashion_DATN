@@ -53,7 +53,6 @@ export default function Home() {
           seeMoreUrl="/sallers"
           categoryTitle="Best Saller"
         >
-          <BestSellers />
         </ViewMoreTitle>
         <ProductsAds
           ads={[`/assets/images/ads-1.png`, `/assets/images/ads-2.png`]}
@@ -69,10 +68,6 @@ export default function Home() {
           seeMoreUrl="/all-products"
           className="category-products mb-[60px]"
         />
-        <ProductsAds
-          ads={[`/assets/images/ads-3.png`]}
-          className="products-ads-section mb-[60px]"
-        />
         <SectionStyleThree
           products={products}
           sectionTitle="New Arrivals"
@@ -83,12 +78,6 @@ export default function Home() {
           sectionHeight="164"
           ads={[`/assets/images/ads-4.png`]}
           className="products-ads-section mb-[60px]"
-        />
-        <SectionStyleFour
-          products={products}
-          sectionTitle="Popular Sales"
-          seeMoreUrl="/all-products"
-          className="category-products mb-[60px]"
         />
       </Layout>
     </>

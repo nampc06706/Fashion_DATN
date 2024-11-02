@@ -14,7 +14,14 @@ export default function SectionStyleOneHmFour2({
     const fetchProducts = async () => {
       try {
         const response = await fetch("http://localhost:8080/api/guest/product-flashsale");
+
+        // Kiểm tra trạng thái phản hồi
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
         const data = await response.json();
+
         if (Array.isArray(data)) {
           setProducts(data);
         } else {
@@ -44,7 +51,6 @@ export default function SectionStyleOneHmFour2({
                 </div>
               )}
             </DataIteration>
-
           </div>
         </div>
       </ViewMoreTitle2>

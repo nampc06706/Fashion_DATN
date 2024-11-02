@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import BreadcrumbCom from "../BreadcrumbCom";
-import ProductCardStyleOne from "../Helpers/Cards/ProductCardStyleOne";
+import ProductCardStyleOneAllProducts from "../Helpers/Cards/ProductCardStyleOneAllProducts";
 import DataIteration from "../Helpers/DataIteration";
 import Layout from "../Partials/LayoutHomeFive";
 import ProductsFilter from "./ProductsFilter";
@@ -158,7 +158,7 @@ export default function AllProductPage() {
                   {({ data, index }) => {
                     return (
                       <div key={data?.id || index}>
-                        <ProductCardStyleOne data={data} />
+                        <ProductCardStyleOneAllProducts data={data} />
                       </div>
                     );
                   }}

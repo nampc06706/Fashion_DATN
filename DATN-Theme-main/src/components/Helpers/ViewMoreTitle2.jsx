@@ -1,8 +1,6 @@
 export default function ViewMoreTitle2({
-  categoryTitle = "",
   className,
-  children,
-  seeMoreUrl = "",
+  children
 }) {
   return (
     <div className={`section-wrapper w-full ${className || ""}`}>
@@ -14,7 +12,7 @@ export default function ViewMoreTitle2({
             </h1>
           </div>
           <div>
-            <a href={seeMoreUrl}>
+            <a href="/flash-sale">
               <div className="flex space-x-2 items-center">
                 <p className="text-base font-600 text-qblack">Xem thêm</p>
                 <span className="animate-right-dir">
