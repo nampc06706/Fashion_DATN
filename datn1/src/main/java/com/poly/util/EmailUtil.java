@@ -3,6 +3,9 @@ package com.poly.util;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
+
+import com.poly.dto.ContactDTO;
+
 import java.util.Random;
 
 @Component
@@ -44,4 +47,32 @@ public class EmailUtil {
         // Trả về mã OTP để lưu hoặc sử dụng sau
         return otp;
     }
+    
+    
+    public void sendContactEmail(ContactDTO contact) {
+        // Tạo nội dung email dựa trên thông tin từ ContactDTO
+        String content = "Xin chào " + contact.getFullName() + ",\r\n\r\n"
+                + "Chúng tôi đã nhận được tin nhắn từ bạn với các thông tin sau:\r\n"
+                + "Chủ đề: " + contact.getSubject() + "\r\n"
+                + "Nội dung: " + contact.getMessage() + "\r\n\r\n"
+                + "Chúng tôi sẽ phản hồi bạn trong thời gian sớm nhất.\r\n"
+                + "Trân trọng,\r\n"
+                + "Đội ngũ hỗ trợ Thời trang công sở";
+
+        // Tạo và gửi email
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(contact.getEmail()); // gửi đến email của người dùng
+        message.setSubject("Xác nhận nhận tin nhắn từ bạn: " + contact.getSubject());
+        message.setText(content);
+
+        mailSender.send(message);
+    }
+
+
+
 }
+
+
+    
+    
+

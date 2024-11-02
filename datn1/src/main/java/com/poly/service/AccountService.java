@@ -6,10 +6,12 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,6 +21,7 @@ import com.poly.dto.AccountUpdateDTO;
 import com.poly.entity.Account;
 import com.poly.entity.Authorities;
 import com.poly.entity.Roles;
+import com.poly.model.ChangePasswordModel;
 import com.poly.repository.AccountRepository;
 import com.poly.repository.AuthoritiesRepository;
 import com.poly.repository.RolesRepository;
@@ -166,11 +169,11 @@ public class AccountService {
 	}
 
 	public Account loginByEmail(String email, String password) {
-		Account account = accountRepository.findByEmail(email);
+		Optional<Account> account = accountRepository.findByEmail(email);
 		if (account == null) {
 			throw new UsernameNotFoundException("Email not found");
 		}
-		return account;
+		return account.get();
 	}
 
 	public AccountDTO updateAccount2(Integer id, AccountUpdateDTO accountUpdateDTO) {
@@ -242,7 +245,8 @@ public class AccountService {
 
 	// Phương thức tìm tài khoản theo email
 	public Account findByEmail(String email) {
-		return accountRepository.findByEmail(email);
+		Optional<Account> optional =  accountRepository.findByEmail(email);
+		return optional.get();
 	}
 //    public AccountDTO updateAccount(Integer id, AccountUpdateDTO accountUpdateDTO) {
 //        // Tìm kiếm tài khoản theo ID
@@ -330,16 +334,43 @@ public class AccountService {
 		}
 	}
 
-	public void updatePassword(String email, String newPassword) {
-		Account account = accountRepository.findByEmail(email);
+	public Account updatePassword(String email, String newPassword) {
+		Optional<Account> account = accountRepository.findByEmail(email);
 
 		if (account == null) {
 			throw new RuntimeException("Không tìm thấy tài khoản với email này.");
 		}
 
 		// Mã hóa mật khẩu mới và lưu vào tài khoản
-		account.setPassword(passwordEncoder.encode(newPassword));
-		accountRepository.save(account);
+		account.get().setPassword(passwordEncoder.encode(newPassword));
+		return accountRepository.save(account.get());
 	}
 
+	
+
+
+
+	public Account updatePasswordProfile(ChangePasswordModel changePasswordModel) {
+        // Tìm kiếm tài khoản dựa trên email
+        Account account = accountRepository.findByEmail(changePasswordModel.getEmail())
+            .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại."));
+
+        // Kiểm tra mật khẩu hiện tại có khớp không
+        if (!passwordEncoder.matches(changePasswordModel.getCurrentPassword(), account.getPassword())) {
+            throw new RuntimeException("Mật khẩu hiện tại không chính xác.");
+        }
+
+        // Kiểm tra mật khẩu mới và xác nhận mật khẩu có khớp không
+        if (!changePasswordModel.getNewPassword().equals(changePasswordModel.getConfirmPassword())) {
+            throw new RuntimeException("Mật khẩu mới và xác nhận mật khẩu không khớp.");
+        }
+
+        // Cập nhật mật khẩu mới và mã hóa trước khi lưu
+        account.setPassword(passwordEncoder.encode(changePasswordModel.getNewPassword()));
+        return accountRepository.save(account);
+    }
+	
+	
+	
+	
 }

@@ -34,10 +34,16 @@ public class JwtTokenProvider {
     public String getUsernameFromToken(String token) {
         return getClaims(token).getSubject();
     }
+ // Lấy email từ token
+    public String getEmailFromToken(String token) {
+        return getClaims(token).get("email", String.class);
+    }
+
     
     public Authentication getAuthentication(String token) {
         Claims claims = getClaims(token);
         String username = claims.getSubject();
+        String email = claims.get("email", String.class); // Lấy email từ claims
         // Lấy thông tin người dùng từ UserDetailsService
         System.out.println("Username from token: " + username);
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
@@ -57,11 +63,12 @@ public class JwtTokenProvider {
     }
 
     // Tạo JWT token cho người dùng với vai trò
-    public String generateToken(String username, String roles, Integer accountId) {
+    public String generateToken(String username, String roles, Integer accountId , String gmail) {
         return Jwts.builder()
                 .setSubject(username)  // Đặt tên người dùng trong token
                 .claim("roles", roles) // Thêm vai trò vào token
                 .claim("accountId", accountId)
+                .claim("email", gmail)
                 .setIssuedAt(new Date())  // Thời điểm token được tạo
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime))  // Thời gian hết hạn của token
                 .signWith(SignatureAlgorithm.HS512, secretKey)  // Ký token với thuật toán HS512 và khóa bí mật

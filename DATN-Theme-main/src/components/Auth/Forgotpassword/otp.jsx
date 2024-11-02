@@ -18,7 +18,6 @@ export default function Otp() {
       toast.error("Mã OTP không được để trống.");
       return;
     }
-
     try {
       const response = await axios.post(`http://localhost:8080/api/verify-otp?email=${email}&otp=${otp}`);
       toast.success(response.data); // Hiển thị thông báo thành công
@@ -54,6 +53,7 @@ export default function Otp() {
                       type="text"
                       value={otp}
                       inputHandler={(e) => setOtp(e.target.value)} // Cập nhật state cho otp
+                      style={{ width: '100%', padding: '7px 15px', border: '1px solid #a9a9a9' }}
                     />
                   </div>
                   <div className="signin-area mb-3.5">

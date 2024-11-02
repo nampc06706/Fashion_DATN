@@ -1,8 +1,58 @@
+import { useState } from "react"; // Import useState để quản lý state
 import InputCom from "../Helpers/InputCom";
 import PageTitle from "../Helpers/PageTitle";
 import LayoutHomeFive from "../Partials/LayoutHomeFive";
+import { ToastContainer, toast } from 'react-toastify';
 
 export default function Contact() {
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    subject: "",
+    message: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+
+  // Hàm xử lý thay đổi input
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  // Hàm gửi dữ liệu đến API
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+
+    try {
+      const response = await fetch("http://localhost:8080/api/send", { // Thay đổi endpoint cho phù hợp
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        toast.success("Gửi liên hệ thành công!"); // Hiện thông báo thành công
+        setFormData({ ...formData }); // Reset form
+
+      } else {
+        toast.error("Có lỗi xảy ra. Vui lòng thử lại.!");
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      toast.error("Có lỗi xảy ra. Vui lòng thử lại.!");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   return (
     <LayoutHomeFive childrenClasses="pt-0 pb-0">
       <div className="page-title mb-10">
@@ -173,46 +223,64 @@ export default function Contact() {
                 </span>
               </div>
               <div className="inputs mt-5">
-                <div className="mb-4">
-                  <InputCom
-                    label="Họ và tên*"
-                    placeholder="Tên mẫu"
-                    name="first_name"
-                    inputClasses="h-[50px]"
-                  />
-                </div>
-                <div className="mb-4">
-                  <InputCom
-                    label="Địa chỉ email*"
-                    placeholder="info@quomodosoft.com"
-                    name="email"
-                    inputClasses="h-[50px]"
-                  />
-                </div>
-                <div className="mb-4">
-                  <InputCom
-                    label="Chủ đề*"
-                    placeholder="Chủ đề của bạn ở đây"
-                    name="subject"
-                    inputClasses="h-[50px]"
-                  />
-                </div>
-                <div className="mb-5">
+                <form onSubmit={handleSubmit} >
+                  <div className="mb-4 form-group">
                   <h6 className="input-label text-qgray capitalize text-[13px] font-normal block mb-2 ">
-                    Tin nhắn*
-                  </h6>
-                  <textarea
-                    placeholder="Nhập tin nhắn của bạn ở đây"
-                    className="w-full h-[105px] focus:ring-0 focus:outline-none p-3 border border-qgray-border placeholder:text-sm"
-                  ></textarea>
-                </div>
-                <div>
-                  <a href="#">
-                    <div className="black-btn text-sm font-semibold w-full h-[50px] flex justify-center items-center">
-                      <span>Gửi ngay</span>
-                    </div>
-                  </a>
-                </div>
+                      Họ và tên*
+                    </h6>
+                    <input
+                      className="form-control"
+                      placeholder="Nhập họ và tên của bạn ở đây..."
+                      name="fullName"
+                      type="text"
+                      value={formData.name}
+                      onChange={handleChange}
+                      style={{ width: '100%', padding: '7px 15px', border: '1px solid #a9a9a9' }}
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <input
+                      label="Địa chỉ email*"
+                      placeholder="info@quomodosoft.com"
+                      name="email"
+                      type="text"
+                      value={formData.email}
+                      onChange={handleChange}
+                      style={{ width: '100%', padding: '7px 15px', border: '1px solid #a9a9a9' }}
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <input
+                      
+                      placeholder="Nhập chủ đề của bạn ở đây..."
+                      name="subject"
+                      type="text"
+                      value={formData.subject}
+                      onChange={handleChange}
+                      style={{ width: '100%', padding: '7px 15px', border: '1px solid #a9a9a9' }}
+                    />
+                  </div>
+                  <div className="mb-5">
+                    <h6 className="input-label text-qgray capitalize text-[13px] font-normal block mb-2 ">
+                      Tin nhắn*
+                    </h6>
+                    <textarea
+                      placeholder="Nhập tin nhắn của bạn ở đây"
+                      className="w-full h-[105px] focus:ring-0 focus:outline-none p-3 border border-qgray-border placeholder:text-sm"
+                      value={formData.message}
+                      onChange={handleChange}
+                      name="message"
+                      style={{ width: '100%', padding: '7px 15px', border: '1px solid #a9a9a9' }}
+                    ></textarea>
+                  </div>
+                  <div>
+                    <button  type="submit" disabled={isSubmitting} style={{width:'100%',backgroundColor:'black',color:'white',padding: '10px 15px'}} >
+                      
+                        {isSubmitting ? "Đang gửi..." : "Gửi ngay"}
+                      
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
 

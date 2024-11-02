@@ -59,6 +59,7 @@ export default function Forgotpassword() {
                       type="email"
                       value={email}
                       inputHandler={(e) => setEmail(e.target.value)}
+                      style={{ width: '100%', padding: '2px 15px', border: '1px solid #a9a9a9' }}
                     />
                   </div>
                   <div className="signin-area mb-3.5">
