@@ -17,4 +17,8 @@ public class AccountUpdateDTO {
 	private boolean activated;
 
 	private Integer roleId; // ID của role mới
+
+	public void setImage(MultipartFile image) {
+        this.image = image;
+    }
 }

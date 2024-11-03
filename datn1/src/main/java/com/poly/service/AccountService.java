@@ -222,8 +222,11 @@ public class AccountService {
 		// Tạo tên tệp mới dựa trên thời gian hiện tại và tên tệp gốc
 		String fileName = System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
 
+		String projectPath = System.getProperty("user.dir");
+
 		// Đường dẫn tới thư mục mà bạn muốn lưu hình ảnh
-		String uploadDirectory = "D:\\Java6\\DuAnTotNghiep2024\\Fashion_DATN\\DATN-Theme-main\\public\\assets\\images";
+		String uploadDirectory = projectPath + "\\Fashion_DATN\\DATN-Theme-main\\public\\assets\\images";
+
 		File directory = new File(uploadDirectory);
 
 		// Tạo thư mục nếu chưa tồn tại
@@ -256,10 +259,12 @@ public class AccountService {
        		  .orElseThrow(() -> new RuntimeException("Vai trò mặc định không tồn tại"));
 
        // Cập nhật các trường
+	   String imageName = saveImage(accountUpdateDTO.getImage());
+
        account.setFullname(accountUpdateDTO.getFullname());
        account.setEmail(accountUpdateDTO.getEmail());
        account.setPhone(accountUpdateDTO.getPhone());
-       account.setImage(accountUpdateDTO.getImage().toString());
+       account.setImage(imageName);
        account.setActivated(accountUpdateDTO.isActivated());
 
        // Cập nhật Role nếu có Role mới
