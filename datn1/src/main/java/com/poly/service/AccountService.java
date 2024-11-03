@@ -225,9 +225,9 @@ public class AccountService {
 		String projectPath = System.getProperty("user.dir");
 
 		// Đường dẫn tới thư mục mà bạn muốn lưu hình ảnh
-		String uploadDirectory = projectPath + "\\Fashion_DATN\\DATN-Theme-main\\public\\assets\\images";
-
-		File directory = new File(uploadDirectory);
+		String uploadDirectory = projectPath + "\\DATN-Theme-main\\public\\assets\\images";
+		String updatedPath = uploadDirectory.replace("\\datn1", "");
+		File directory = new File(updatedPath);
 
 		// Tạo thư mục nếu chưa tồn tại
 		if (!directory.exists()) {
