@@ -1,6 +1,7 @@
 package com.poly.entity;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -73,6 +74,10 @@ public class Orders implements Serializable {
 
     public void setOrderDetails(List<OrderDetails> orderDetails) {
         this.orderDetails = orderDetails;
+    }
+    
+    public BigDecimal getShipmentFee() {
+        return shippingMethod != null ? shippingMethod.getPrice() : BigDecimal.ZERO;
     }
 
 }

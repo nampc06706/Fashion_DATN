@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
+import { useLocation } from 'react-router-dom';
 import BreadcrumbCom from "../BreadcrumbCom";
-import ProductCardStyleOne from "../Helpers/Cards/ProductCardStyleOne";
+import ProductCardStyleOneAllProducts from "../Helpers/Cards/ProductCardStyleOneAllProducts";
 import DataIteration from "../Helpers/DataIteration";
 import Layout from "../Partials/LayoutHomeFive";
 import ProductsFilter from "./ProductsFilter";
@@ -28,20 +29,43 @@ export default function AllProductPage() {
   const filterStorage = (value) => setStorage(value);
   const [filterToggle, setToggle] = useState(false);
 
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const param = searchParams.get('s');
+
   useEffect(() => {
     const fetchProducts = async () => {
-      try {
-        const response = await fetch("http://localhost:8080/api/guest/products");
-        const data = await response.json();
-        if (Array.isArray(data)) {
-          setProducts(data);
-        } else {
-          console.error("Data is not an array:", data);
+
+      if (param != null) {
+        // call api ở đâu
+        // đó mò đi a push code
+        try {
+          const response = await fetch("http://localhost:8080/api/guest/products?s="+param);
+          const data = await response.json();
+          if (Array.isArray(data)) {
+            setProducts(data);
+          } else {
+            console.error("Data is not an array:", data);
+          }
+        } catch (error) {
+          console.error("Error fetching products:", error);
         }
-      } catch (error) {
-        console.error("Error fetching products:", error);
+      } else {
+        try {
+          const response = await fetch("http://localhost:8080/api/guest/products");
+          const data = await response.json();
+          if (Array.isArray(data)) {
+            setProducts(data);
+          } else {
+            console.error("Data is not an array:", data);
+          }
+        } catch (error) {
+          console.error("Error fetching products:", error);
+        }
       }
+
     };
+
 
     fetchProducts();
   }, []);
@@ -158,7 +182,7 @@ export default function AllProductPage() {
                   {({ data, index }) => {
                     return (
                       <div key={data?.id || index}>
-                        <ProductCardStyleOne data={data} />
+                        <ProductCardStyleOneAllProducts data={data} />
                       </div>
                     );
                   }}

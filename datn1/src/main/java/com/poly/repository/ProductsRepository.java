@@ -20,7 +20,20 @@ public interface ProductsRepository extends JpaRepository<Products, Integer> {
     // Lấy 12 sản phẩm cũ nhất theo ngày tạo
     List<Products> findTop12ByOrderByCreateDateAsc();
     
-    @Query("SELECT p FROM Products p LEFT JOIN FETCH p.images JOIN LEFT JOIN FETCH p.sizes WHERE p.id = :id")
-    Products findByIdWithDetails(@Param("id") Integer id);
+    //tìm sản phẩm liên quan theo danh mục 
+    List<Products> findByCategoryId(Integer categoryId);
+    
+    @Query("SELECT p FROM Products p JOIN p.category c WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+    	       "AND LOWER(c.name) = LOWER(:category)")
+    	List<Products> findByKeywordAndCategory(@Param("keyword") String keyword, @Param("category") String category);
+
+    	@Query("SELECT p FROM Products p WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    	List<Products> findByKeyword(@Param("keyword") String keyword);
+
+    	@Query("SELECT p FROM Products p JOIN p.category c WHERE LOWER(c.name) = LOWER(:category)")
+    	List<Products> findByCategory(@Param("category") String category);
+
+    	
+    
 
 }

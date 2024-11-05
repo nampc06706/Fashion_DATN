@@ -3,6 +3,7 @@ package com.poly.service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -331,7 +332,121 @@ public class ProductsService {
 	            .collect(Collectors.toList());
 	}
 
+//	 public List<ProductDTO> searchProducts(String keyword, String categoryName) {
+//	        // Gọi phương thức trong repository để tìm kiếm sản phẩm theo từ khóa và tên danh mục
+//	        List<Products> products = productsRepository.findByKeywordAndCategory(keyword, categoryName);
+//
+//	        return products.stream()
+//	                .map(this::convertToDTO) // Chuyển đổi sản phẩm sang ProductDTO
+//	                .collect(Collectors.toList());
+//	    }
+	 
+	 public List<ProductDTO> searchProducts(String keyword, String category) {
+	        // Ghi log tham số
+	        System.out.println("Searching products with keyword: " + keyword + " and category: " + category);
+	        
+	        List<Products> products;
+
+	        // Tìm sản phẩm theo keyword và category
+	        if (keyword != null && category != null) {
+	            products = productsRepository.findByKeywordAndCategory(keyword, category);
+	        } 
+	        // Tìm sản phẩm chỉ theo keyword
+	        else if (keyword != null) {
+	            products = productsRepository.findByKeyword(keyword);
+	        } 
+	        // Tìm sản phẩm chỉ theo category
+	        else if (category != null) {
+	            products = productsRepository.findByCategory(category);
+	        } 
+	        // Nếu cả hai đều null, trả về danh sách rỗng
+	        else {
+	            products = Collections.emptyList();
+	        }
+
+	        System.out.println("Number of products found: " + products.size());
+	        
+	        // Chuyển đổi danh sách sản phẩm sang danh sách ProductDTO
+	        return products.stream()
+	            .map(this::convertToDTO)
+	            .collect(Collectors.toList());
+	    }
+
+	    // Phương thức chuyển đổi sản phẩm sang ProductDTO
+	    private ProductDTO convertToDTO(Products product) {
+	        // Lấy danh sách hình ảnh của sản phẩm
+	        List<ProductImageDTO> imageDTOs = productImageRepository.findByProductId(product.getId()).stream()
+	                .map(img -> new ProductImageDTO(img.getImage()))
+	                .collect(Collectors.toList());
+	        
+	        // Lấy danh sách kích thước của sản phẩm
+	        List<SizeDTO> sizeDTOs = sizeRepository.findByProductId(product.getId()).stream()
+	                .map(size -> new SizeDTO(size.getId(), size.getProduct().getId(), size.getName(), 
+	                                          size.getQuantityInStock(),
+	                                          size.getColor() != null ? new ColorDTO(size.getColor().getId(), size.getColor().getName()) : null))
+	                .collect(Collectors.toList());
+	        
+	        // Chuyển đổi category của sản phẩm
+	        CategoryDTO categoryDTO = product.getCategory() != null
+	                ? new CategoryDTO(product.getCategory().getId(), product.getCategory().getName())
+	                : null;
+
+	        // Trả về ProductDTO
+	        return new ProductDTO(product.getId(), product.getName(), product.getPrice(), product.getDescription(),
+	                imageDTOs.isEmpty() ? null : imageDTOs.get(0).getImage(), imageDTOs, sizeDTOs, categoryDTO);
+	    }
 	
+	    //hiển thị sản phẩm liên quan theo danh mục 
+	    public List<ProductDTO> getRelatedProductsByCategory(Integer productId) {
+			// Lấy sản phẩm hiện tại
+			Optional<Products> currentProductOpt = productsRepository.findById(productId);
+
+			// Trả về danh sách rỗng nếu không tìm thấy sản phẩm hiện tại
+			if (currentProductOpt.isEmpty()) {
+				return new ArrayList<>(); // Nếu không tìm thấy sản phẩm
+			}
+
+			Products currentProduct = currentProductOpt.get();
+
+			// Kiểm tra xem sản phẩm có danh mục không
+			if (currentProduct.getCategory() == null) {
+				return new ArrayList<>(); // Trả về danh sách trống nếu sản phẩm không có danh mục
+			}
+
+			Integer categoryId = currentProduct.getCategory().getId();
+			System.out.println("Category ID của sản phẩm hiện tại: " + categoryId);
+
+			// Lấy tất cả sản phẩm theo categoryId và loại bỏ sản phẩm hiện tại dựa trên
+			// productId
+			List<Products> relatedProducts = productsRepository.findByCategoryId(categoryId).stream()
+					.filter(product -> !product.getId().equals(productId)) // Loại bỏ sản phẩm hiện tại
+					.collect(Collectors.toList());
+
+			// Log số lượng sản phẩm sau khi lọc
+			System.out.println("Số lượng sản phẩm liên quan sau khi lọc: " + relatedProducts.size());
+
+			// Chuyển đổi danh sách sản phẩm thành danh sách DTO
+			return relatedProducts.stream().map(product -> {
+				List<ProductImageDTO> imageDTOs = productImageRepository.findByProductId(product.getId()).stream()
+						.map(img -> new ProductImageDTO(img.getImage())).collect(Collectors.toList());
+
+				List<SizeDTO> sizeDTOs = sizeRepository.findByProductId(product.getId()).stream().map(size -> new SizeDTO(
+						size.getId(), size.getProduct().getId(), size.getName(), size.getQuantityInStock(),
+						size.getColor() != null ? new ColorDTO(size.getColor().getId(), size.getColor().getName()) : null))
+						.collect(Collectors.toList());
+
+				CategoryDTO categoryDTO = product.getCategory() != null
+						? new CategoryDTO(product.getCategory().getId(), product.getCategory().getName())
+						: null;
+
+				return new ProductDTO(product.getId(), product.getName(), product.getPrice(), product.getDescription(),
+						imageDTOs.isEmpty() ? null : imageDTOs.get(0).getImage(), imageDTOs, sizeDTOs, categoryDTO);
+			}).collect(Collectors.toList());
+		}
+
+
+
+
 
 
 

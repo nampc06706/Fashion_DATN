@@ -63,6 +63,7 @@ public class OrdersService {
 
 	@Transactional
 	public Orders createOrder(OrderRequestDTO orderRequest) {
+	    
 		// Tạo đối tượng Orders mới
 		Orders order = new Orders();
 		order.setDate(LocalDateTime.now());
@@ -209,4 +210,29 @@ public class OrdersService {
         return ordersRepository.updateOrderStatusById(orderId,status);
     }
 
+	// Phương thức kiểm tra sự tồn tại của order
+	public boolean checkOrderExists(int orderID) {
+	    return ordersRepository.existsById(orderID);
+	}
+
+	public boolean checkOrderStatus(Integer id) {
+		Optional<Orders> orderOptional = ordersRepository.findById(id);
+		if (orderOptional.isPresent()) {
+			Orders order = orderOptional.get();
+			return order.getStatus() == 1; // Kiểm tra trạng thái, 1 có thể là "mới"
+		}
+		return false; // Đơn hàng không tồn tại
+	}
+
+	public void updateOrderStatus(Integer id, int status) {
+		// Tìm đơn hàng theo ID
+		Orders order = ordersRepository.findById(id)
+				.orElseThrow(() -> new RuntimeException("Order not found with ID: " + id));
+		
+		// Cập nhật trạng thái
+		order.setStatus(status);
+	
+		// Lưu thay đổi
+		ordersRepository.save(order);
+	}
 }

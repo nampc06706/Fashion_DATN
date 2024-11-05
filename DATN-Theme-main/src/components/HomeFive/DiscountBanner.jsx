@@ -12,7 +12,7 @@ export default function DiscountBanner({ className }) {
       <div className="container-x mx-auto relative h-full">
         <div className="thumb absolute -left-[140px] -top-[87px] w-[520px] h-[394px]">
           <img
-            src="/assets/images/discount-banner-3.1.png"
+            src="/assets/images/banner-4.png"
             alt=""
             className="w-full h-full object-contain"
           />
@@ -21,8 +21,8 @@ export default function DiscountBanner({ className }) {
           <div>
             <div data-aos="fade-up">
               <h1 className="sm:text-3xl text-xl font-700 text-qblack mb-2 text-center">
-              Lấy <span className="mx-1 text-qred">20%</span> Giảm giá
-              Phiếu giảm giá
+              Lấy thông tin về <span className="mx-1 text-qred">FLASH SALE</span> 
+              
               </h1>
               <p className="text-center sm:text-[18px] text-sm font-400">
               bằng cách Đăng ký nhận bản tin của chúng tôi
@@ -61,14 +61,14 @@ export default function DiscountBanner({ className }) {
                   type="email"
                   name="email"
                   className="w-full h-full focus:outline-none text-sm placeholder:text-xs placeholder:text-qblack text-qblack font-400 tracking-wider"
-                  placeholder="EMAIL ADDRESS"
+                  placeholder="ĐỊA CHỈ EMAIL"
                 />
               </div>
               <button
                 type="button"
                 className="sm:w-[158px] w-[80px]  h-full bg-qh5-bwhite text-sm font-600"
               >
-                Nhận phiếu giảm giá
+                NHẬN THÔNG TIN
               </button>
             </div>
           </div>

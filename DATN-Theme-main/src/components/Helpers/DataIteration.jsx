@@ -25,7 +25,7 @@ function DataIteration({ datas = [], startLength = 0, endLength = datas.length, 
             </React.Fragment>
           );
         } catch (error) {
-          console.error('Error rendering children with data:', error);
+          //console.error('Error rendering children with data:', error);
           return null;
         }
       })}
