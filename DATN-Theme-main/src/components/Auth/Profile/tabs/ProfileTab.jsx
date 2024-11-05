@@ -73,7 +73,7 @@ export default function ProfileTab() {
     formData.append('fullname', accountInfo.fullname);
     formData.append('email', accountInfo.email);
     formData.append('phone', accountInfo.phone);
-
+    
     axios.put(`http://localhost:8080/api/user/${accountId}`, formData, {
       headers: {
         Authorization: `Bearer ${token}`,

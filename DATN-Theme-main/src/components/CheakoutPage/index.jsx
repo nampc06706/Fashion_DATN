@@ -179,8 +179,17 @@ export default function CheckoutPage() {
   useEffect(() => {
     const loadPaymentMethods = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/api/guest/payments`);
+        const response = await axios.get(`http://localhost:8080/api/user/payments`, {
+          headers: {
+            'Authorization': `Bearer ${token}`, // Thêm token vào header
+            'Content-Type': 'application/json', // Thêm Content-Type nếu cần
+          },
+          withCredentials: true, // Nếu bạn cần gửi cookies cùng với yêu cầu
+        });
+
         const dataPaymentMethod = response.data;
+        console.log(dataPaymentMethod);
+
         setPaymentMethods(dataPaymentMethod);
       } catch (err) {
         setError('Không thể tải phương thức thanh toán');
@@ -188,7 +197,8 @@ export default function CheckoutPage() {
     };
 
     loadPaymentMethods();
-  }, []);
+  }, [token]); // Thêm token vào dependency array nếu nó có thể thay đổi
+
 
   useEffect(() => {
     const calculateTotalAmount = () => {
@@ -236,11 +246,12 @@ export default function CheckoutPage() {
 
 
   const handleCreateOrder = async () => {
+    // Kiểm tra xem người dùng đã chọn đủ thông tin chưa
     if (!selectedAddressId || !selectedShippingMethod || !selectedPaymentMethod) {
       toast.error("Vui lòng chọn địa chỉ, phương thức vận chuyển và phương thức thanh toán."); // Thông báo lỗi
       return;
     }
-
+  
     const orderData = {
       accountId: userInfo.accountId,
       addressId: selectedAddressId,
@@ -260,45 +271,61 @@ export default function CheckoutPage() {
         }
       }))
     };
-
+  
+   // console.log("Order Data: ", orderData); // Log thông tin đơn hàng
+  
     try {
-      const response = await axios.post('http://localhost:8080/api/user/orders/create', orderData, {
+      // Sử dụng endpoint của PaymentController
+      const response = await fetch('http://localhost:8080/api/user/payments/create-payment-url', {
+        method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        withCredentials: true,
+        body: JSON.stringify(orderData),
+        credentials: 'include', // Để gửi cookie
       });
-
+  
+      const data = await response.json();
+      console.log("Payment Response: ", data);
+  
       // Kiểm tra nếu phương thức thanh toán là VNPAY
-      if (selectedPaymentMethod === 1) {
-        // Nếu chọn VNPAY, chuyển hướng đến trang thanh toán VNPAY với thông tin đơn hàng
-        const vnpayUrl = response.data.vnpayUrl; // Giả sử server trả về URL thanh toán
-        window.location.href = vnpayUrl; // Chuyển hướng đến trang thanh toán VNPAY
-      } else {
-        toast.success("Đặt hàng thành công!"); // Thông báo thành công
-        setTimeout(() => {
-          navigate('/profile#order'); // Chuyển trang sau 2 giây
-        }, 1000); // 2000ms = 2 giây
-        // Reset lại trạng thái sau khi đặt hàng thành công
-
-        // Xóa sản phẩm khỏi giỏ hàng
-        const orderCartItemIds = cartItems.map(item => item.id); // Lấy danh sách ID sản phẩm đã đặt hàng
-        setCartItems(prevCartItems => prevCartItems.filter(item => !orderCartItemIds.includes(item.id))); // Lọc ra sản phẩm đã đặt hàng
-
-        setCartItems([]);
-        setSelectedAddressId(null);
-        setSelectedShippingMethod(null);
-        setSelectedPaymentMethod(null);
-        setShippingFee(0);
-        setTotalAmount(0);
+      console.log("Selected Payment Method: ", selectedPaymentMethod); // Log giá trị phương thức thanh toán
+  
+      if (selectedPaymentMethod == 1) {
+        const vnpayUrl = data.vnpayUrl;
+        console.log("VNPAY URL: ", vnpayUrl); // Log URL VNPAY
+  
+        if (vnpayUrl) {
+          console.log("Redirecting to VNPAY URL: ", vnpayUrl);
+          window.location.href = vnpayUrl; // Chuyển hướng tự động
+          return;
+        } else {
+          console.error("No vnpayUrl found in the response.");
+          toast.error("Không nhận được URL thanh toán từ server.");
+          return; // Ngừng thực hiện nếu không có URL
+        }
       }
+  
+      // Nếu không phải là phương thức VNPAY
+      toast.success("Đặt hàng thành công!"); // Thông báo thành công
+  
+      // Reset lại trạng thái sau khi đặt hàng thành công
+      const orderCartItemIds = cartItems.map(item => item.id); // Lấy danh sách ID sản phẩm đã đặt hàng
+      setCartItems(prevCartItems => prevCartItems.filter(item => !orderCartItemIds.includes(item.id))); // Lọc ra sản phẩm đã đặt hàng
+  
+      // Reset các giá trị trạng thái
+      setSelectedAddressId(null);
+      setSelectedShippingMethod(null);
+      setSelectedPaymentMethod(null);
+      setShippingFee(0);
+      setTotalAmount(0);
     } catch (error) {
+      console.error("Error creating order: ", error); // Log lỗi
       if (error.response) {
         // Kiểm tra mã lỗi
         if (error.response.status === 400) {
-          // Thông báo lỗi 400 cụ thể
-          const errorMessage = error.response.data.message || "Không đủ hàng trong kho để hoàn tất đơn hàng, vui lòng liên hệ 098765432 để được hỗ trợ.!"; // Lấy thông điệp lỗi từ phản hồi
+          const errorMessage = error.response.data.message || "Không đủ hàng trong kho để hoàn tất đơn hàng, vui lòng liên hệ 098765432 để được hỗ trợ!"; // Lấy thông điệp lỗi từ phản hồi
           toast.error(`Lỗi: ${errorMessage}`); // Thông báo lỗi 400
         } else if (error.response.data.message.includes("Insufficient stock")) {
           // Thông báo khi hết số lượng trong kho
@@ -312,8 +339,12 @@ export default function CheckoutPage() {
       }
     }
   };
+  
 
-  // Kiểm tra và cập nhật địa chỉ mặc định
+
+
+
+
   // Kiểm tra và cập nhật địa chỉ mặc định
   const handleSetDefaultAddress = async (addressId) => {
     if (!userInfo || !token) {
