@@ -67,13 +67,6 @@ public class ProductsController {
 		return productsService.getAllCategories();
 	}
 
-	// Lấy 12 sản phẩm cũ nhất và áp dụng giảm giá
-	@GetMapping("/oldest-discounted")
-	public ResponseEntity<List<ProductDTO>> getDiscountedOldestProducts(@RequestParam BigDecimal discountPercentage) {
-		List<ProductDTO> products = productsService.getDiscountedOldestProducts(discountPercentage);
-		return new ResponseEntity<>(products, HttpStatus.OK);
-	}
-
 	// Kiểm tra chi tiết sản phẩm qua ID (nếu cần thêm phương thức này)
 	@GetMapping("/search")
 	public ResponseEntity<List<ProductDTO>> searchProducts(

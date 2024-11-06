@@ -3,6 +3,7 @@ package com.poly.controller;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -35,7 +36,8 @@ import com.poly.util.EmailUtil;
 @RequestMapping("/api")
 @CrossOrigin(origins = "http://localhost:5173")
 public class AuthController {
-
+	
+	
 	@Autowired
 	private AccountService accountService;
 
@@ -45,8 +47,12 @@ public class AuthController {
 	@Autowired
 	EmailUtil emailUil;
 	
+	private final EmailUtil emailUtil;
+	
+	public AuthController(EmailUtil emailUtil) {
+		this.emailUtil = emailUtil;
+	}
 
-  
 	@PostMapping("/guest/takeData")
 	public ResponseEntity<?> layDuLieuGoogle(@RequestBody Account account) {
 		// Kiểm tra thông tin tài khoản trước khi lưu
@@ -57,13 +63,18 @@ public class AuthController {
 
 		try {
 			// Kiểm tra xem tài khoản đã tồn tại hay chưa
-			Account existingAccount = accountService.findByEmail(account.getEmail());
-			if (existingAccount != null) {
-				// Tài khoản đã tồn tại, trả về JWT token
-				String roles = existingAccount.getAuthority().getRole().getName();
-				String token = jwtTokenProvider.generateToken(existingAccount.getUsername(), roles,
-						existingAccount.getId(),existingAccount.getEmail());
-				return ResponseEntity.ok(new JwtResponse(token, roles));
+			Optional<Account> existingAccountOptional = accountService.findByEmail(account.getEmail());
+			if (existingAccountOptional.isPresent()) {
+				Account existingAccount = existingAccountOptional.get();
+				if (existingAccount.getAuthority() != null && existingAccount.getAuthority().getRole() != null) {
+					String roles = existingAccount.getAuthority().getRole().getName();
+					String token = jwtTokenProvider.generateToken(existingAccount.getUsername(), roles,
+							existingAccount.getId(), existingAccount.getEmail());
+					return ResponseEntity.ok(new JwtResponse(token, roles));
+				} else {
+					return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+							.body("Account role or authority is not properly set up.");
+				}
 			}
 
 			// Tạo tài khoản mới nếu chưa tồn tại
@@ -71,30 +82,18 @@ public class AuthController {
 					account.getEmail());
 
 			// Tạo và trả về JWT token cho tài khoản mới
-			String roles = savedAccount.getAuthority().getRole().getName(); // Lấy vai trò từ tài khoản đã lưu
-			String token = jwtTokenProvider.generateToken(savedAccount.getUsername(), roles, savedAccount.getId() ,savedAccount.getEmail());
+			String roles = savedAccount.getAuthority().getRole().getName();
+			String token = jwtTokenProvider.generateToken(savedAccount.getUsername(), roles, savedAccount.getId(),
+					savedAccount.getEmail());
 
-			return ResponseEntity.ok(new JwtResponse(token, roles)); // Trả về thông tin tài khoản mới và token
+			return ResponseEntity.ok(new JwtResponse(token, roles));
 		} catch (Exception e) {
-			// Ghi lại lỗi để dễ dàng chẩn đoán
+			e.printStackTrace();
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body("Error saving account: " + e.getMessage());
 		}
 	}
 
-//    @PostMapping("	")
-//    public ResponseEntity<?> verifyOtpAndChangePassword(@RequestParam String email, @RequestParam String otp, @RequestParam String newPassword) {
-//        try {
-//            if (accountService.verifyOtpAndAllowPasswordChange(email, otp)) {
-//                // Thực hiện đổi mật khẩu
-//                accountService.updatePassword(email, newPassword);
-//                return ResponseEntity.ok("Mật khẩu đã được thay đổi thành công.");
-//            }
-//        } catch (RuntimeException e) {
-//            return ResponseEntity.badRequest().body(e.getMessage());
-//        }
-//        return ResponseEntity.badRequest().body("Có lỗi xảy ra.");
-//    }// Lưu trữ mã OTP
 	// Lưu trữ mã OTP
 	private static Map<String, Forgotpassword> otpStorage = new HashMap<>();
 
@@ -172,41 +171,33 @@ public class AuthController {
 		}
 	}
 
-	
 	@PostMapping("/update-password-profile")
-    public ResponseEntity<?> updatePassword(@RequestBody ChangePasswordModel changePasswordModel) {
-        try {
-            Account updatedAccount = accountService.updatePasswordProfile(changePasswordModel);
-            return ResponseEntity.ok("Cập nhật mật khẩu thành công.");
-        } catch (RuntimeException ex) {
-            return ResponseEntity.badRequest().body(ex.getMessage());
-        }
-    }
+	public ResponseEntity<?> updatePassword(@RequestBody ChangePasswordModel changePasswordModel) {
+		try {
+			Account updatedAccount = accountService.updatePasswordProfile(changePasswordModel);
+			return ResponseEntity.ok("Cập nhật mật khẩu thành công.");
+		} catch (RuntimeException ex) {
+			return ResponseEntity.badRequest().body(ex.getMessage());
+		}
+	}
+
 	
-	private final EmailUtil emailUtil;
 
-    @Autowired
-    public AuthController(EmailUtil emailUtil) {
-        this.emailUtil = emailUtil;
-    }
+	@PostMapping("/send")
+	public ResponseEntity<String> sendContactEmail(@RequestBody ContactDTO contactDTO) {
+		try {
+			// Gửi email liên hệ
+			emailUtil.sendContactEmail(contactDTO);
 
-    @PostMapping("/send")
-    public ResponseEntity<String> sendContactEmail(@RequestBody ContactDTO contactDTO) {
-        try {
-            // Gửi email liên hệ
-            emailUtil.sendContactEmail(contactDTO);
+			// Phản hồi lại khi gửi email thành công
+			return ResponseEntity.ok("Thông tin liên hệ đã được gửi thành công. Chúng tôi sẽ sớm liên hệ với bạn.");
+		} catch (Exception e) {
+			// Xử lý lỗi nếu có sự cố khi gửi email
+			e.printStackTrace();
+			return ResponseEntity.status(500).body("Đã xảy ra lỗi khi gửi thông tin liên hệ. Vui lòng thử lại sau.");
+		}
+	}
 
-            // Phản hồi lại khi gửi email thành công
-            return ResponseEntity.ok("Thông tin liên hệ đã được gửi thành công. Chúng tôi sẽ sớm liên hệ với bạn.");
-        } catch (Exception e) {
-            // Xử lý lỗi nếu có sự cố khi gửi email
-            e.printStackTrace();
-            return ResponseEntity.status(500).body("Đã xảy ra lỗi khi gửi thông tin liên hệ. Vui lòng thử lại sau.");
-        }
-    }
-	    
-	    
-	    
 	@PostMapping("/signup")
 	public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
 		try {
@@ -234,7 +225,8 @@ public class AuthController {
 				String role = authority.getRole().getName();
 
 				// Tạo và trả về JWT token
-				String token = jwtTokenProvider.generateToken(account.getUsername(), role, account.getId(), account.getEmail());
+				String token = jwtTokenProvider.generateToken(account.getUsername(), role, account.getId(),
+						account.getEmail());
 				return ResponseEntity.ok(new JwtResponse(token, role));
 			} else {
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No roles assigned to this account");
@@ -245,25 +237,6 @@ public class AuthController {
 			// Ghi log chi tiết để debug
 			// System.err.println("Error during login: " + e.getMessage());
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Incorrect password");
-		}
-	}
-
-	// Cập nhật JwtResponse để chứa thêm thông tin
-	public static class JwtResponse {
-		private String token;
-		private String role; // Thêm vai trò
-
-		public JwtResponse(String token, String role) {
-			this.token = token;
-			this.role = role;
-		}
-
-		public String getToken() {
-			return token;
-		}
-
-		public String getRole() {
-			return role; // Thêm getter cho vai trò
 		}
 	}
 
@@ -348,6 +321,25 @@ public class AuthController {
 
 		public void setPhone(String phone) {
 			this.phone = phone;
+		}
+	}
+
+	// Cập nhật JwtResponse để chứa thêm thông tin
+	public static class JwtResponse {
+		private String token;
+		private String role; // Thêm vai trò
+
+		public JwtResponse(String token, String role) {
+			this.token = token;
+			this.role = role;
+		}
+
+		public String getToken() {
+			return token;
+		}
+
+		public String getRole() {
+			return role; // Thêm getter cho vai trò
 		}
 	}
 }

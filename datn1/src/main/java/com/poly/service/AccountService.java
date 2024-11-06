@@ -120,55 +120,57 @@ public class AccountService {
 	}
 
 	public Account save(String fullname, String username, String email) {
-		Logger logger = Logger.getLogger(AccountService.class.getName()); // Tạo Logger
-		logger.info("Bắt đầu tạo tài khoản mới...");
+	    Logger logger = Logger.getLogger(AccountService.class.getName()); // Tạo Logger
+	    logger.info("Bắt đầu tạo tài khoản mới...");
 
-		// Kiểm tra đầu vào
-		if (fullname == null || username == null || email == null) {
-			logger.severe("Thiếu thông tin fullname, username hoặc email.");
-			throw new IllegalArgumentException("Fullname, username, và email là bắt buộc.");
-		}
+	    // Kiểm tra đầu vào
+	    if (fullname == null || username == null || email == null) {
+	        logger.severe("Thiếu thông tin fullname, username hoặc email.");
+	        throw new IllegalArgumentException("Fullname, username, và email là bắt buộc.");
+	    }
 
-		// Kiểm tra xem email đã tồn tại chưa
-		if (accountRepository.findByEmail(email) != null) {
-			logger.warning("Email đã tồn tại: " + email);
-			throw new RuntimeException("Email đã tồn tại");
-		}
+	    // Kiểm tra xem email đã tồn tại chưa
+	    Optional<Account> existingAccountOptional = accountRepository.findByEmail(email);
+	    if (existingAccountOptional.isPresent()) {
+	        logger.warning("Email đã tồn tại: " + email);
+	        throw new RuntimeException("Email đã tồn tại");
+	    }
 
-		// Tạo đối tượng tài khoản mới
-		Account newAccount = new Account();
-		newAccount.setFullname(fullname);
-		newAccount.setUsername(username);
-		newAccount.setEmail(email);
-		newAccount.setActivated(true);
+	    // Tạo đối tượng tài khoản mới
+	    Account newAccount = new Account();
+	    newAccount.setFullname(fullname);
+	    newAccount.setUsername(username);
+	    newAccount.setEmail(email);
+	    newAccount.setActivated(true);
 
-		logger.info("Tài khoản mới được tạo với username: " + username);
+	    logger.info("Tài khoản mới được tạo với username: " + username);
 
-		// Tạo vai trò mặc định và gán cho tài khoản
-		try {
-			Roles defaultRole = rolesRepository.findById(3)
-					.orElseThrow(() -> new RuntimeException("Vai trò mặc định không tồn tại"));
+	    // Tạo vai trò mặc định và gán cho tài khoản
+	    try {
+	        Roles defaultRole = rolesRepository.findById(3)
+	                .orElseThrow(() -> new RuntimeException("Vai trò mặc định không tồn tại"));
 
-			Authorities authority = new Authorities();
-			authority.setAccount(newAccount);
-			authority.setRole(defaultRole);
+	        Authorities authority = new Authorities();
+	        authority.setAccount(newAccount);
+	        authority.setRole(defaultRole);
 
-			logger.info("Vai trò mặc định đã được gán cho tài khoản.");
+	        logger.info("Vai trò mặc định đã được gán cho tài khoản.");
 
-			// Gán quyền cho tài khoản
-			newAccount.setAuthority(authority);
+	        // Gán quyền cho tài khoản
+	        newAccount.setAuthority(authority);
 
-		} catch (Exception e) {
-			logger.severe("Lỗi khi gán vai trò mặc định: " + e.getMessage());
-			throw e; // Đảm bảo lỗi được truyền đi nếu có vấn đề
-		}
+	    } catch (Exception e) {
+	        logger.severe("Lỗi khi gán vai trò mặc định: " + e.getMessage());
+	        throw e; // Đảm bảo lỗi được truyền đi nếu có vấn đề
+	    }
 
-		// Lưu tài khoản mới vào cơ sở dữ liệu
-		Account savedAccount = accountRepository.save(newAccount);
-		logger.info("Tài khoản đã được lưu thành công với ID: " + savedAccount.getId());
+	    // Lưu tài khoản mới vào cơ sở dữ liệu
+	    Account savedAccount = accountRepository.save(newAccount);
+	    logger.info("Tài khoản đã được lưu thành công với ID: " + savedAccount.getId());
 
-		return savedAccount;
+	    return savedAccount;
 	}
+
 
 	public Account loginByEmail(String email, String password) {
 		Optional<Account> account = accountRepository.findByEmail(email);
@@ -249,10 +251,10 @@ public class AccountService {
 	}
 
 	// Phương thức tìm tài khoản theo email
-	public Account findByEmail(String email) {
-		Optional<Account> optional =  accountRepository.findByEmail(email);
-		return optional.get();
+	public Optional<Account> findByEmail(String email) {
+	    return accountRepository.findByEmail(email);
 	}
+
    public AccountDTO updateAccount(Integer id, AccountUpdateDTO accountUpdateDTO) {
        // Tìm kiếm tài khoản theo ID
        Account account = accountRepository.findById(id)

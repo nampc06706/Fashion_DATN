@@ -1,9 +1,9 @@
 import BreadcrumbCom from "../BreadcrumbCom";
 import LayoutHomeFive from "../Partials/LayoutHomeFive";
-import { FaCheckCircle } from "react-icons/fa"; // Import biểu tượng từ react-icons
+import { FaTimesCircle } from "react-icons/fa"; // Đổi biểu tượng thành FaTimesCircle để hiển thị lỗi
 import { useLocation } from 'react-router-dom';
 
-export default function Succes() {
+export default function Failer() {
   const location = useLocation();
   const query = new URLSearchParams(location.search);
   
@@ -21,12 +21,12 @@ export default function Succes() {
             <div className="flex justify-center items-center w-full">
               <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-md">
                 <div data-aos="fade-up" className="empty-content w-full text-center">
-                  <FaCheckCircle className="text-green-600 mx-auto mb-4" size={50} />
-                  <h1 className="text-2xl font-bold text-green-600 mb-2">
-                    Thanh toán hóa đơn thành công!
+                  <FaTimesCircle className="text-red-600 mx-auto mb-4" size={50} />
+                  <h1 className="text-2xl font-bold text-red-600 mb-2">
+                    Thanh toán hóa đơn thất bại!
                   </h1>
                   <p className="text-gray-600 mb-6">
-                    Cảm ơn bạn đã đặt hàng. Đơn hàng của bạn đã được xử lý thành công.
+                    Vui lòng thử lại thanh toán.
                   </p>
                   <div className="mb-4 border-t border-gray-200 pt-4">
                     <h2 className="text-lg font-semibold">Chi tiết đơn hàng</h2>
@@ -41,7 +41,7 @@ export default function Succes() {
                           type="button"
                           className="yellow-btn transition duration-300 hover:bg-yellow-600"
                         >
-                          Xem đơn hàng
+                          Thử lại thanh toán
                         </span>
                       </div>
                     </div>

@@ -97,7 +97,7 @@ public class PaymentController {
 				if (checkOrderStatus) {
 					// Cập nhật trạng thái thanh toán
 					if ("00".equals(vnp_ResponseCode)) {
-						ordersService.updateOrderStatus(orderID, 1); // 1 là trạng thái thành công
+						ordersService.updateOrderStatus(orderID, 0); // 1 là trạng thái thành công
 
 						// Điều hướng đến trang Success với các thông tin cần thiết
 						String redirectUrl = String.format(
@@ -105,9 +105,10 @@ public class PaymentController {
 								orderID, vnp_Amount);
 						return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(redirectUrl)).build();
 					} else {
-						ordersService.updateOrderStatus(orderID, 2); // 2 là trạng thái thất bại
+						ordersService.updateOrderStatus(orderID, 99); // 2 là trạng thái thất bại
 						// Điều hướng đến trang thất bại
-						String redirectUrl = "http://localhost:5173/payment-failed";
+						String redirectUrl = String.format("http://localhost:5173/checkout/payment-failed?orderID=%d&amount=%s&paymentMethod=VNPay",
+								orderID, vnp_Amount);
 						return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(redirectUrl)).build();
 					}
 				} else {

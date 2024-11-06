@@ -56,6 +56,7 @@ export default function ProductView() {
             const defaultColor = sizes[0].color.name;
             const sizesForDefaultColor = sizes.filter(size => size.color.name === defaultColor);
             setAvailableSizes(sizesForDefaultColor);
+
           }
         } else {
           console.warn("No product details available.");
@@ -131,11 +132,8 @@ export default function ProductView() {
       return;
     }
 
-    // Khởi tạo ID tạm thời, có thể là null hoặc một giá trị mặc định
-    let id = null; // hoặc gán một giá trị tạm thời nếu cần
-
     const cartItem = {
-      id: id, // ID tạm thời sẽ được cập nhật từ backend
+      id: null, // ID tạm thời sẽ được cập nhật từ backend
       accountId: null, // ID tài khoản, sẽ được cập nhật nếu có
       quantity: parseInt(quantity, 10),
       size: {
@@ -156,7 +154,7 @@ export default function ProductView() {
 
       if (existingItem) {
         // Cập nhật quantity
-        existingItem.quantity = parseInt(existingItem.quantity, 10) + parseInt(item.quantity, 10);
+        existingItem.quantity += item.quantity; // Cập nhật số lượng
       } else {
         // Thêm mới mục vào giỏ hàng
         cartItems.push(item);
@@ -164,6 +162,7 @@ export default function ProductView() {
 
       // Lưu lại giỏ hàng vào cookie
       Cookies.set('cart', JSON.stringify(cartItems), { expires: 7 });
+      setCartItems(cartItems); // Cập nhật lại trạng thái giỏ hàng
     };
 
     try {
@@ -180,8 +179,6 @@ export default function ProductView() {
       // Cập nhật ID tạm thời từ phản hồi
       if (response.data && response.data.id) {
         cartItem.id = response.data.id; // Cập nhật ID từ phản hồi
-      } else {
-        //console.error('Không tìm thấy ID trong phản hồi:', response.data);
       }
 
       updateCartCookie(cartItem);
@@ -190,7 +187,6 @@ export default function ProductView() {
       toast.error('Có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng.');
       console.error('Error adding product to cart:', error);
     }
-
   };
 
 
@@ -228,14 +224,14 @@ export default function ProductView() {
         toast.success('Sản phẩm đã được thêm vào danh sách yêu thích!');
       }
     } catch (error) {
-      const errorMessage = error.response?.status === 403 
-        ? 'Bạn không có quyền yêu thích sản phẩm này.' 
+      const errorMessage = error.response?.status === 403
+        ? 'Bạn không có quyền yêu thích sản phẩm này.'
         : 'Không thể thêm sản phẩm vào danh sách yêu thích.';
       toast.error(errorMessage);
       console.error('Error adding product to favourites:', error);
     }
   };
-  
+
   const changeImgHandler = (image) => {
     setSrc(image);
   };
@@ -244,15 +240,22 @@ export default function ProductView() {
     return <div>Loading...</div>;
   }
 
-  const { name, price, description, images, sizes } = productDetails;
+  const { name, price, description, images, sizes, originalPrice, discount } = productDetails;
   const productName = name || 'No name available';
   const formattedPrice = price || '0.00';
+  const formattedOriginalPrice = originalPrice || '0.00';
   const productDescription = description || 'No description available';
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
   };
 
+  const formatOriginalPrice = (originalPrice) => {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(originalPrice);
+  };
+
+  // Kiểm tra nếu giá mới và giá cũ bằng nhau
+  const isSamePrice = price === originalPrice;
   return (
     <div className="product-view w-full lg:flex justify-between">
       <div className="lg:w-1/2 xl:mr-[70px] lg:mr-[50px]">
@@ -267,7 +270,16 @@ export default function ProductView() {
             ) : (
               <div className="text-center text-qgray">No image available</div>
             )}
+
+            {/* Hiển thị discount ở góc trên bên phải */}
+            {discount && Number(discount) > 0 && (
+              <div className="absolute top-0 right-0 bg-red-600 text-white text-2xl font-bold flex justify-center items-center rounded-full w-28 h-28 shadow-lg transform hover:scale-105 transition-transform duration-300 ease-in-out">
+                -{Number(discount).toFixed(0)}%
+              </div>
+            )}
+
           </div>
+
           <div className="flex gap-2 flex-wrap">
             {images.length > 0 ? images.map((img, index) => (
               <div
@@ -290,12 +302,13 @@ export default function ProductView() {
 
       <div className="flex-1">
         <div className="product-details w-full mt-10 lg:mt-0">
-          <span className="text-qgray text-xs font-normal uppercase tracking-wider mb-2 inline-block">
+          {/* <span className="text-qgray text-xs font-normal uppercase tracking-wider mb-2 inline-block">
             {productDetails.category?.name || 'Unknown Category'}
-          </span>
-          <p className="text-xl font-medium text-qblack mb-4">
+          </span> */}
+          <p className="text-3xl font-bold mb-4 transition-transform">
             {productName}
           </p>
+
 
           <div className="flex space-x-[10px] items-center mb-6">
             <div className="flex">
@@ -306,6 +319,11 @@ export default function ProductView() {
           </div>
 
           <div className="flex space-x-2 items-center mb-7">
+            {!isSamePrice && (
+              <span className="text-2xl font-500 text-gray line-through">
+                {formatOriginalPrice(formattedOriginalPrice)}
+              </span>
+            )}
             <span className="text-2xl font-500 text-qred">{formatPrice(formattedPrice)}</span>
           </div>
 

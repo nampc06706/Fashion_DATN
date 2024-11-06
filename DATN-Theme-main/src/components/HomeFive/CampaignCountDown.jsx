@@ -1,8 +1,50 @@
 import { Link } from "react-router-dom";
 import CountDown from "../Helpers/CountDown";
-
+import { useState, useEffect } from "react";
 export default function CampaignCountDown({ className, lastDate }) {
-  const { showDate, showHour, showMinute, showSecound } = CountDown(lastDate);
+  const [products, setProducts] = useState([]);
+  const [flashSaleInfo, setFlashSaleInfo] = useState({
+    name: "",
+    startDate: null,
+    endDate: null,
+  });
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch("http://localhost:8080/api/guest/product-flashsale");
+        const data = await response.json();
+        console.log(data);
+        if (Array.isArray(data)) {
+          setProducts(data);
+
+          // Giả sử data[0] chứa thông tin flash sale
+          if (data.length > 0 && data[0].flashsale) {
+            const { name, startdate, enddate } = data[0].flashsale;
+
+            // Chuyển đổi startdate và enddate thành đối tượng Date
+            const startDate = new Date(startdate[0], startdate[1] - 1, startdate[2], startdate[3], startdate[4]);
+            const endDate = new Date(enddate[0], enddate[1] - 1, enddate[2], enddate[3], enddate[4], enddate[5]);
+
+            setFlashSaleInfo({
+              name,
+              startDate,
+              endDate,
+            });
+          }
+        } else {
+          console.error("Data is not an array:", data);
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  // Gọi hàm CountDown với endDate
+  const { showDate, showHour, showMinute, showSecound } = CountDown(flashSaleInfo.endDate);
 
   return (
     <div>

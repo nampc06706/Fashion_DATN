@@ -56,7 +56,7 @@ export default function OrderTab({ accountId: initialAccountId }) {
 
     fetchOrders();
   }, [accountId, token]);
-  
+
   const handleOpenModal = (order) => {
     setSelectedOrder(order);
     setModalOpen(true);
@@ -67,13 +67,16 @@ export default function OrderTab({ accountId: initialAccountId }) {
     setSelectedOrder(null);
   };
 
+  // Hàm chuyển đổi trạng thái đơn hàng thành chuỗi mô tả
   const getOrderStatus = (status) => {
-    switch (status) {
+    switch (status.toString()) { // Đảm bảo status là chuỗi để so sánh
       case '1': return "Chờ xác nhận";
       case '2': return "Đã xác nhận";
       case '3': return "Đang giao hàng";
       case '4': return "Hoàn thành";
       case '5': return "Đã hủy";
+      case '99': return "Thanh toán VNPay thất bại";
+      case '0': return "Đã thanh toán";
       default: return "Không xác định";
     }
   };
@@ -241,9 +244,7 @@ export default function OrderTab({ accountId: initialAccountId }) {
                 <span>Thời gian giao hàng dự kiến:</span>
                 <span>{selectedOrder.shippingMethod.estimatedDeliveryTime}</span>
               </div>
-
-              {/* Thông báo thanh toán */}
-              {selectedOrder.payment && selectedOrder.payment.id === "1" && (
+              {["0", "1", "2", "3", "4"].includes(selectedOrder.status) && (
                 <div className="flex justify-between items-center border-t-2 pt-2 text-green-600 font-semibold">
                   <span>Thông báo:</span>
                   <span>Đã thanh toán</span>
@@ -260,11 +261,22 @@ export default function OrderTab({ accountId: initialAccountId }) {
               )}
             </div>
 
-            <div className="flex justify-end">
-              <button onClick={handleCloseModal} className="bg-red-600 text-white px-6 py-2 rounded-lg transition duration-300 ease-in-out hover:bg-red-700 transform hover:scale-105">
+            <div className="flex justify-end space-x-4 mt-4">
+              {selectedOrder.status === "99" && (
+                <button className="bg-yellow-500 text-white px-6 py-2 rounded-full shadow-md transition duration-300 ease-in-out hover:bg-yellow-600 hover:shadow-lg transform hover:scale-105 border border-yellow-500 hover:border-yellow-600">
+                  Thanh toán lại
+                </button>
+              )}
+              <button
+                onClick={handleCloseModal}
+                className="bg-red-500 text-white px-6 py-2 rounded-full shadow-md transition duration-300 ease-in-out hover:bg-red-600 hover:shadow-lg transform hover:scale-105 border border-red-500 hover:border-red-600"
+              >
                 Đóng
               </button>
             </div>
+
+
+
           </div>
         </>
       )}
