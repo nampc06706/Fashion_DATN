@@ -40,5 +40,9 @@ public class SizeService {
     public Size getSizeById(Integer sizeId) {
         return sizeRepository.findById(sizeId).orElse(null);
     }
+    
+    public List<Size> getSizes() {
+    	return sizeRepository.findAll();
+	}
 
 }
