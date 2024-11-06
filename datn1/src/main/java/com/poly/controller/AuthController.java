@@ -183,8 +183,9 @@ public class AuthController {
         }
     }
 	
+	
+	
 	private final EmailUtil emailUtil;
-
     @Autowired
     public AuthController(EmailUtil emailUtil) {
         this.emailUtil = emailUtil;
@@ -205,7 +206,8 @@ public class AuthController {
         }
     }
 	    
-	    
+
+    
 	    
 	@PostMapping("/signup")
 	public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {

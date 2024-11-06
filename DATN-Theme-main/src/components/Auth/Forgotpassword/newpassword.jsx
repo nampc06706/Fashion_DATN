@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import axios from "axios";
 import LayoutHomeFive from '../../Partials/LayoutHomeFive';
 import Thumbnail from './Thumbnail';
