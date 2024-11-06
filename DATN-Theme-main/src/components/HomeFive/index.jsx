@@ -19,12 +19,18 @@ function Index() {
         className="new-products mb-[60px]"
       />
       <BrandSection className="mb-[60px]" />
-      <CampaignCountDown lastDate="2024-10-01T23:59:59"  className="mb-[60px]" />
+      <CampaignCountDown
+        lastDate="2024-10-01T23:59:59"
+        className="mb-[60px]"
+        sectionTitle="New Arrival"
+        seeMoreUrl="/flash-sale"
+        products={products.slice(16, 28)}
+      />
       <SectionStyleOneHmFour2
         sectionTitle="New Arrival"
         seeMoreUrl="/flash-sale"
         products={products.slice(16, 28)}
-        className="mb-[60px]" 
+        className="mb-[60px]"
       />
 
       <ProductsAds

@@ -38,7 +38,6 @@ export default function CardPage({ cart = true }) {
     setLoading(false);
   };
 
-  // Load cart data from database if logged in
   const loadCartFromDatabase = async (accountId) => {
     try {
       const response = await axios.get(`http://localhost:8080/api/guest/carts`, {

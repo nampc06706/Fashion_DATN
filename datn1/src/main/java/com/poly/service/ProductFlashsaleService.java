@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.poly.dto.CategoryDTO;
 import com.poly.dto.ColorDTO;
+import com.poly.dto.FlashsaleDTO;
 import com.poly.dto.ProductDTO;
 import com.poly.dto.ProductImageDTO;
 import com.poly.dto.SizeDTO;
@@ -24,9 +25,11 @@ public class ProductFlashsaleService {
 
     public List<ProductDTO> findAll() {
         return productFlashsaleRepository.findAll().stream()
+                .filter(productFlashsale -> productFlashsale.getFlashsale() != null && productFlashsale.getFlashsale().isIsactive())
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
+
 
     public ProductDTO save(ProductFlashsale productFlashsale) {
         ProductFlashsale savedProductFlashsale = productFlashsaleRepository.save(productFlashsale);
@@ -43,49 +46,86 @@ public class ProductFlashsaleService {
         }
 
         ProductDTO productDTO = new ProductDTO();
+
+        // Gán các thuộc tính từ ProductFlashsale
         productDTO.setId(productFlashsale.getProduct().getId());
         productDTO.setName(productFlashsale.getProduct().getName());
-     // Tính toán giá sau khi giảm giá
+
+        // Tính toán giá sau khi giảm giá
         BigDecimal originalPrice = productFlashsale.getProduct().getPrice(); // Giá gốc
         BigDecimal discountPercent = productFlashsale.getDiscount(); // Phần trăm giảm giá
-        BigDecimal hundred = BigDecimal.valueOf(100); // 100 để sử dụng trong phép chia
+
+        if (originalPrice == null) {
+            throw new IllegalArgumentException("Giá gốc không được null");
+        }
+
+        if (discountPercent == null || discountPercent.compareTo(BigDecimal.ZERO) < 0 || discountPercent.compareTo(BigDecimal.valueOf(100)) > 0) {
+            throw new IllegalArgumentException("Phần trăm giảm giá phải từ 0 đến 100");
+        }
 
         // Tính giá đã giảm
-        BigDecimal discountAmount = originalPrice.multiply(discountPercent).divide(hundred); // Tính tiền giảm giá
-        BigDecimal discountedPrice = originalPrice.subtract(discountAmount); // Giá đã giảm
+        BigDecimal discountAmount = originalPrice.multiply(discountPercent).divide(BigDecimal.valueOf(100)); // Tính tiền giảm giá
+        BigDecimal discountedPrice = originalPrice.subtract(discountAmount).setScale(2, BigDecimal.ROUND_HALF_UP); // Giá đã giảm
 
-        productDTO.setPrice(discountedPrice); // Đặt giá đã giảm vào ProductDTO
-        
+        productDTO.setPrice(discountedPrice);
+        productDTO.setOriginalPrice(originalPrice); // Gán giá gốc
+        productDTO.setDiscount(discountPercent);
         productDTO.setDescription(productFlashsale.getProduct().getDescription());
-        
+
         // Lấy hình ảnh đầu tiên (nếu có)
-        if (!productFlashsale.getProduct().getImages().isEmpty()) {
-            productDTO.setFirstImage(productFlashsale.getProduct().getImages().get(0).getImage()); // Sử dụng phương thức getImage() từ ProductImages
+        if (productFlashsale.getProduct().getImages() != null && !productFlashsale.getProduct().getImages().isEmpty()) {
+            productDTO.setFirstImage(productFlashsale.getProduct().getImages().get(0).getImage());
         }
 
         // Chuyển đổi danh sách hình ảnh thành ProductImageDTO
-        List<ProductImageDTO> imageDTOs = productFlashsale.getProduct().getImages().stream()
-            .map(image -> new ProductImageDTO(image.getImage())) // Sử dụng phương thức getImage() từ ProductImages
-            .collect(Collectors.toList());
-        productDTO.setImages(imageDTOs);
+        if (productFlashsale.getProduct().getImages() != null) {
+            List<ProductImageDTO> imageDTOs = productFlashsale.getProduct().getImages().stream()
+                .map(image -> new ProductImageDTO(image.getImage()))
+                .collect(Collectors.toList());
+            productDTO.setImages(imageDTOs);
+        }
 
-     // Chuyển đổi danh sách kích thước thành SizeDTO
-        List<SizeDTO> sizeDTOs = productFlashsale.getProduct().getSizes().stream()
-            .map(size -> new SizeDTO(size.getId(), // ID của kích thước
-                                      size.getProduct().getId(), // ID của sản phẩm mà kích thước này thuộc về
-                                      size.getName(), // Tên của kích thước
-                                      size.getQuantityInStock(), // Số lượng còn trong kho
-                                      new ColorDTO(size.getColor().getId(), size.getColor().getName())) // Chuyển đổi màu sắc
-            )
-            .collect(Collectors.toList());
-        productDTO.setSizes(sizeDTOs);
-
+        // Chuyển đổi danh sách kích thước thành SizeDTO
+        if (productFlashsale.getProduct().getSizes() != null) {
+            List<SizeDTO> sizeDTOs = productFlashsale.getProduct().getSizes().stream()
+                .map(size -> new SizeDTO(size.getId(),
+                                          size.getProduct().getId(),
+                                          size.getName(),
+                                          size.getQuantityInStock(),
+                                          new ColorDTO(size.getColor().getId(), size.getColor().getName())))
+                .collect(Collectors.toList());
+            productDTO.setSizes(sizeDTOs);
+        }
 
         // Tạo CategoryDTO từ Category
-        productDTO.setCategory(new CategoryDTO(productFlashsale.getProduct().getCategory().getId(),
-                                                productFlashsale.getProduct().getCategory().getName()));
+        if (productFlashsale.getProduct().getCategory() != null) {
+            productDTO.setCategory(new CategoryDTO(productFlashsale.getProduct().getCategory().getId(),
+                                                    productFlashsale.getProduct().getCategory().getName()));
+        }
+
+        // Thêm thông tin Flashsale vào ProductDTO chỉ khi flash sale đang hoạt động
+        if (productFlashsale.getFlashsale() != null) {
+            boolean isActive = productFlashsale.getFlashsale().isIsactive();
+            System.out.println("Flashsale isActive: " + isActive); // Kiểm tra giá trị
+
+            if (isActive) {
+                FlashsaleDTO flashsaleDTO = new FlashsaleDTO();
+                flashsaleDTO.setId(productFlashsale.getFlashsale().getId());
+                flashsaleDTO.setName(productFlashsale.getFlashsale().getName());
+                flashsaleDTO.setStartdate(productFlashsale.getFlashsale().getStartdate());
+                flashsaleDTO.setEnddate(productFlashsale.getFlashsale().getEnddate());
+                flashsaleDTO.setIsactive(isActive);
+
+                productDTO.setFlashsale(flashsaleDTO);
+            }
+        }
+
 
         return productDTO;
     }
+
+
+
+
 
 }

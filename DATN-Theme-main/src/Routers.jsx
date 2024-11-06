@@ -36,6 +36,7 @@ import Forgotpassword from "./components/Auth/Forgotpassword/index.jsx";
 import Otp from "./components/Auth/Forgotpassword/otp.jsx";
 import Newpassword from "./components/Auth/Forgotpassword/newpassword.jsx";
 import Succes from "./components/CheakoutPage/succes.jsx";
+import Failer from "./components/CheakoutPage/failer.jsx";
 
 // Tạo một component cho các route admin với layout riêng
 const AdminRoutes = () => (
@@ -62,6 +63,7 @@ export default function Routers() {
       <Route exact path="/cart" element={<CardPage />} />
       <Route exact path="/checkout" element={<CheakoutPage />} />
       <Route exact path="/checkout/succes" element={<Succes />} />
+      <Route exact path="/checkout/payment-failed" element={<Failer />} />
       <Route exact path="/orders" element={<OrdersPage />} />
       <Route exact path="/wishlist" element={<Wishlist />} />
       <Route exact path="/flash-sale" element={<FlashSale />} />
