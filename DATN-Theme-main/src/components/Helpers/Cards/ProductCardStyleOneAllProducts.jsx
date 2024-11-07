@@ -28,7 +28,7 @@ export default function ProductCardStyleOne({ data = {}, type = 1 }) {
 
   return (
     <div
-      className="product-card-one w-full h-full bg-white relative group overflow-hidden"
+      className="product-card-one w-full group"
       style={{ boxShadow: "0px 15px 64px 0px rgba(0, 0, 0, 0.05)" }}
     >
       <div
@@ -38,17 +38,8 @@ export default function ProductCardStyleOne({ data = {}, type = 1 }) {
         }}
       />
 
-      <div className="absolute top-4 left-4 flex flex-col space-y-2 transition-transform duration-300 transform group-hover:translate-y-2 z-20">
-        <button type="button" className="text-qblack group-hover:opacity-100 transition-opacity duration-300">
-          <QuickViewIco />
-        </button>
-        <button type="button" className="text-qblack group-hover:opacity-100 transition-opacity duration-300">
-          <ThinLove />
-        </button>
-      </div>
-
       <div className="product-card-details px-[30px] pb-[30px] relative">
-        <div className="absolute w-full h-10 px-[30px] left-0 top-32 group-hover:top-16 transition-all duration-300 ease-in-out">
+        <div className="absolute w-full h-10 px-[30px] left-0 top-32  transition-all duration-300 ease-in-out">
           <button
             type="button"
             className={type === 3 ? "blue-btn w-full" : "yellow-btn w-full"}

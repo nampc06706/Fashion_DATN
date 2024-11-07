@@ -1,5 +1,6 @@
 package com.poly.controller;
 
+import java.math.BigDecimal;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +29,7 @@ import com.poly.entity.Orders;
 import com.poly.entity.Payment;
 import com.poly.service.OrdersService;
 import com.poly.service.PaymentService;
+import com.poly.service.VNPayService;
 
 @RestController
 @RequestMapping("/api/user/payments")
@@ -38,6 +40,8 @@ public class PaymentController {
 	@Autowired
 	private OrdersService ordersService;
 
+	@Autowired
+	private VNPayService vnPayService;
 	private static final Logger logger = LoggerFactory.getLogger(PaymentController.class);
 
 	// Endpoint để tạo URL thanh toán
@@ -97,7 +101,7 @@ public class PaymentController {
 				if (checkOrderStatus) {
 					// Cập nhật trạng thái thanh toán
 					if ("00".equals(vnp_ResponseCode)) {
-						ordersService.updateOrderStatus(orderID, 0); // 1 là trạng thái thành công
+						ordersService.updateOrderStatus(orderID, 0); // 0 là trạng thái thành công
 
 						// Điều hướng đến trang Success với các thông tin cần thiết
 						String redirectUrl = String.format(
@@ -105,14 +109,33 @@ public class PaymentController {
 								orderID, vnp_Amount);
 						return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(redirectUrl)).build();
 					} else {
-						ordersService.updateOrderStatus(orderID, 99); // 2 là trạng thái thất bại
+						ordersService.updateOrderStatus(orderID, 99); // 99 là trạng thái thất bại
 						// Điều hướng đến trang thất bại
-						String redirectUrl = String.format("http://localhost:5173/checkout/payment-failed?orderID=%d&amount=%s&paymentMethod=VNPay",
+						String redirectUrl = String.format(
+								"http://localhost:5173/checkout/payment-failed?orderID=%d&amount=%s&paymentMethod=VNPay",
 								orderID, vnp_Amount);
+						ordersService.restoreOrderStock(orderID); // Hoàn lại kho nếu thanh toán thất bại
 						return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(redirectUrl)).build();
 					}
 				} else {
-					return ResponseEntity.ok(Map.of("RspCode", "02", "Message", "Order already confirmed"));
+					// Cập nhật trạng thái thanh toán
+					if ("00".equals(vnp_ResponseCode)) {
+						ordersService.updateOrderStatus(orderID, 0); // 0 là trạng thái thành công
+
+						// Điều hướng đến trang Success với các thông tin cần thiết
+						String redirectUrl = String.format(
+								"http://localhost:5173/checkout/succes?orderID=%d&amount=%s&paymentMethod=VNPay",
+								orderID, vnp_Amount);
+						return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(redirectUrl)).build();
+					} else {
+						ordersService.updateOrderStatus(orderID, 99); // 99 là trạng thái thất bại
+						// Điều hướng đến trang thất bại
+						String redirectUrl = String.format(
+								"http://localhost:5173/checkout/payment-failed?orderID=%d&amount=%s&paymentMethod=VNPay",
+								orderID, vnp_Amount);
+						ordersService.restoreOrderStock(orderID); // Hoàn lại kho nếu thanh toán thất bại
+						return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(redirectUrl)).build();
+					}
 				}
 			} else {
 				return ResponseEntity.ok(Map.of("RspCode", "01", "Message", "Order not Found"));
@@ -120,6 +143,49 @@ public class PaymentController {
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body(Map.of("RspCode", "99", "Message", "Unknown error: " + e.getMessage()));
+		}
+	}
+
+	@PostMapping("/payment-again")
+	@PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF', 'USER')")
+	public ResponseEntity<Map<String, String>> createPaymentAgain(Orders order,
+			@RequestBody Map<String, String> payload) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		// Kiểm tra xác thực
+		if (authentication == null || !authentication.isAuthenticated()) {
+			logger.error("Authentication is null or not authenticated.");
+			Map<String, String> response = new HashMap<>();
+			response.put("message", "You are not authorized to perform this action.");
+			return ResponseEntity.ok(response);
+		}
+		try {
+			// Lấy orderId từ payload
+			String orderIdStr = payload.get("orderId");
+			Orders orders = ordersService.findById(Integer.valueOf(orderIdStr));
+
+			BigDecimal totalAmount = orders.getOrderDetails().stream()
+				    .map(od -> od.getPrice()) // Chỉ lấy giá sản phẩm, không nhân với số lượng nữa
+				    .reduce(BigDecimal.ZERO, BigDecimal::add)
+				    .multiply(BigDecimal.valueOf(100)); // Thêm hai số 0 vào tổng tiền (nếu cần)
+
+			// Lấy phí vận chuyển từ đơn hàng và nhân thêm 100
+			BigDecimal shipmentFee = orders.getShipmentFee().multiply(BigDecimal.valueOf(100));
+
+			// Tính tổng số tiền bao gồm phí vận chuyển
+			BigDecimal totalAmountWithShipping = totalAmount.add(shipmentFee);
+			String paymentUrl = vnPayService.createOrder(orders.getId(), totalAmountWithShipping.intValue(),
+					"Thanh toán đơn hàng");
+
+			// Trả về link thanh toán dưới dạng JSON
+			Map<String, String> response = new HashMap<>();
+			response.put("vnpayUrl", paymentUrl);
+			return ResponseEntity.ok(response);
+
+		} catch (Exception e) {
+			// Xử lý khi có lỗi và trả về thông báo lỗi
+			Map<String, String> errorResponse = new HashMap<>();
+			errorResponse.put("error", e.getMessage());
+			return ResponseEntity.status(500).body(errorResponse);
 		}
 	}
 

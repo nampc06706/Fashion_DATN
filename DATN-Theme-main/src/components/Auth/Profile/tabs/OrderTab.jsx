@@ -8,6 +8,8 @@ export default function OrderTab({ accountId: initialAccountId }) {
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [accountId, setAccountId] = useState(initialAccountId);
+  const [error, setError] = useState(null);
+  const [paymentUrl, setPaymentUrl] = useState(null);
   const token = Cookies.get("token");
 
   useEffect(() => {
@@ -44,7 +46,7 @@ export default function OrderTab({ accountId: initialAccountId }) {
           );
 
           setOrders(sortedOrders);
-          console.log(sortedOrders)
+          //console.log(sortedOrders)
         } catch (error) {
           console.error("Lỗi khi lấy đơn hàng:", error);
           //alert("Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại.");
@@ -80,6 +82,45 @@ export default function OrderTab({ accountId: initialAccountId }) {
       default: return "Không xác định";
     }
   };
+
+  const handlePaymentAgain = async (orderId) => {
+    try {
+        // In ra token và orderId để kiểm tra giá trị
+        console.log('Token:', token);
+        console.log('Order ID:', orderId);
+
+        // Gửi yêu cầu POST đến API với token trong header
+        const response = await axios.post(
+            'http://localhost:8080/api/user/payments/payment-again',
+            { orderId: orderId },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Đính kèm token vào header
+                },
+            }
+        );
+
+        // Kiểm tra phản hồi API
+        console.log('API Response:', response.data);
+
+        const vnpayUrl = response.data.vnpayUrl;
+        console.log('VNPAY URL:', vnpayUrl);
+
+        // Kiểm tra và chuyển hướng đến link thanh toán
+        if (vnpayUrl) {
+            setError(null); // Reset error state
+            window.location.href = vnpayUrl; // Chuyển hướng trực tiếp
+        } else {
+            setError('URL thanh toán không hợp lệ');
+        }
+    } catch (error) {
+        // Xử lý lỗi khi gọi API
+        console.error('API Error:', error);
+        setError(error.response?.data?.error || 'Có lỗi xảy ra khi gọi API');
+    }
+};
+
+
 
   // Hàm tính tổng tiền từ orderDetails và giá của shippingMethod
   const calculateTotalPrice = (orderDetails, shippingMethod) => {
@@ -263,7 +304,9 @@ export default function OrderTab({ accountId: initialAccountId }) {
 
             <div className="flex justify-end space-x-4 mt-4">
               {selectedOrder.status === "99" && (
-                <button className="bg-yellow-500 text-white px-6 py-2 rounded-full shadow-md transition duration-300 ease-in-out hover:bg-yellow-600 hover:shadow-lg transform hover:scale-105 border border-yellow-500 hover:border-yellow-600">
+                <button
+                onClick={() => handlePaymentAgain(selectedOrder.id)}
+                  className="bg-yellow-500 text-white px-6 py-2 rounded-full shadow-md transition duration-300 ease-in-out hover:bg-yellow-600 hover:shadow-lg transform hover:scale-105 border border-yellow-500 hover:border-yellow-600">
                   Thanh toán lại
                 </button>
               )}

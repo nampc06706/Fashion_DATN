@@ -235,4 +235,24 @@ public class OrdersService {
 		// Lưu thay đổi
 		ordersRepository.save(order);
 	}
+	
+	@Transactional
+	public void restoreOrderStock(int orderId) {
+		Orders order = ordersRepository.findById(orderId)
+				.orElseThrow(() -> new RuntimeException("Order not found"));
+
+		List<OrderDetails> orderDetails = order.getOrderDetails();
+		for (OrderDetails orderDetail : orderDetails) {
+			Size size = orderDetail.getSize();
+			int quantity = orderDetail.getQuantity();
+
+			size.setQuantityInStock(size.getQuantityInStock() + quantity);
+			sizeRepository.save(size); 
+		}
+
+		ordersRepository.save(order);
+	}
+	public Orders findById(Integer valueOf) {
+		return ordersRepository.findById(valueOf).get();
+	}
 }

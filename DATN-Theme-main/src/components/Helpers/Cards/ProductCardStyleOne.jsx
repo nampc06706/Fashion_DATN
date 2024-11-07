@@ -66,43 +66,44 @@ export default function ProductCardStyleOne({ data = {}, type = 1, productId }) 
                       background: `url(${product.firstImage ? `/assets/images/${product.firstImage}` : '/assets/images/sanpham1.jpg'}) no-repeat center center/cover`,
                     }}
                   />
-                  <div className="product-card-details p-4 relative">
-                    {/* Nút thụt xuống bình thường */}
-                    <div className="absolute w-full h-10 left-0 top-36 transition-all duration-300 ease-in-out group-hover:top-28">
-                      <button
-                        type="button"
-                        className={`w-full ${type === 3 ? 'blue-btn' : 'yellow-btn'}`}
-                        style={{ padding: '12px 0', textAlign: 'center' }}
-                        onClick={() => handleTitleClick(product.id)}
-                      >
-                        <div className="flex items-center justify-center space-x-3">
-                          <span>Xem chi tiết</span>
-                        </div>
-                      </button>
-                    </div>
-
-                    <div className="product-card-title mt-2">
-                      <h4
-                        className="font-bold text-lg text-qblack leading-8 cursor-pointer"
-                        onClick={() => handleTitleClick(product.id)}
-                      >
-                        {product.name || 'Tên sản phẩm'}
-                      </h4>
-                      <div className="product-card-rating flex items-center mt-1 space-x-1">
-                        <Star />
-                        <Star />
-                        <Star />
-                        <Star />
-                        <Star />
-                      </div>
-                    </div>
-
-                    <div className="product-card-price mt-3">
-                      <span className="text-xl font-semibold text-qblack">
-                        {formatPrice(product.price)}
-                      </span>
+                  <div className="product-card-title mt-2">
+                    <h4
+                      className="font-bold text-lg text-qblack leading-8 cursor-pointer"
+                      onClick={() => handleTitleClick(product.id)}
+                    >
+                      {product.name || 'Tên sản phẩm'}
+                    </h4>
+                    <div className="product-card-rating flex items-center mt-1 space-x-1">
+                      <Star />
+                      <Star />
+                      <Star />
+                      <Star />
+                      <Star />
                     </div>
                   </div>
+
+                  <div className="product-card-price mt-3">
+                    <span className="text-xl font-semibold text-qblack">
+                      {formatPrice(product.price)}
+                    </span>
+                  </div>
+                </div>
+                <div className="product-card-details relative">
+                  {/* Nút thụt xuống bình thường */}
+                  <div className="absolute w-full h-10 left-0 top-0 transition-all duration-300 ease-in-out">
+                    <button
+                      type="button"
+                      className={`w-full ${type === 3 ? 'blue-btn' : 'yellow-btn'}`}
+                      style={{ padding: '12px 0', textAlign: 'center' }}
+                      onClick={() => handleTitleClick(product.id)}
+                    >
+                      <div className="flex items-center justify-center space-x-3">
+                        <span>Xem chi tiết</span>
+                      </div>
+                    </button>
+                  </div>
+
+
                 </div>
               </div>
             ))
