@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import Cookies from 'js-cookie';
@@ -19,6 +19,8 @@ const colors = [
   { id: 5, name: "Đen", code: "#000000" },
   { id: 6, name: "White", code: "#FFFFFF" },
 ];
+// mấy này động hay cứng em làm đi có gì k biết a giúp, có làm dì bên th BE hong hay em sử lý bên này thoi 2 bên luôn dạ để em koi
+
 
 const SizeManagementPage = () => {
   const [products, setProducts] = useState([]);
@@ -42,7 +44,6 @@ const SizeManagementPage = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       if (!userInfo) {
-        setError("Không tìm thấy thông tin người dùng.");
         return;
       }
       try {
@@ -65,8 +66,9 @@ const SizeManagementPage = () => {
         setProducts(response.data);
       } catch (error) {
         console.error("Lỗi khi lấy dữ liệu sản phẩm:", error);
-        setError("Có lỗi xảy ra. Vui lòng thử lại sau.");
       } finally {
+        console.log();
+        // loading
       }
     };
     fetchProducts();
