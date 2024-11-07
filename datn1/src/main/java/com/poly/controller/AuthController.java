@@ -180,14 +180,18 @@ public class AuthController {
 			return ResponseEntity.badRequest().body(ex.getMessage());
 		}
 	}
+<<<<<<< HEAD
 
 	
+=======
+>>>>>>> 8770a943831eedfa6c45d1f55e9b0d7761aac6c5
 
 	@PostMapping("/send")
 	public ResponseEntity<String> sendContactEmail(@RequestBody ContactDTO contactDTO) {
 		try {
 			// Gửi email liên hệ
 			emailUtil.sendContactEmail(contactDTO);
+<<<<<<< HEAD
 
 			// Phản hồi lại khi gửi email thành công
 			return ResponseEntity.ok("Thông tin liên hệ đã được gửi thành công. Chúng tôi sẽ sớm liên hệ với bạn.");
@@ -198,6 +202,18 @@ public class AuthController {
 		}
 	}
 
+=======
+
+            // Phản hồi lại khi gửi email thành công
+            return ResponseEntity.ok("Thông tin liên hệ đã được gửi thành công. Chúng tôi sẽ sớm liên hệ với bạn.");
+        } catch (Exception e) {
+            // Xử lý lỗi nếu có sự cố khi gửi email
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Đã xảy ra lỗi khi gửi thông tin liên hệ. Vui lòng thử lại sau.");
+        }
+    }
+	    
+>>>>>>> 8770a943831eedfa6c45d1f55e9b0d7761aac6c5
 	@PostMapping("/signup")
 	public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
 		try {

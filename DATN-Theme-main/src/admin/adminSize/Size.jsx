@@ -1,11 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from "axios";
+import { jwtDecode } from "jwt-decode";
+import Cookies from 'js-cookie';
 import { AiOutlineEdit, AiOutlineDelete } from 'react-icons/ai';
 
-const products = [
-  { id: 1, name: "Product A" },
-  { id: 2, name: "Product B" },
-  { id: 3, name: "Product C" },
-];
 
 const sizes = [
   { id: 1, name: "S", description: "Small" },
@@ -19,15 +17,60 @@ const colors = [
   { id: 3, name: "Xanh dương", code: "#0000FF" },
   { id: 4, name: "Vàng", code: "#FFFF00" },
   { id: 5, name: "Đen", code: "#000000" },
-  { id: 6, name: "Trắng", code: "#FFFFFF" },
+  { id: 6, name: "White", code: "#FFFFFF" },
 ];
 
 const SizeManagementPage = () => {
+  const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState('');
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState(''); // Mới thêm
   const [addedItems, setAddedItems] = useState([]);
   const [editIndex, setEditIndex] = useState(null);
+
+  const token = Cookies.get('token');
+  let userInfo = null;
+
+  if (token) {
+    try {
+      userInfo = jwtDecode(token);
+    } catch (error) {
+      console.error("Token decoding error:", error);
+    }
+  }
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      if (!userInfo) {
+        setError("Không tìm thấy thông tin người dùng.");
+        return;
+      }
+      try {
+        const response = await axios.get(`http://localhost:8080/api/admin/products`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          withCredentials: true,
+        });
+
+        const responseSize = await axios.get(`http://localhost:8080/api/admin/size`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          withCredentials: true,
+        });
+        setAddedItems(responseSize.data);
+        setProducts(response.data);
+      } catch (error) {
+        console.error("Lỗi khi lấy dữ liệu sản phẩm:", error);
+        setError("Có lỗi xảy ra. Vui lòng thử lại sau.");
+      } finally {
+      }
+    };
+    fetchProducts();
+  }, [token]);
 
   const handleProductChange = (e) => {
     setSelectedProduct(e.target.value);
@@ -60,11 +103,11 @@ const SizeManagementPage = () => {
     setAddedItems(addedItems.filter(item => item.product.id !== id));
   };
 
-  const handleEditProduct = (index) => {
-    setEditIndex(index);
-    setSelectedProduct(addedItems[index].product.id);
-    setSelectedSize(addedItems[index].size.id);
-    setSelectedColor(addedItems[index].color.id); // Lấy màu để chỉnh sửa
+  const handleEditProduct = (size) => {
+    setEditIndex(size);
+    setSelectedProduct(size.product.id);
+    setSelectedSize(size.id);
+    setSelectedColor(size.color.id); // Lấy màu để chỉnh sửa
   };
 
   const handleUpdateProduct = () => {
@@ -163,6 +206,33 @@ const SizeManagementPage = () => {
             {addedItems.map((item, index) => (
               <tr key={index} className="hover:bg-gray-100">
                 <td className="py-4 px-6 border-b border-gray-200">{item.product.name}</td>
+                <td className="py-4 px-6 border-b border-gray-200">{item.name}</td>
+                <td className="py-4 px-6 border-b border-gray-200">
+                  <span className="inline-block w-4 h-4" style={{ backgroundColor: item.color.name }}></span> {item.color.name}
+                </td>
+                <td className="py-4 px-6 border-b border-gray-200">{item.createdAt}</td>
+                <td className="py-4 px-6 border-b border-gray-200">
+                  <button
+                    onClick={() => handleEditProduct(item)}
+                    className="bg-yellow-500 text-white px-3 py-1 rounded-lg hover:bg-yellow-600 transition duration-300 mr-2"
+                  >
+                    <AiOutlineEdit />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteProduct(item.product.id)}
+                    className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 transition duration-300"
+                  >
+                    <AiOutlineDelete />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {/* {addedItems.map((item, index) => (
+              <tr key={index} className="hover:bg-gray-100">
+                <td className="py-4 px-6 border-b border-gray-200">{item.product.name}</td>
                 <td className="py-4 px-6 border-b border-gray-200">{item.size.name} - {item.size.description}</td>
                 <td className="py-4 px-6 border-b border-gray-200">
                   <span className="inline-block w-4 h-4" style={{ backgroundColor: item.color.code }}></span> {item.color.name}
@@ -183,9 +253,7 @@ const SizeManagementPage = () => {
                   </button>
                 </td>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            ))} */}
 
         {editIndex !== null && (
           <div className="mt-4">

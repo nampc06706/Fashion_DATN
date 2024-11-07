@@ -1,4 +1,4 @@
-import React, { useState } from 'react'; // Import useState để quản lý state
+import { useState } from 'react'; // Import useState để quản lý state
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import InputCom from '../../Helpers/InputCom'; // Đường dẫn tới InputCom

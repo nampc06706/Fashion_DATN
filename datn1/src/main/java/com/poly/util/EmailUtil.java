@@ -50,8 +50,8 @@ public class EmailUtil {
     
     
     public void sendContactEmail(ContactDTO contact) {
-        // Tạo nội dung email dựa trên thông tin từ ContactDTO
-        String content = "Xin chào " + contact.getFullName() + ",\r\n\r\n"
+        // Tạo nội dung email gửi đến người dùng
+        String userContent = "Xin chào " + contact.getFullName() + ",\r\n\r\n"
                 + "Chúng tôi đã nhận được tin nhắn từ bạn với các thông tin sau:\r\n"
                 + "Chủ đề: " + contact.getSubject() + "\r\n"
                 + "Nội dung: " + contact.getMessage() + "\r\n\r\n"
@@ -59,13 +59,27 @@ public class EmailUtil {
                 + "Trân trọng,\r\n"
                 + "Đội ngũ hỗ trợ Thời trang công sở";
 
-        // Tạo và gửi email
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(contact.getEmail()); // gửi đến email của người dùng
-        message.setSubject("Xác nhận nhận tin nhắn từ bạn: " + contact.getSubject());
-        message.setText(content);
+        // Tạo và gửi email cho người dùng
+        SimpleMailMessage userMessage = new SimpleMailMessage();
+        userMessage.setTo(contact.getEmail()); // gửi đến email của người dùng
+        userMessage.setSubject("Xác nhận nhận tin nhắn từ bạn: " + contact.getSubject());
+        userMessage.setText(userContent);
+        mailSender.send(userMessage);
 
-        mailSender.send(message);
+        // Tạo nội dung email gửi đến admin
+        String adminContent = "Bạn vừa nhận được tin nhắn mới từ người dùng:\r\n\r\n"
+                + "Tên người dùng: " + contact.getFullName() + "\r\n"
+                + "Email người dùng: " + contact.getEmail() + "\r\n"
+                + "Chủ đề: " + contact.getSubject() + "\r\n"
+                + "Nội dung: " + contact.getMessage() + "\r\n\r\n"
+                + "Vui lòng kiểm tra và phản hồi trong thời gian sớm nhất.";
+
+        // Tạo và gửi email cho admin
+        SimpleMailMessage adminMessage = new SimpleMailMessage();
+        adminMessage.setTo("le0963845867@gmail.com"); // thay "admin_email@gmail.com" bằng email của bạn
+        adminMessage.setSubject("Tin nhắn mới từ người dùng: " + contact.getSubject());
+        adminMessage.setText(adminContent);
+        mailSender.send(adminMessage);
     }
 
 
