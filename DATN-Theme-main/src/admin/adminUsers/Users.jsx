@@ -13,6 +13,7 @@ const UserManagementPage = () => {
     roleId: null,
     image: null, // Thêm trường cho hình ảnh
   });
+  const [searchTerm, setSearchTerm] = useState('');
 
   const [selectedImage, setSelectedImage] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -40,6 +41,16 @@ const UserManagementPage = () => {
 
     fetchUsers();
   }, []);
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value.toLowerCase());
+  };
+
+  const filteredUsers = users.filter((user) =>
+    user.fullname.toLowerCase().includes(searchTerm) ||
+    user.username.toLowerCase().includes(searchTerm) ||
+    user.email.toLowerCase().includes(searchTerm)
+  );
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
@@ -107,7 +118,7 @@ const UserManagementPage = () => {
 
       // Cập nhật danh sách người dùng sau khi thêm hoặc cập nhật
       const user = newUser.id ? response.data : [...users, response.data];
-      
+
       setUsers(user);
       setShowForm(false); // Ẩn form sau khi gửi thành công
     } catch (error) {
@@ -133,11 +144,25 @@ const UserManagementPage = () => {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <button onClick={handleAddUser} className="bg-green-600 text-white px-4 py-2 rounded flex items-center">
+      <div className="flex justify-between items-center mb-6 space-x-4">
+        {/* Search Input */}
+        <input
+          type="text"
+          placeholder="Tìm kiếm người dùng..."
+          value={searchTerm}
+          onChange={handleSearchChange}
+          className="px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+
+        {/* Add User Button */}
+        <button
+          onClick={handleAddUser}
+          className="bg-green-600 text-white px-4 py-2 rounded flex items-center"
+        >
           <AiOutlinePlus className="mr-2" /> Thêm người dùng
         </button>
       </div>
+
       <div className="bg-white shadow-md rounded-lg p-5">
         <table className="min-w-full bg-white border border-gray-300">
           <thead>
@@ -151,7 +176,7 @@ const UserManagementPage = () => {
             </tr>
           </thead>
           <tbody>
-            {users.map((user) => (
+            {filteredUsers.map((user) => (
               <tr key={user.id} className="hover:bg-gray-100">
                 <td className="py-4 px-6 border-b border-gray-200">{user.fullname}</td>
                 <td className="py-4 px-6 border-b border-gray-200">{user.username}</td>
@@ -171,6 +196,7 @@ const UserManagementPage = () => {
           </tbody>
         </table>
       </div>
+
 
       {showForm && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
@@ -283,6 +309,7 @@ const UserManagementPage = () => {
       )}
     </div>
   );
+
 };
 
 export default UserManagementPage;
