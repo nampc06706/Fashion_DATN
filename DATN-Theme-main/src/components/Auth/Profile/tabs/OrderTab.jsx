@@ -304,13 +304,9 @@ export default function OrderTab({ accountId: initialAccountId }) {
 
             <div className="flex justify-end space-x-4 mt-4">
               {selectedOrder.status === "99" && (
-<<<<<<< HEAD
                 <button
                 onClick={() => handlePaymentAgain(selectedOrder.id)}
                   className="bg-yellow-500 text-white px-6 py-2 rounded-full shadow-md transition duration-300 ease-in-out hover:bg-yellow-600 hover:shadow-lg transform hover:scale-105 border border-yellow-500 hover:border-yellow-600">
-=======
-                <button className="bg-yellow-500 text-white px-6 py-2 rounded-full shadow-md transition duration-300 ease-in-out hover:bg-yellow-600 hover:shadow-lg transform hover:scale-105 border border-yellow-500 hover:border-yellow-600">
->>>>>>> 8770a943831eedfa6c45d1f55e9b0d7761aac6c5
                   Thanh toán lại
                 </button>
               )}
