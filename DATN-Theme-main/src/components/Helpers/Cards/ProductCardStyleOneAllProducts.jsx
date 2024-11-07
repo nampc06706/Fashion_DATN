@@ -38,15 +38,6 @@ export default function ProductCardStyleOne({ data = {}, type = 1 }) {
         }}
       />
 
-      <div className="absolute top-4 left-4 flex flex-col space-y-2 transition-transform duration-300 transform group-hover:translate-y-2 z-20">
-        <button type="button" className="text-qblack group-hover:opacity-100 transition-opacity duration-300">
-          <QuickViewIco />
-        </button>
-        <button type="button" className="text-qblack group-hover:opacity-100 transition-opacity duration-300">
-          <ThinLove />
-        </button>
-      </div>
-
       <div className="product-card-details px-[30px] pb-[30px] relative">
         <div className="absolute w-full h-10 px-[30px] left-0 top-32  transition-all duration-300 ease-in-out">
           <button
