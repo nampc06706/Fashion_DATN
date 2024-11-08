@@ -484,4 +484,38 @@ public class ProductsService {
 		}).collect(Collectors.toList());
 	}
 
+	// Lấy tất cả sản phẩm theo loại sản phẩm
+	public List<SimpleProductDTO> getProductsByCategory(Integer categoryId) {
+		// Lấy danh sách sản phẩm theo categoryId từ repository
+		List<Products> products = productsRepository.findByCategoryId(categoryId);
+		List<SimpleProductDTO> productDTOList = new ArrayList<>();
+
+		for (Products product : products) {
+			// Lấy hình đầu tiên, nếu không có thì để null
+			String firstImage = product.getImages().isEmpty() ? null : product.getImages().get(0).getImage();
+
+			// Tạo đối tượng SimpleProductDTO với tên, giá và hình đầu tiên
+			SimpleProductDTO productDTO = new SimpleProductDTO(product.getId(), product.getName(), product.getPrice(),
+					firstImage);
+
+			productDTOList.add(productDTO);
+		}
+
+		return productDTOList;
+	}
+	
+	//hiện sản phẩm theo giá từ dến
+    public List<SimpleProductDTO> getProductsByPriceRange(BigDecimal minPrice, BigDecimal maxPrice) {
+        List<Products> products = productsRepository.findByPriceBetween(minPrice, maxPrice);
+        List<SimpleProductDTO> productDTOList = new ArrayList<>();
+
+        for (Products product : products) {
+            String firstImage = product.getImages().isEmpty() ? null : product.getImages().get(0).getImage();
+            SimpleProductDTO productDTO = new SimpleProductDTO(product.getId(), product.getName(), product.getPrice(), firstImage);
+            productDTOList.add(productDTO);
+        }
+
+        return productDTOList;
+    }
+
 }

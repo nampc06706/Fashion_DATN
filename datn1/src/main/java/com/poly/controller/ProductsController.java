@@ -92,4 +92,19 @@ public class ProductsController {
 		return ResponseEntity.ok(relatedProducts);
 	}
 
+	// tìm sp theo danh mục
+	@GetMapping("/category/{categoryId}")
+	public ResponseEntity<List<SimpleProductDTO>> getProductsByCategory(@PathVariable Integer categoryId) {
+		List<SimpleProductDTO> products = productsService.getProductsByCategory(categoryId);
+		return ResponseEntity.ok(products);
+	}
+
+	// lấy sản phẩm theo giá từ đến từ
+	@GetMapping("/price-range")
+	public ResponseEntity<List<SimpleProductDTO>> getProductsByPriceRange(@RequestParam BigDecimal minPrice,
+			@RequestParam BigDecimal maxPrice) {
+		List<SimpleProductDTO> products = productsService.getProductsByPriceRange(minPrice, maxPrice);
+		return ResponseEntity.ok(products);
+	}
+
 }

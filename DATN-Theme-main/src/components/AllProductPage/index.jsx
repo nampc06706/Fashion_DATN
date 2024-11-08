@@ -21,30 +21,32 @@ export default function AllProductPage() {
   const param = searchParams.get('s');
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = param 
-          ? await axios.get("http://localhost:8080/api/guest/products/search", {
-              params: { keyword: param, category: null }
-            })
-          : await axios.get("http://localhost:8080/api/guest/products");
-
-        const data = response.data;
-
-        if (Array.isArray(data) && data.length > 0) {
-          setProducts(data);
-          setNoProductsFound(false); // Reset khi có sản phẩm
-        } else {
-          setNoProductsFound(true); // Đánh dấu không có sản phẩm
-        }
-      } catch (error) {
-        console.error("Error fetching products:", error);
-        toast.error("Có lỗi xảy ra khi kết nối với máy chủ.");
-      }
-    };
-
     fetchProducts();
   }, [param]);
+
+
+  const fetchProducts = async () => {
+    try {
+      const response = param
+        ? await axios.get("http://localhost:8080/api/guest/products/search", {
+          params: { keyword: param, category: null }
+        })
+        : await axios.get("http://localhost:8080/api/guest/products");
+
+      const data = response.data;
+
+      if (Array.isArray(data) && data.length > 0) {
+        setProducts(data);
+        setNoProductsFound(false);
+      } else {
+        setNoProductsFound(true);
+      }
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      toast.error("Có lỗi xảy ra khi kết nối với máy chủ.");
+    }
+  };
+
 
   // Hiển thị thông báo chỉ khi không có sản phẩm
   useEffect(() => {
@@ -70,6 +72,61 @@ export default function AllProductPage() {
     }
   });
 
+  //tìm sản phẩm theo danh mục
+  const onCategoryChange = async (categoryId) => {
+    try {
+      const response = await axios.get(`http://localhost:8080/api/guest/products/category/${categoryId}`);
+      setProducts(response.data);
+      setCurrentPage(1);
+    } catch (error) {
+      console.error("Lỗi khi lấy sản phẩm:", error);
+    }
+  };
+
+  const fetchProductsByPriceRange = async (minPrice, maxPrice) => {
+    try {
+      const response = await axios.get(`http://localhost:8080/api/guest/products/price-range`, {
+        params: { minPrice, maxPrice }
+      });
+      setProducts(response.data);
+      setCurrentPage(1);
+    } catch (error) {
+      console.error("Lỗi khi lọc sản phẩm theo giá:", error);
+    }
+  };
+
+  const handleSearchByPrice = (volume) => {
+    const minPrice = volume[0]; // minPrice từ volume[0]
+    const maxPrice = volume[1]; // maxPrice từ volume[1]
+
+    if (minPrice !== "" && maxPrice !== "") {
+      fetchProductsByPriceRange(minPrice, maxPrice);
+    } else {
+      fetchProducts(); // Gọi lại fetchProducts khi không có khoảng giá
+    }
+  };
+  const volumeHandler = (volume) => {
+    // Gọi hàm handleSearchByPrice với phạm vi giá
+    handleSearchByPrice(volume);
+  };
+  
+
+  const checkboxHandler = (e) => {
+    const { name, checked } = e.target;
+
+    // Cập nhật filters, chỉ giữ checkbox hiện tại là true, tất cả checkbox khác là false
+    setFilter({
+      [name]: checked, // Đặt trạng thái của checkbox hiện tại
+    });
+  };
+  const resetFilters = () => {
+    // Đặt lại tất cả các bộ lọc về giá trị mặc định
+    setFilter({}); // Giả sử setFilter là state setter để cập nhật các bộ lọc
+    
+    // Nếu cần, bạn có thể gọi lại API hoặc cập nhật lại sản phẩm mặc định khi reset
+    fetchProducts(); // Lấy lại tất cả sản phẩm khi bộ lọc bị reset
+  };
+
   // Tính toán các sản phẩm cần hiển thị trên trang hiện tại
   const indexOfLastProduct = currentPage * productsPerPage; // Chỉ số sản phẩm cuối cùng
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage; // Chỉ số sản phẩm đầu tiên
@@ -89,6 +146,11 @@ export default function AllProductPage() {
                 filters={filters}
                 setFilter={setFilter}
                 className="mb-[30px]"
+                onCategoryChange={onCategoryChange}
+                handleSearchByPrice={handleSearchByPrice}
+                checkboxHandler={checkboxHandler}
+                volumeHandler={volumeHandler} 
+                resetFilters={resetFilters}
               />
             </div>
 

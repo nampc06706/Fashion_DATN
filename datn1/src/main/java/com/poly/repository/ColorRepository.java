@@ -7,5 +7,5 @@ import com.poly.entity.Color;
 
 @Repository
 public interface ColorRepository extends JpaRepository<Color, Integer> {
-	
+	Color findByName(String name);
 }
