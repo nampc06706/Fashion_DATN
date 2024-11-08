@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import Cookies from 'js-cookie';
@@ -34,7 +34,6 @@ const SizeManagementPage = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       if (!userInfo) {
-        setError("Không tìm thấy thông tin người dùng.");
         return;
       }
       try {
@@ -57,8 +56,9 @@ const SizeManagementPage = () => {
         setProducts(response.data);
       } catch (error) {
         console.error("Lỗi khi lấy dữ liệu sản phẩm:", error);
-        setError("Có lỗi xảy ra. Vui lòng thử lại sau.");
       } finally {
+        console.log();
+        // loading
       }
     };
     fetchProducts();
