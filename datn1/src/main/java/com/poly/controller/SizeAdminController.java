@@ -47,7 +47,9 @@ public class SizeAdminController {
 			logger.error("Authentication is null or not authenticated.");
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null); // Trả về 403 nếu không xác thực
 		}
+		
 		try {
+			
 			Size newSize = sizeService.addSize(size, colorName, productId);
 			return ResponseEntity.ok(newSize);
 		} catch (Exception e) {

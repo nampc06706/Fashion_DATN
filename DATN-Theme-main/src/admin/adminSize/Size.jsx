@@ -66,130 +66,159 @@ const SizeManagementPage = () => {
 
 
   // Hàm gọi API để thêm Size và tạo Color mới
-  const addSize = async () => {
-    try {
-      const colorName = selectedColor;
-      const productId = selectedProduct;
-      const sizeName = selectedSize;
-      const quantityInStock = selectedStock; // Bạn có thể thay đổi giá trị này
+const addSize = async () => {
+  // Kiểm tra nếu không chọn màu sắc, sản phẩm hoặc kích thước
+  if (!selectedColor || !selectedProduct || !selectedSize) {
+    console.log('Vui lòng chọn đủ thông tin trước khi thêm Size!');
+    toast.error('Vui lòng chọn đủ thông tin trước khi thêm Size!', {
+      position: "top-right",
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+    return;
+  }
 
-      const response = await axios.post(
-        `http://localhost:8080/api/admin/size/add?colorName=${encodeURIComponent(colorName)}&productId=${productId}`,
-        {
-          name: sizeName,
-          quantityInStock: quantityInStock,
+  try {
+    // Log dữ liệu trước khi gửi
+    console.log('Dữ liệu sẽ được gửi:', {
+      colorName: selectedColor,
+      productId: selectedProduct,
+      sizeName: selectedSize.name,
+      quantityInStock: selectedStock
+    });
+
+    // Mã hóa màu sắc
+    const colorName = encodeURIComponent(selectedColor);
+    const sizeName = selectedSize.name;
+    const productId = selectedProduct;
+    const quantityInStock = selectedStock;
+
+    // Gửi yêu cầu thêm Size
+    const response = await axios.post(
+      `http://localhost:8080/api/admin/size/add?colorName=${colorName}&productId=${productId}`,
+      {
+        name: sizeName,
+        quantityInStock: quantityInStock,
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          withCredentials: true,
-        }
-      );
+        withCredentials: true,
+      }
+    );
 
-      console.log('Thêm Size thành công:', response.data);
-      toast.success('Thêm Size thành công!', {
-        position: "top-right",
-        autoClose: 1000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-      setAddedItems([...addedItems, response.data]);
-    } catch (error) {
-      console.error('Lỗi khi thêm Size:', error);
-      toast.error('Lỗi khi thêm Size!', {
-        position: "top-right",
-        autoClose: 1000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-    }
-  };
+    console.log('Thêm Size thành công:', response.data);
+    toast.success('Thêm Size thành công!', {
+      position: "top-right",
+      autoClose: 1000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
 
+    // Cập nhật lại danh sách các item trong state
+    setAddedItems([...addedItems, response.data]);
 
-  // Hàm gọi API để cập nhật Size
-  const updateSize = async () => {
-    if (!selectedSize || !selectedSize.id) {
-      console.log('Vui lòng chọn một size để cập nhật!');
-      toast.error('Vui lòng chọn một size để cập nhật!', {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-      return; // Dừng lại nếu chưa chọn size
-    }
+  } catch (error) {
+    console.error('Lỗi khi thêm Size:', error);
+    toast.error('Lỗi khi thêm Size!', {
+      position: "top-right",
+      autoClose: 1000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+  }
+};
 
-    try {
-      // Log dữ liệu trước khi gửi
-      console.log('Dữ liệu sẽ được gửi:', {
-        id: selectedSize.id,
-        name: selectedSize.name,
-        colorName: selectedColor,
-        productId: selectedProduct,
-        quantityInStock: selectedStock
-      });
+// Hàm gọi API để cập nhật Size
+const updateSize = async () => {
+  if (!selectedSize || !selectedSize.id) {
+    console.log('Vui lòng chọn một size để cập nhật!');
+    toast.error('Vui lòng chọn một size để cập nhật!', {
+      position: "top-right",
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+    return; // Dừng lại nếu chưa chọn size
+  }
 
-      const { id, name } = selectedSize;
-      const colorName = selectedColor;
-      const productId = selectedProduct;
-      const quantityInStock = selectedStock;
+  try {
+    // Log dữ liệu trước khi gửi
+    console.log('Dữ liệu sẽ được gửi:', {
+      id: selectedSize.id,
+      name: selectedSize.name,
+      colorName: selectedColor,
+      productId: selectedProduct,
+      quantityInStock: selectedStock
+    });
 
-      const response = await axios.post(
-        `http://localhost:8080/api/admin/size/update?colorName=${encodeURIComponent(colorName)}&productId=${productId}`,
-        {
-          id: id, // Gửi id size
-          name: name, // Gửi name size
-          quantityInStock: quantityInStock
+    const { id, name } = selectedSize;
+    const colorName = selectedColor;
+    const productId = selectedProduct;
+    const quantityInStock = selectedStock;
+
+    const response = await axios.post(
+      `http://localhost:8080/api/admin/size/update?colorName=${encodeURIComponent(colorName)}&productId=${productId}`,
+      {
+        id: id, // Gửi id size
+        name: name, // Gửi name size
+        quantityInStock: quantityInStock
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          withCredentials: true,
-        }
-      );
+        withCredentials: true,
+      }
+    );
 
-      console.log('Cập nhật Size thành công:', response.data);
-      toast.success('Cập nhật Size thành công!', {
-        position: "top-right",
-        autoClose: 1000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+    console.log('Cập nhật Size thành công:', response.data);
+    toast.success('Cập nhật Size thành công!', {
+      position: "top-right",
+      autoClose: 1000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
 
-      // Cập nhật lại danh sách các item trong state
-      const updatedItems = addedItems.map(item =>
-        item.id === id ? response.data : item
-      );
-      setAddedItems(updatedItems);
-    } catch (error) {
-      console.error('Lỗi khi cập nhật Size:', error);
-      toast.error('Lỗi khi cập nhật Size!', {
-        position: "top-right",
-        autoClose: 1000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-    }
-  };
+    // Cập nhật lại danh sách các item trong state
+    const updatedItems = addedItems.map(item =>
+      item.id === id ? response.data : item
+    );
+    setAddedItems(updatedItems);
+
+  } catch (error) {
+    console.error('Lỗi khi cập nhật Size:', error);
+    toast.error('Lỗi khi cập nhật Size!', {
+      position: "top-right",
+      autoClose: 1000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+  }
+};
+
 
 
 
