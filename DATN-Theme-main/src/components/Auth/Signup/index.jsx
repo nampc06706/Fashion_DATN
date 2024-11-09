@@ -27,7 +27,7 @@ export default function Signup() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     // Kiểm tra các trường dữ liệu không được bỏ trống
     for (const [key, value] of Object.entries(formData)) {
       if (!value) {
@@ -35,34 +35,39 @@ export default function Signup() {
         return;
       }
     }
-
+  
     // Kiểm tra mật khẩu phải có ít nhất 6 ký tự
     if (formData.password.length < 6) {
       toast.error('Mật khẩu phải có ít nhất 6 ký tự.');
       return;
     }
-
+  
     // Kiểm tra mật khẩu và xác nhận mật khẩu khớp nhau
     if (formData.password !== formData.passwordConfirm) {
       toast.error('Mật khẩu không khớp.');
       return;
     }
-
+  
     try {
       await axios.post('http://localhost:8080/api/signup', formData);
       toast.success('Đăng ký thành công!');
       navigate("/login");
-      // Xử lý thêm nếu cần
     } catch (error) {
       if (error.response) {
-        // Hiển thị lỗi từ server
-        toast.error(error.response.data);
+        const errorMessage = error.response.data.message || error.response.data;
+  
+        // Kiểm tra thông báo lỗi từ server
+        if (errorMessage === "Email already exists") {
+          toast.error("Email đã tồn tại. Vui lòng sử dụng email khác.");
+        } else {
+          toast.error(errorMessage);
+        }
       } else {
-        // Hiển thị lỗi không liên quan đến server (ví dụ lỗi mạng)
-        toast.error('Đăng ký thất bại');
+        //toast.error('Đăng ký thất bại. Vui lòng thử lại sau.');
       }
     }
   };
+  
 
   return (
     <LayoutHomeFive childrenClasses="pt-0 pb-0">

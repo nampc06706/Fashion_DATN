@@ -320,6 +320,8 @@ export default function CheckoutPage() {
       setSelectedPaymentMethod(null);
       setShippingFee(0);
       setTotalAmount(0);
+
+      navigate('/profile#order');
     } catch (error) {
       console.error("Error creating order: ", error); // Log lỗi
       if (error.response) {

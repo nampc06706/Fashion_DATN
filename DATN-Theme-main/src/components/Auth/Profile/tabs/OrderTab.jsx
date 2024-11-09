@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode"; // Sửa import cho jwtDecode
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function OrderTab({ accountId: initialAccountId }) {
   const [isModalOpen, setModalOpen] = useState(false);
@@ -30,34 +32,69 @@ export default function OrderTab({ accountId: initialAccountId }) {
     return new Date(year, month - 1, day, hour, minute, second); // `month - 1` vì tháng trong Date bắt đầu từ 0
   };
 
-  useEffect(() => {
-    const fetchOrders = async () => {
-      if (accountId) {
-        try {
-          const response = await axios.get(`http://localhost:8080/api/user/orders/${accountId}`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
+  // Định nghĩa hàm fetchOrders bên ngoài useEffect
+  const fetchOrders = async () => {
+    if (accountId) {
+      try {
+        const response = await axios.get(`http://localhost:8080/api/user/orders/${accountId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-          // Sắp xếp đơn hàng theo ngày mới nhất
-          const sortedOrders = response.data.sort((a, b) =>
-            formatDateArray(b.date) - formatDateArray(a.date)
-          );
+        // Sắp xếp đơn hàng theo ngày mới nhất
+        const sortedOrders = response.data.sort((a, b) =>
+          formatDateArray(b.date) - formatDateArray(a.date)
+        );
 
-          setOrders(sortedOrders);
-          //console.log(sortedOrders)
-        } catch (error) {
-          console.error("Lỗi khi lấy đơn hàng:", error);
-          //alert("Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại.");
-        }
-      } else {
-        console.warn("Không có accountId.");
+        setOrders(sortedOrders);
+        //console.log('Đơn hàng đã sắp xếp:', sortedOrders);
+      } catch (error) {
+        //console.error('Lỗi khi lấy đơn hàng:', error);
+        //toast.error('Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại.');
       }
-    };
+    } else {
+      console.warn('Không có accountId.');
+    }
+  };
 
+  // Gọi fetchOrders khi component được render
+  useEffect(() => {
     fetchOrders();
   }, [accountId, token]);
+
+  // Hàm cập nhật trạng thái đơn hàng thành 5
+  const updateOrderStatus = async (orderId) => {
+    try {
+      //console.log('Token:', token);
+      //console.log('Order ID:', orderId);
+
+      // Gọi API với token trong header
+      const response = await axios.put(
+        `http://localhost:8080/api/user/orders/${orderId}/setStatus`,
+        {},
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        toast.success(`Đã hủy đơn ${orderId} thành công`);
+        // Gọi lại hàm fetchOrders để cập nhật danh sách đơn hàng
+        fetchOrders();
+      } else {
+        const errorMessage = response.data?.message || 'Không thể cập nhật trạng thái đơn hàng.';
+        toast.error(errorMessage);
+      }
+    } catch (error) {
+      console.error('Lỗi khi cập nhật trạng thái đơn hàng:', error);
+      toast.error('Lỗi khi cập nhật trạng thái đơn hàng.');
+    }
+  };
+
 
   const handleOpenModal = (order) => {
     setSelectedOrder(order);
@@ -78,47 +115,50 @@ export default function OrderTab({ accountId: initialAccountId }) {
       case '4': return "Hoàn thành";
       case '5': return "Đã hủy";
       case '99': return "Thanh toán VNPay thất bại";
-      case '0': return "Đã thanh toán";
+      case '0': return "Đã thanh toán, Chờ xác nhận";
       default: return "Không xác định";
     }
   };
 
   const handlePaymentAgain = async (orderId) => {
     try {
-        // In ra token và orderId để kiểm tra giá trị
-        console.log('Token:', token);
-        console.log('Order ID:', orderId);
+      // In ra token và orderId để kiểm tra giá trị
+      console.log('Token:', token);
+      console.log('Order ID:', orderId);
 
-        // Gửi yêu cầu POST đến API với token trong header
-        const response = await axios.post(
-            'http://localhost:8080/api/user/payments/payment-again',
-            { orderId: orderId },
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`, // Đính kèm token vào header
-                },
-            }
-        );
-
-        // Kiểm tra phản hồi API
-        console.log('API Response:', response.data);
-
-        const vnpayUrl = response.data.vnpayUrl;
-        console.log('VNPAY URL:', vnpayUrl);
-
-        // Kiểm tra và chuyển hướng đến link thanh toán
-        if (vnpayUrl) {
-            setError(null); // Reset error state
-            window.location.href = vnpayUrl; // Chuyển hướng trực tiếp
-        } else {
-            setError('URL thanh toán không hợp lệ');
+      // Gửi yêu cầu POST đến API với token trong header
+      const response = await axios.post(
+        'http://localhost:8080/api/user/payments/payment-again',
+        { orderId: orderId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Đính kèm token vào header
+          },
         }
+      );
+
+      // Kiểm tra phản hồi API
+      console.log('API Response:', response.data);
+
+      const vnpayUrl = response.data.vnpayUrl;
+      console.log('VNPAY URL:', vnpayUrl);
+
+      // Kiểm tra và chuyển hướng đến link thanh toán
+      if (vnpayUrl) {
+        setError(null); // Reset error state
+        window.location.href = vnpayUrl; // Chuyển hướng trực tiếp
+      } else {
+        setError('URL thanh toán không hợp lệ');
+      }
     } catch (error) {
-        // Xử lý lỗi khi gọi API
-        console.error('API Error:', error);
-        setError(error.response?.data?.error || 'Có lỗi xảy ra khi gọi API');
+      // Xử lý lỗi khi gọi API
+      console.error('API Error:', error);
+      setError(error.response?.data?.error || 'Có lỗi xảy ra khi gọi API');
     }
-};
+  };
+
+
+
 
 
 
@@ -134,7 +174,10 @@ export default function OrderTab({ accountId: initialAccountId }) {
 
   return (
     <>
+      <ToastContainer position="top-right" autoClose={1000} hideProgressBar={false} />
+
       <div className="relative w-full overflow-x-auto sm:rounded-lg">
+
         <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
           <thead>
             <tr className="text-base text-qgray whitespace-nowrap px-2 border-b default-border-bottom">
@@ -218,7 +261,17 @@ export default function OrderTab({ accountId: initialAccountId }) {
                       <span className="text-gray-800 font-semibold">{detail.size?.product?.name || "Tên sản phẩm"}</span>
                       <div className="text-gray-700">
                         <p>{`Kích thước: ${detail.size?.name || "N/A"}`}</p>
-                        <p>{`Màu: ${detail.size?.color.name || "N/A"}`}</p>
+                        <div className="w-[30px] h-[30px] rounded-full border">
+                          <p
+                            style={{
+                              backgroundColor: detail.size?.color?.name || 'gray', // Nếu không có màu, sẽ dùng màu gray làm mặc định
+                              width: '100%', // Đảm bảo thẻ <p> chiếm đầy đủ chiều rộng của <div>
+                              height: '100%', // Đảm bảo thẻ <p> chiếm đầy đủ chiều cao của <div>
+                              margin: 0, // Bỏ margin mặc định của thẻ <p>
+                              borderRadius: '50%', // Đảm bảo rằng thẻ <p> có dạng hình tròn
+                            }}
+                          />
+                        </div>
                         <p>
                           {`Giá: ${detail.size?.product?.price !== undefined
                             ? Math.round(detail.size?.product?.price).toLocaleString("vi-VN", { style: "currency", currency: "VND" })
@@ -285,7 +338,7 @@ export default function OrderTab({ accountId: initialAccountId }) {
                 <span>Thời gian giao hàng dự kiến:</span>
                 <span>{selectedOrder.shippingMethod.estimatedDeliveryTime}</span>
               </div>
-              {["0", "1", "2", "3", "4"].includes(selectedOrder.status) && (
+              {["0", "1", "2", "3", "4"].includes(selectedOrder.status) && selectedOrder.payment.id === "1" && (
                 <div className="flex justify-between items-center border-t-2 pt-2 text-green-600 font-semibold">
                   <span>Thông báo:</span>
                   <span>Đã thanh toán</span>
@@ -305,9 +358,16 @@ export default function OrderTab({ accountId: initialAccountId }) {
             <div className="flex justify-end space-x-4 mt-4">
               {selectedOrder.status === "99" && (
                 <button
-                onClick={() => handlePaymentAgain(selectedOrder.id)}
+                  onClick={() => handlePaymentAgain(selectedOrder.id)}
                   className="bg-yellow-500 text-white px-6 py-2 rounded-full shadow-md transition duration-300 ease-in-out hover:bg-yellow-600 hover:shadow-lg transform hover:scale-105 border border-yellow-500 hover:border-yellow-600">
                   Thanh toán lại
+                </button>
+              )}
+              {selectedOrder.status === "1" && (
+                <button
+                  onClick={() => updateOrderStatus(selectedOrder.id)}
+                  className="bg-yellow-500 text-white px-6 py-2 rounded-full shadow-md transition duration-300 ease-in-out hover:bg-yellow-600 hover:shadow-lg transform hover:scale-105 border border-yellow-500 hover:border-yellow-600">
+                  Hủy đơn
                 </button>
               )}
               <button
