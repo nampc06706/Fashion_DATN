@@ -159,9 +159,18 @@ export default function OrderTab({ accountId: initialAccountId }) {
                     </span>
                   </td>
                   <td className="text-center py-4 px-2">
-                    <span className={`text-sm rounded p-2 ${order.status === '4' ? 'text-green-500 bg-green-100' : 'text-red-500 bg-red-100'}`}>
-                      {getOrderStatus(order.status)}
-                    </span>
+                    <select
+                      className={`text-sm rounded p-2 ${order.status === '4' ? 'text-green-500 bg-green-100' : 'text-red-500 bg-red-100'
+                        }`}
+                      value={order.status}
+                      onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                    >
+                      <option value="1" className="text-red-500">Chờ xác nhận</option>
+                      <option value="2" className="text-red-500">Đã xác nhận</option>
+                      <option value="3" className="text-yellow-500">Đang giao hàng</option>
+                      <option value="4" className="text-green-500">Hoàn thành</option>
+                      <option value="5" className="text-gray-500">Đã hủy</option>
+                    </select>
                   </td>
                   <td className="text-center py-4 px-2">
                     <span className="text-base text-qblack whitespace-nowrap px-2">

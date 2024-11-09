@@ -14,7 +14,6 @@ const UserManagementPage = () => {
     image: null, // Thêm trường cho hình ảnh
   });
   const [searchTerm, setSearchTerm] = useState('');
-
   const [selectedImage, setSelectedImage] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
 
@@ -38,7 +37,6 @@ const UserManagementPage = () => {
         console.error("Lỗi khi gọi API:", error);
       }
     };
-
     fetchUsers();
   }, []);
 
@@ -59,29 +57,24 @@ const UserManagementPage = () => {
 
   const handleAddUser = () => {
     setShowForm(true);
-    setNewUser({ name: '', email: '', role: '', id: null }); // Đặt lại form khi thêm người dùng mới
+    setNewUser({ fullname: '', email: '', role: '', id: null });
   };
 
   const handleEditUser = (user) => {
-    console.log(user);
     setNewUser(user);
     setShowForm(true);
-  };
-
-  const handleDeleteUser = (index) => {
-    const updatedUsers = users.filter((_, i) => i !== index);
-    setUsers(updatedUsers);
   };
 
   const handleFormSubmit = async () => {
     try {
       // Append the account data as a JSON string
       formData.append("account", new Blob([JSON.stringify({
+        username: newUser.username,
         fullname: newUser.fullname,
         email: newUser.email,
         phone: newUser.phone,
         activated: newUser.activated,
-        roleId: newUser.id, // Kiểm tra nếu roleId là hợp lệ
+        roleId: newUser.roleId, // Kiểm tra nếu roleId là hợp lệ
       })], { type: "application/json" }));
 
       // Thêm tệp hình ảnh vào FormData nếu có
@@ -105,27 +98,23 @@ const UserManagementPage = () => {
       } else {
         // Add a new user
         response = await axios.post(
-          'http://localhost:8080/api/admin/useradmin',
+          'http://localhost:8080/api/admin/useradmin/add',
           formData,
           {
             headers: {
               'Authorization': `Bearer ${token}`,
-              // Không cần thiết lập Content-Type cho FormData
+              'Content-Type': 'multipart/form-data',
             },
           }
         );
       }
-
-      // Cập nhật danh sách người dùng sau khi thêm hoặc cập nhật
       const user = newUser.id ? response.data : [...users, response.data];
-
       setUsers(user);
       setShowForm(false); // Ẩn form sau khi gửi thành công
     } catch (error) {
       console.error('Error submitting form:', error);
     }
   };
-
 
   const handleCancelForm = () => {
     setPreviewUrl(null)
@@ -187,9 +176,6 @@ const UserManagementPage = () => {
                   <button onClick={() => handleEditUser(user)} className="bg-yellow-500 text-white px-3 py-1 rounded-lg hover:bg-yellow-600 transition duration-300 mr-2">
                     <AiOutlineEdit />
                   </button>
-                  <button onClick={() => handleDeleteUser(user)} className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 transition duration-300">
-                    <AiOutlineDelete />
-                  </button>
                 </td>
               </tr>
             ))}
@@ -211,7 +197,7 @@ const UserManagementPage = () => {
                 <label className="block text-gray-700">Tên tài khoản</label>
                 <input
                   type="text"
-                  name="name"
+                  name="username"
                   value={newUser.username}
                   onChange={handleFormChange}
                   className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -258,14 +244,18 @@ const UserManagementPage = () => {
 
             <div className="mb-4">
               <label className="block text-gray-700">Vai trò</label>
-              <input
-                type="text"
-                name="role"
-                value={newUser.id}
+              <select
+                name="roleId" // Matches the key in newUser state
+                value={newUser.roleId}
                 onChange={handleFormChange}
                 className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
-              />
+              >
+                <option value="">Chọn vai trò</option> {/* Placeholder option */}
+                <option value="1">ADMIN</option>
+                <option value="2">STAFF</option>
+                <option value="3">USER</option>
+              </select>
             </div>
 
             {/* Image Upload Section */}

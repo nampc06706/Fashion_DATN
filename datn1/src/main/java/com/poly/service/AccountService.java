@@ -120,57 +120,56 @@ public class AccountService {
 	}
 
 	public Account save(String fullname, String username, String email) {
-	    Logger logger = Logger.getLogger(AccountService.class.getName()); // Tạo Logger
-	    logger.info("Bắt đầu tạo tài khoản mới...");
+		Logger logger = Logger.getLogger(AccountService.class.getName()); // Tạo Logger
+		logger.info("Bắt đầu tạo tài khoản mới...");
 
-	    // Kiểm tra đầu vào
-	    if (fullname == null || username == null || email == null) {
-	        logger.severe("Thiếu thông tin fullname, username hoặc email.");
-	        throw new IllegalArgumentException("Fullname, username, và email là bắt buộc.");
-	    }
+		// Kiểm tra đầu vào
+		if (fullname == null || username == null || email == null) {
+			logger.severe("Thiếu thông tin fullname, username hoặc email.");
+			throw new IllegalArgumentException("Fullname, username, và email là bắt buộc.");
+		}
 
-	    // Kiểm tra xem email đã tồn tại chưa
-	    Optional<Account> existingAccountOptional = accountRepository.findByEmail(email);
-	    if (existingAccountOptional.isPresent()) {
-	        logger.warning("Email đã tồn tại: " + email);
-	        throw new RuntimeException("Email đã tồn tại");
-	    }
+		// Kiểm tra xem email đã tồn tại chưa
+		Optional<Account> existingAccountOptional = accountRepository.findByEmail(email);
+		if (existingAccountOptional.isPresent()) {
+			logger.warning("Email đã tồn tại: " + email);
+			throw new RuntimeException("Email đã tồn tại");
+		}
 
-	    // Tạo đối tượng tài khoản mới
-	    Account newAccount = new Account();
-	    newAccount.setFullname(fullname);
-	    newAccount.setUsername(username);
-	    newAccount.setEmail(email);
-	    newAccount.setActivated(true);
+		// Tạo đối tượng tài khoản mới
+		Account newAccount = new Account();
+		newAccount.setFullname(fullname);
+		newAccount.setUsername(username);
+		newAccount.setEmail(email);
+		newAccount.setActivated(true);
 
-	    logger.info("Tài khoản mới được tạo với username: " + username);
+		logger.info("Tài khoản mới được tạo với username: " + username);
 
-	    // Tạo vai trò mặc định và gán cho tài khoản
-	    try {
-	        Roles defaultRole = rolesRepository.findById(3)
-	                .orElseThrow(() -> new RuntimeException("Vai trò mặc định không tồn tại"));
+		// Tạo vai trò mặc định và gán cho tài khoản
+		try {
+			Roles defaultRole = rolesRepository.findById(3)
+					.orElseThrow(() -> new RuntimeException("Vai trò mặc định không tồn tại"));
 
-	        Authorities authority = new Authorities();
-	        authority.setAccount(newAccount);
-	        authority.setRole(defaultRole);
+			Authorities authority = new Authorities();
+			authority.setAccount(newAccount);
+			authority.setRole(defaultRole);
 
-	        logger.info("Vai trò mặc định đã được gán cho tài khoản.");
+			logger.info("Vai trò mặc định đã được gán cho tài khoản.");
 
-	        // Gán quyền cho tài khoản
-	        newAccount.setAuthority(authority);
+			// Gán quyền cho tài khoản
+			newAccount.setAuthority(authority);
 
-	    } catch (Exception e) {
-	        logger.severe("Lỗi khi gán vai trò mặc định: " + e.getMessage());
-	        throw e; // Đảm bảo lỗi được truyền đi nếu có vấn đề
-	    }
+		} catch (Exception e) {
+			logger.severe("Lỗi khi gán vai trò mặc định: " + e.getMessage());
+			throw e; // Đảm bảo lỗi được truyền đi nếu có vấn đề
+		}
 
-	    // Lưu tài khoản mới vào cơ sở dữ liệu
-	    Account savedAccount = accountRepository.save(newAccount);
-	    logger.info("Tài khoản đã được lưu thành công với ID: " + savedAccount.getId());
+		// Lưu tài khoản mới vào cơ sở dữ liệu
+		Account savedAccount = accountRepository.save(newAccount);
+		logger.info("Tài khoản đã được lưu thành công với ID: " + savedAccount.getId());
 
-	    return savedAccount;
+		return savedAccount;
 	}
-
 
 	public Account loginByEmail(String email, String password) {
 		Optional<Account> account = accountRepository.findByEmail(email);
@@ -220,7 +219,7 @@ public class AccountService {
 				account.getPhone(), account.getImage(), account.isActivated(), roleName);
 	}
 
-	private String saveImage(MultipartFile imageFile) {
+	public String saveImage(MultipartFile imageFile) {
 		// Tạo tên tệp mới dựa trên thời gian hiện tại và tên tệp gốc
 		String fileName = System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
 
@@ -252,55 +251,56 @@ public class AccountService {
 
 	// Phương thức tìm tài khoản theo email
 	public Optional<Account> findByEmail(String email) {
-	    return accountRepository.findByEmail(email);
+		return accountRepository.findByEmail(email);
 	}
 
-   public AccountDTO updateAccount(Integer id, AccountUpdateDTO accountUpdateDTO) {
-       // Tìm kiếm tài khoản theo ID
-       Account account = accountRepository.findById(id)
-       		  .orElseThrow(() -> new RuntimeException("Vai trò mặc định không tồn tại"));
+	public AccountDTO updateAccount(Integer id, AccountUpdateDTO accountUpdateDTO) {
+		// Tìm kiếm tài khoản theo ID
+		Account account = accountRepository.findById(id)
+				.orElseThrow(() -> new RuntimeException("Vai trò mặc định không tồn tại"));
 
-       // Cập nhật các trường
-	   String imageName = saveImage(accountUpdateDTO.getImage());
+		// Cập nhật các trường
+		String imageName = saveImage(accountUpdateDTO.getImage());
 
-       account.setFullname(accountUpdateDTO.getFullname());
-       account.setEmail(accountUpdateDTO.getEmail());
-       account.setPhone(accountUpdateDTO.getPhone());
-       account.setImage(imageName);
-       account.setActivated(accountUpdateDTO.isActivated());
+		account.setFullname(accountUpdateDTO.getFullname());
+		account.setEmail(accountUpdateDTO.getEmail());
+		account.setPhone(accountUpdateDTO.getPhone());
+		account.setImage(imageName);
+		account.setActivated(accountUpdateDTO.isActivated());
 
-       // Cập nhật Role nếu có Role mới
-       if (accountUpdateDTO.getRoleId() != null) {
-           Roles newRole = rolesRepository.findById(accountUpdateDTO.getRoleId())
-           		.orElseThrow(() -> new RuntimeException("Không tìm thấy quyền với ID: " + accountUpdateDTO.getRoleId()));
-                 
+		// Cập nhật Role nếu có Role mới
+		if (accountUpdateDTO.getRoleId() != null) {
+			Roles newRole = rolesRepository.findById(accountUpdateDTO.getRoleId())
+					.orElseThrow(
+							() -> new RuntimeException("Không tìm thấy quyền với ID: " + accountUpdateDTO.getRoleId()));
 
-           Authorities authority = authoritiesRepository.findByAccount(account);
-           if (authority == null) {
-               // Tạo mới Authority nếu chưa có
-               authority = new Authorities();
-               authority.setAccount(account);
-           }
-           authority.setRole(newRole);
-           authoritiesRepository.save(authority);
-       }
+			Authorities authority = authoritiesRepository.findByAccount(account);
+			if (authority == null) {
+				// Tạo mới Authority nếu chưa có
+				authority = new Authorities();
+				authority.setAccount(account);
+			}
+			authority.setRole(newRole);
+			authoritiesRepository.save(authority);
+		}
 
-       // Lưu tài khoản đã cập nhật
-       account = accountRepository.save(account);
+		// Lưu tài khoản đã cập nhật
+		account = accountRepository.save(account);
 
-       // Trả về thông tin tài khoản sau khi cập nhật
-       return new AccountDTO(account.getId(), account.getUsername(), account.getFullname(),
-               account.getEmail(), account.getPhone() , account.getImage(), account.isActivated(),
-               account.getAuthority() != null ? account.getAuthority().getRole().getName() : null);
-   }
-   public List<AccountDTO> getAllAccounts() {
-       return accountRepository.findAll().stream().map(account -> {
-           Authorities authority = authoritiesRepository.findByAccount(account);
-           String roleName = authority != null && authority.getRole() != null ? authority.getRole().getName() : null;
-           return new AccountDTO(account.getId(), account.getUsername(), account.getFullname(), account.getEmail(),
-                                 account.getPhone(), account.getImage(), account.isActivated(), roleName);
-       }).collect(Collectors.toList());
-   }
+		// Trả về thông tin tài khoản sau khi cập nhật
+		return new AccountDTO(account.getId(), account.getUsername(), account.getFullname(),
+				account.getEmail(), account.getPhone(), account.getImage(), account.isActivated(),
+				account.getAuthority() != null ? account.getAuthority().getRole().getName() : null);
+	}
+
+	public List<AccountDTO> getAllAccounts() {
+		return accountRepository.findAll().stream().map(account -> {
+			Authorities authority = authoritiesRepository.findByAccount(account);
+			String roleName = authority != null && authority.getRole() != null ? authority.getRole().getName() : null;
+			return new AccountDTO(account.getId(), account.getUsername(), account.getFullname(), account.getEmail(),
+					account.getPhone(), account.getImage(), account.isActivated(), roleName);
+		}).collect(Collectors.toList());
+	}
 
 	// Lưu trữ mã OTP
 	private static Map<String, Forgotpassword> otpStorage = new HashMap<>();
@@ -355,31 +355,56 @@ public class AccountService {
 		return accountRepository.save(account.get());
 	}
 
-	
-
-
-
 	public Account updatePasswordProfile(ChangePasswordModel changePasswordModel) {
-        // Tìm kiếm tài khoản dựa trên email
-        Account account = accountRepository.findByEmail(changePasswordModel.getEmail())
-            .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại."));
+		// Tìm kiếm tài khoản dựa trên email
+		Account account = accountRepository.findByEmail(changePasswordModel.getEmail())
+				.orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại."));
 
-        // Kiểm tra mật khẩu hiện tại có khớp không
-        if (!passwordEncoder.matches(changePasswordModel.getCurrentPassword(), account.getPassword())) {
-            throw new RuntimeException("Mật khẩu hiện tại không chính xác.");
-        }
+		// Kiểm tra mật khẩu hiện tại có khớp không
+		if (!passwordEncoder.matches(changePasswordModel.getCurrentPassword(), account.getPassword())) {
+			throw new RuntimeException("Mật khẩu hiện tại không chính xác.");
+		}
 
-        // Kiểm tra mật khẩu mới và xác nhận mật khẩu có khớp không
-        if (!changePasswordModel.getNewPassword().equals(changePasswordModel.getConfirmPassword())) {
-            throw new RuntimeException("Mật khẩu mới và xác nhận mật khẩu không khớp.");
-        }
+		// Kiểm tra mật khẩu mới và xác nhận mật khẩu có khớp không
+		if (!changePasswordModel.getNewPassword().equals(changePasswordModel.getConfirmPassword())) {
+			throw new RuntimeException("Mật khẩu mới và xác nhận mật khẩu không khớp.");
+		}
 
-        // Cập nhật mật khẩu mới và mã hóa trước khi lưu
-        account.setPassword(passwordEncoder.encode(changePasswordModel.getNewPassword()));
-        return accountRepository.save(account);
-    }
-	
-	
-	
-	
+		// Cập nhật mật khẩu mới và mã hóa trước khi lưu
+		account.setPassword(passwordEncoder.encode(changePasswordModel.getNewPassword()));
+		return accountRepository.save(account);
+	}
+
+	public Account createAccount(AccountUpdateDTO account) {
+		Account acc = new Account();
+		String encode = passwordEncoder.encode(account.getUsername() + "@123");
+		String image = null;
+		if (account.getImage() != null) {
+			image = saveImage(account.getImage());
+		}
+
+		acc.setUsername(account.getUsername());
+		acc.setFullname(account.getFullname());
+		acc.setEmail(account.getEmail());
+		acc.setImage(image);
+		acc.setPhone(account.getPhone());
+		acc.setPassword(encode);
+		acc.setActivated(true);
+		Account save = accountRepository.save(acc);
+
+		if (account.getRoleId() != null) {
+			Roles newRole = rolesRepository.findById(account.getRoleId())
+					.orElseThrow(() -> new RuntimeException("Không tìm thấy quyền với ID: " + account.getRoleId()));
+
+			Authorities authority = new Authorities();
+
+			authority.setAccount(save);
+			authority.setRole(newRole);
+			authoritiesRepository.save(authority);
+
+		}
+
+		return save;
+	}
+
 }
