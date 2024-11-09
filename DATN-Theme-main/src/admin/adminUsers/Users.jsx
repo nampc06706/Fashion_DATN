@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { AiOutlinePlus, AiOutlineEdit, AiOutlineDelete } from 'react-icons/ai';
 import Cookies from 'js-cookie';
 import axios from 'axios';
+
 const UserManagementPage = () => {
   const [users, setUsers] = useState([]); // Danh sách người dùng
   const [showForm, setShowForm] = useState(false);
@@ -13,13 +14,15 @@ const UserManagementPage = () => {
     roleId: null,
     image: null,
   });
+  const token = Cookies.get('token');
+  const formData = new FormData();
+
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedImage, setSelectedImage] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
 
-  const token = Cookies.get('token');
-
-  const formData = new FormData();
+  const [sortConfig, setSortConfig] = useState({ key: 'fullname', direction: 'ascending' });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
 
   // Hàm để thêm dữ liệu tĩnh vào danh sách người dùng
   useEffect(() => {
@@ -40,15 +43,51 @@ const UserManagementPage = () => {
     fetchUsers();
   }, []);
 
+
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value.toLowerCase());
   };
+
+
+
+  const handleSortChange = (key) => {
+    let direction = 'ascending';
+    if (sortConfig.key === key && sortConfig.direction === 'ascending') {
+      direction = 'descending';
+    }
+    setSortConfig({ key, direction });
+  };
+
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
 
   const filteredUsers = users.filter((user) =>
     user.fullname.toLowerCase().includes(searchTerm) ||
     user.username.toLowerCase().includes(searchTerm) ||
     user.email.toLowerCase().includes(searchTerm)
   );
+
+  // Sort users based on the selected column
+  const sortedUsers = filteredUsers.sort((a, b) => {
+    if (a[sortConfig.key] < b[sortConfig.key]) {
+      return sortConfig.direction === 'ascending' ? -1 : 1;
+    }
+    if (a[sortConfig.key] > b[sortConfig.key]) {
+      return sortConfig.direction === 'ascending' ? 1 : -1;
+    }
+    return 0;
+  });
+
+  // Paginate the sorted users
+  const paginatedUsers = sortedUsers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
@@ -169,22 +208,40 @@ const UserManagementPage = () => {
         <table className="min-w-full bg-white border border-gray-300">
           <thead>
             <tr className="bg-gray-500">
-              <th className="py-3 px-6 text-left text-sm font-semibold text-white">Tên</th>
-              <th className="py-3 px-6 text-left text-sm font-semibold text-white">Tên tài khoản</th>
-              <th className="py-3 px-6 text-left text-sm font-semibold text-white">Số điện thoại</th>
-              <th className="py-3 px-6 text-left text-sm font-semibold text-white">Email</th>
-              <th className="py-3 px-6 text-left text-sm font-semibold text-white">Vai trò</th>
+              <th onClick={() => handleSortChange('fullname')} className="cursor-pointer py-3 px-6 text-left text-sm font-semibold text-white">
+                Tên ⇅
+              </th>
+              <th onClick={() => handleSortChange('username')} className="cursor-pointer py-3 px-6 text-left text-sm font-semibold text-white">
+                Tên tài khoản ⇅
+              </th>
+              <th onClick={() => handleSortChange('phone')} className="cursor-pointer py-3 px-6 text-left text-sm font-semibold text-white">
+                Số điện thoại ⇅
+              </th>
+              <th onClick={() => handleSortChange('email')} className="cursor-pointer py-3 px-6 text-left text-sm font-semibold text-white">
+                Email ⇅
+              </th>
+              <th onClick={() => handleSortChange('roleName')} className="cursor-pointer py-3 px-6 text-left text-sm font-semibold text-white">
+                Vai trò ⇅
+              </th>
               <th className="py-3 px-6 text-left text-sm font-semibold text-white">Hành động</th>
             </tr>
           </thead>
           <tbody>
-            {filteredUsers.map((user) => (
+            {paginatedUsers.map((user) => (
               <tr key={user.id} className="hover:bg-gray-100">
                 <td className="py-4 px-6 border-b border-gray-200">{user.fullname}</td>
                 <td className="py-4 px-6 border-b border-gray-200">{user.username}</td>
                 <td className="py-4 px-6 border-b border-gray-200">{user.phone}</td>
                 <td className="py-4 px-6 border-b border-gray-200">{user.email}</td>
-                <td className="py-4 px-6 border-b border-gray-200">{user.roleName}</td>
+                <td className="py-4 px-6 border-b border-gray-200">
+                  {
+                    {
+                      ADMIN: 'Quản lý',
+                      STAFF: 'Nhân viên',
+                      USER: 'Khách hàng',
+                    }[user.roleName] || user.roleName
+                  }
+                </td>
                 <td className="py-4 px-6 border-b border-gray-200">
                   <button onClick={() => handleEditUser(user)} className="bg-yellow-500 text-white px-3 py-1 rounded-lg hover:bg-yellow-600 transition duration-300 mr-2">
                     <AiOutlineEdit />
@@ -196,6 +253,18 @@ const UserManagementPage = () => {
         </table>
       </div>
 
+      {/* Pagination Controls */}
+      <div className="flex justify-center mt-4">
+        {[...Array(totalPages)].map((_, i) => (
+          <button
+            key={i}
+            onClick={() => handlePageChange(i + 1)}
+            className={`px-3 py-1 mx-1 rounded ${currentPage === i + 1 ? 'bg-blue-500 text-white' : 'bg-gray-300'}`}
+          >
+            {i + 1}
+          </button>
+        ))}
+      </div>
 
       {showForm && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
