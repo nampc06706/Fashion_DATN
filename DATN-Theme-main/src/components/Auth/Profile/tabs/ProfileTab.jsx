@@ -62,18 +62,18 @@ export default function ProfileTab() {
   const handleUpdateProfile = () => {
     const token = Cookies.get("token");
     const accountId = accountInfo.id;
-
+  
     const formData = new FormData();
     const imageFile = profileImgInput.current.files[0];
-
+  
     if (imageFile) {
       formData.append('image', imageFile);
     }
-
+  
     formData.append('fullname', accountInfo.fullname);
     formData.append('email', accountInfo.email);
     formData.append('phone', accountInfo.phone);
-
+  
     axios.put(`http://localhost:8080/api/user/${accountId}`, formData, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -86,9 +86,16 @@ export default function ProfileTab() {
       })
       .catch(error => {
         console.error("Có lỗi xảy ra khi cập nhật thông tin:", error);
-        toast.error("Có lỗi xảy ra khi cập nhật thông tin."); // Thông báo lỗi
+  
+        // Kiểm tra lỗi từ API (giả sử API trả về message "Email đã tồn tại")
+        if (error.response && error.response.data && error.response.data.includes("Email đã tồn tại")) {
+          toast.error("Email đã tồn tại, vui lòng sử dụng email khác!");
+        } else {
+          toast.error("Email đã tồn tại, vui lòng sử dụng email khác!"); // Thông báo lỗi chung
+        }
       });
   };
+  
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

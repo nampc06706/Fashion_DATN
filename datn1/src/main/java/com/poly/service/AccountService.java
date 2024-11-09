@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -76,14 +75,11 @@ public class AccountService {
 		}
 
 		// Kiểm tra xem email đã tồn tại chưa
-		if (accountRepository.findByEmail(email) != null) {
-			throw new RuntimeException("Email đã tồn tại");
-		}
+	    Optional<Account> existingAccountOptional = accountRepository.findByEmail(email);
+	    if (existingAccountOptional.isPresent()) {
+	        throw new RuntimeException("Email đã tồn tại");
+	    }
 
-		// Kiểm tra xem số điện thoại đã tồn tại chưa
-		if (accountRepository.findByPhone(phone) != null) {
-			throw new RuntimeException("Số điện thoại đã tồn tại");
-		}
 
 		// Tạo đối tượng tài khoản mới
 		Account newAccount = new Account();
@@ -181,44 +177,53 @@ public class AccountService {
 	}
 
 	public AccountDTO updateAccount2(Integer id, AccountUpdateDTO accountUpdateDTO) {
-		// Tìm kiếm tài khoản theo ID
-		Account account = accountRepository.findById(id)
-				.orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại"));
+	    // Tìm kiếm tài khoản theo ID
+	    Account account = accountRepository.findById(id)
+	            .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại"));
 
-		// Cập nhật các trường nếu không null
-		if (accountUpdateDTO.getFullname() != null) {
-			account.setFullname(accountUpdateDTO.getFullname());
-		}
-		if (accountUpdateDTO.getEmail() != null) {
-			account.setEmail(accountUpdateDTO.getEmail());
-		}
-		if (accountUpdateDTO.getPhone() != null) {
-			account.setPhone(accountUpdateDTO.getPhone());
-		}
-		if (accountUpdateDTO.getImage() != null) {
-			// Lưu hình ảnh và cập nhật đường dẫn
-			String imageName = saveImage(accountUpdateDTO.getImage());
-			account.setImage(imageName);
-		}
+	    // Kiểm tra email trước khi cập nhật
+	    if (accountUpdateDTO.getEmail() != null) {
+	        Optional<Account> existingAccount = accountRepository.findByEmail(accountUpdateDTO.getEmail());
+	        if (existingAccount.isPresent() && !existingAccount.get().getId().equals(id)) {
+	            throw new RuntimeException("Email đã tồn tại!");
+	        }
+	    }
 
-		// Lưu tài khoản đã cập nhật
-		account = accountRepository.save(account);
+	    // Cập nhật các trường nếu không null
+	    if (accountUpdateDTO.getFullname() != null) {
+	        account.setFullname(accountUpdateDTO.getFullname());
+	    }
+	    if (accountUpdateDTO.getEmail() != null) {
+	        account.setEmail(accountUpdateDTO.getEmail());
+	    }
+	    if (accountUpdateDTO.getPhone() != null) {
+	        account.setPhone(accountUpdateDTO.getPhone());
+	    }
+	    if (accountUpdateDTO.getImage() != null) {
+	        // Lưu hình ảnh và cập nhật đường dẫn
+	        String imageName = saveImage(accountUpdateDTO.getImage());
+	        account.setImage(imageName);
+	    }
 
-		// Trả về thông tin tài khoản sau khi cập nhật
-		String roleName = null;
-		if (account.getAuthority() != null && account.getAuthority().getRole() != null) {
-			roleName = account.getAuthority().getRole().getName();
-		}
+	    // Lưu tài khoản đã cập nhật
+	    account = accountRepository.save(account);
 
-		// Kiểm tra tất cả các thuộc tính trước khi tạo AccountDTO
-		if (account.getUsername() == null || account.getFullname() == null || account.getEmail() == null
-				|| account.getPhone() == null || account.getImage() == null) {
-			throw new RuntimeException("Thông tin tài khoản không hợp lệ!");
-		}
+	    // Trả về thông tin tài khoản sau khi cập nhật
+	    String roleName = null;
+	    if (account.getAuthority() != null && account.getAuthority().getRole() != null) {
+	        roleName = account.getAuthority().getRole().getName();
+	    }
 
-		return new AccountDTO(account.getId(), account.getUsername(), account.getFullname(), account.getEmail(),
-				account.getPhone(), account.getImage(), account.isActivated(), roleName);
+	    // Kiểm tra tất cả các thuộc tính trước khi tạo AccountDTO
+	    if (account.getUsername() == null || account.getFullname() == null || account.getEmail() == null
+	            || account.getPhone() == null || account.getImage() == null) {
+	        throw new RuntimeException("Thông tin tài khoản không hợp lệ!");
+	    }
+
+	    return new AccountDTO(account.getId(), account.getUsername(), account.getFullname(), account.getEmail(),
+	            account.getPhone(), account.getImage(), account.isActivated(), roleName);
 	}
+
 
 	private String saveImage(MultipartFile imageFile) {
 		// Tạo tên tệp mới dựa trên thời gian hiện tại và tên tệp gốc

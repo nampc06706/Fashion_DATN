@@ -15,7 +15,7 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
 
     Account findByUsername(String username);
 
-    Optional<Account> findByEmail(String email);  // Trả về Optional<Account> cho findByEmail
+    Optional<Account> findByEmail(String email);
     
     Optional<Account> findByPhone(String phone);  // Nếu muốn đồng bộ, bạn cũng có thể đổi findByPhone
 

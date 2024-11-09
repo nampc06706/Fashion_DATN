@@ -39,7 +39,7 @@ export default function AddressesTab() {
         setLoading(false);
         return;
       }
-
+  
       try {
         const response = await axios.get(`http://localhost:8080/api/user/addresses/account/${userInfo.accountId}`, {
           headers: {
@@ -48,8 +48,14 @@ export default function AddressesTab() {
           },
           withCredentials: true,
         });
-        console.log(response.data);
-        setAddressData(response.data);
+  
+        // Kiểm tra nếu không có địa chỉ
+        if (!response.data || response.data.length === 0) {
+          setError("Bạn chưa thêm địa chỉ nào.");
+          setAddressData([]); // Đặt addressData là mảng trống nếu không có địa chỉ
+        } else {
+          setAddressData(response.data); // Cập nhật dữ liệu địa chỉ nếu có
+        }
       } catch (error) {
         console.error("Lỗi khi lấy dữ liệu địa chỉ:", error);
         if (error.response) {
@@ -65,16 +71,11 @@ export default function AddressesTab() {
         setLoading(false);
       }
     };
-
+  
     fetchAddresses();
   }, [userInfo?.accountId, token]);
-
+  
   const handleAddAddress = async () => {
-    if (!userInfo) {
-      toast.error("Bạn cần đăng nhập để thêm địa chỉ mới.");
-      return;
-    }
-
     try {
       const response = await axios.post(
         `http://localhost:8080/api/user/addresses/add?accountId=${userInfo.accountId}`,
@@ -87,7 +88,11 @@ export default function AddressesTab() {
         }
       );
       toast.success("Thêm địa chỉ thành công!");
-      setAddressData((prevData) => [...prevData, response.data]);
+
+      // Cập nhật ngay danh sách địa chỉ với địa chỉ vừa thêm
+      setAddressData(prevData => [...prevData, response.data]);
+
+      // Đóng form và reset giá trị form
       setShowNewAddressForm(false);
       setNewAddress({ fullname: '', phone: '', province: '', district: '', ward: '', note: '', isdefault: false });
     } catch (error) {
@@ -95,6 +100,7 @@ export default function AddressesTab() {
       toast.error("Có lỗi xảy ra khi thêm địa chỉ.");
     }
   };
+
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -228,14 +234,9 @@ export default function AddressesTab() {
     }
   };
   
-  
-
-
-
-
   return (
     <>
-      <ToastContainer />
+      <ToastContainer autoClose={1000} />
       <div className="grid grid-cols-2 gap-[30px]">
         <div className="w-full bg-primarygray p-5 border">
           <div className="flex justify-between items-center">
