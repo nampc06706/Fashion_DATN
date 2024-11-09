@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { AiOutlinePlus, AiOutlineEdit, AiOutlineDelete } from 'react-icons/ai';
+import { toast } from 'react-toastify';
 import Cookies from 'js-cookie';
 import axios from 'axios';
 
@@ -115,6 +116,32 @@ const UserManagementPage = () => {
   };
 
   const handleFormSubmit = async () => {
+
+    if (!newUser.username || newUser.username.length < 8) {
+      toast.error("Tên tài khoản là bắt buộc và phải có ít nhất 8 ký tự.");
+      return;
+    }
+
+    if (!newUser.fullname) {
+      toast.error("Họ và tên là bắt buộc.");
+      return;
+    }
+
+    if (!newUser.email || !/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(newUser.email)) {
+      toast.error("Email là bắt buộc và phải đúng định dạng.");
+      return;
+    }
+
+    if (!newUser.phone && !/^\d{10,15}$/.test(newUser.phone)) {
+      toast.error("Số điện thoại phải chứa từ 10 đến 15 chữ số.");
+      return;
+    }
+
+    if (!newUser.roleId || [1, 2, 3].includes(newUser.roleId)) {
+      toast.error("Vai trò là bắt buộc và phải là ID hợp lệ.");
+      return;
+    }
+
     try {
       // Append the account data as a JSON string
       formData.append("account", new Blob([JSON.stringify({
@@ -144,8 +171,9 @@ const UserManagementPage = () => {
             },
           }
         );
-        setUsers(users.map((u) => (u.id === newUser.id ? response.data : u)));
+        setUsers(users.map((u) => (u.id === newUser.id ? response.data.data : u)));
         setShowForm(false); // Ẩn form sau khi gửi thành công
+        toast.success("Cập nhật người dùng thành công!");
       } else {
         // Add a new user
         response = await axios.post(
@@ -161,10 +189,14 @@ const UserManagementPage = () => {
         const user = newUser.id ? response.data : [...users, response.data.data];
         setUsers(user);
         setShowForm(false); // Ẩn form sau khi gửi thành công
+        toast.success("Tạo người mới dùng thành công!");
       }
-
     } catch (error) {
-      console.error('Error submitting form:', error);
+      var status = error.response.data.status;
+      if(status == 409){
+        toast.error("Email này đã tồn tại");
+        return;
+      }
     }
   };
 
@@ -282,6 +314,7 @@ const UserManagementPage = () => {
                   name="username"
                   value={newUser.username}
                   onChange={handleFormChange}
+                  readOnly={!!newUser.id}
                   className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
