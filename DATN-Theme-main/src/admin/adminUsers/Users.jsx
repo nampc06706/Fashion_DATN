@@ -11,11 +11,11 @@ const UserManagementPage = () => {
     phone: '',
     activated: false,
     roleId: null,
-    image: null, // Thêm trường cho hình ảnh
+    image: null,
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedImage, setSelectedImage] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
 
   const token = Cookies.get('token');
 
@@ -61,7 +61,17 @@ const UserManagementPage = () => {
   };
 
   const handleEditUser = (user) => {
-    setNewUser(user);
+    setPreviewImage(null);
+    const updatedUser = { ...user };
+
+    if (updatedUser.roleName === "ADMIN") {
+      updatedUser.roleId = 1;
+    } else if (updatedUser.roleName == "STAFF") {
+      updatedUser.roleId = 2;
+    } else {
+      updatedUser.roleId = 3;
+    }
+    setNewUser(updatedUser);
     setShowForm(true);
   };
 
@@ -95,6 +105,8 @@ const UserManagementPage = () => {
             },
           }
         );
+        setUsers(users.map((u) => (u.id === newUser.id ? response.data : u)));
+        setShowForm(false); // Ẩn form sau khi gửi thành công
       } else {
         // Add a new user
         response = await axios.post(
@@ -107,27 +119,28 @@ const UserManagementPage = () => {
             },
           }
         );
+        const user = newUser.id ? response.data : [...users, response.data.data];
+        setUsers(user);
+        setShowForm(false); // Ẩn form sau khi gửi thành công
       }
-      const user = newUser.id ? response.data : [...users, response.data];
-      setUsers(user);
-      setShowForm(false); // Ẩn form sau khi gửi thành công
+
     } catch (error) {
       console.error('Error submitting form:', error);
     }
   };
 
   const handleCancelForm = () => {
-    setPreviewUrl(null)
     setShowForm(false);
   };
 
-  const handleImageChange = (event) => {
-    const file = event.target.files[0]; // Lấy tệp đầu tiên
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
     if (file) {
-      setNewUser((prevUser) => ({
-        ...prevUser,
-        image: file, // Cập nhật tệp hình ảnh vào state
-      }));
+      // Cập nhật ảnh xem trước
+      setPreviewImage(URL.createObjectURL(file));
+
+      // Cập nhật dữ liệu user với file hình ảnh
+      setNewUser({ ...newUser, image: file });
     }
   };
 
@@ -269,16 +282,13 @@ const UserManagementPage = () => {
               />
             </div>
 
-            {/* Image Preview */}
-            {previewUrl && (
-              <div className="mb-4">
-                <img
-                  src={previewUrl}
-                  alt="User Preview"
-                  className="w-32 h-32 object-cover rounded-full mx-auto"
-                />
-              </div>
-            )}
+            <div className="mb-4">
+              <img
+                src={previewImage || "../../public/assets/images/" + newUser.image}
+                alt=""
+                className="w-32 h-32 object-cover rounded-full mx-auto"
+              />
+            </div>
 
             <div className="flex justify-end">
               <button

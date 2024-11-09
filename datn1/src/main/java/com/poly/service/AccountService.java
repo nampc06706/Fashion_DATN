@@ -260,11 +260,14 @@ public class AccountService {
 				.orElseThrow(() -> new RuntimeException("Vai trò mặc định không tồn tại"));
 
 		// Cập nhật các trường
-		String imageName = saveImage(accountUpdateDTO.getImage());
+		String imageName = null;
+		if (accountUpdateDTO.getImage() != null) {
+			imageName = saveImage(accountUpdateDTO.getImage());
+		}
 
 		account.setFullname(accountUpdateDTO.getFullname());
-		account.setEmail(accountUpdateDTO.getEmail());
 		account.setPhone(accountUpdateDTO.getPhone());
+		account.setEmail(accountUpdateDTO.getEmail());
 		account.setImage(imageName);
 		account.setActivated(accountUpdateDTO.isActivated());
 

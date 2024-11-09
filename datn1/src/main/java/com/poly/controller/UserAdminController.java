@@ -1,6 +1,8 @@
 package com.poly.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,9 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -55,7 +55,7 @@ public class UserAdminController {
 	public ResponseEntity<AccountDTO> updateAccount(
 			@PathVariable Integer id,
 			@RequestPart("account") AccountUpdateDTO accountUpdateDTO,
-			@RequestParam(value = "image", required = false) MultipartFile image) {
+			@RequestPart(value = "image", required = false) MultipartFile image) {
 
 		accountUpdateDTO.setImage(image); // Gán tệp hình ảnh vào đối tượng DTO
 		AccountDTO updatedAccount = accountService.updateAccount(id, accountUpdateDTO);
@@ -72,7 +72,7 @@ public class UserAdminController {
 
 	@PreAuthorize("hasAnyAuthority('ADMIN')")
 	@PostMapping(path = "/add", consumes = "multipart/form-data")
-	public ResponseEntity<AccountUpdateDTO> CreateAccount(
+	public ResponseEntity<Map<String, Object>> CreateAccount(
 			@RequestPart("account") AccountUpdateDTO account,
 			@RequestPart(value = "image", required = false) MultipartFile image) {
 
@@ -84,11 +84,19 @@ public class UserAdminController {
 		logger.info("Người dùng hiện tại: {}, với quyền: {}", authentication.getName(),
 				authentication.getAuthorities());
 
-		if (image != null) {
-			account.setImage(image);
+		Map<String, Object> response = new HashMap<>();
+		try {
+			if (image != null) {
+				account.setImage(image);
+			}
+			Account save = accountService.createAccount(account);
+			response.put("status", HttpStatus.CREATED.value()); // 201
+			response.put("data", save);
+			return ResponseEntity.status(HttpStatus.CREATED).body(response);
+		} catch (Exception e) {
+			response.put("status", HttpStatus.BAD_REQUEST.value()); // 400
+			response.put("data", e.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
 		}
-		accountService.createAccount(account);
-
-		return ResponseEntity.ok(account);
 	}
 }
