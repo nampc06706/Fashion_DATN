@@ -9,53 +9,107 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 
 export default function AllProductPage() {
-  const [products, setProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]); // Lưu toàn bộ sản phẩm
+  const [products, setProducts] = useState([]); // Dữ liệu hiển thị sau khi lọc
   const [filters, setFilter] = useState({});
-  const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
-  const productsPerPage = 12; // Số sản phẩm trên mỗi trang
-  const [sortOrder, setSortOrder] = useState("default"); // Thêm trạng thái để lưu trữ sắp xếp
-  const [noProductsFound, setNoProductsFound] = useState(false); // Thêm trạng thái không tìm thấy sản phẩm
-
+  const [currentPage, setCurrentPage] = useState(1);
+  const productsPerPage = 12;
+  const [sortOrder, setSortOrder] = useState("default");
+  const [noProductsFound, setNoProductsFound] = useState(false);
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
-  const param = searchParams.get('s');
 
+  // Lấy toàn bộ danh sách sản phẩm từ API
   useEffect(() => {
+    const fetchInitialProducts = async () => {
+      try {
+        const response = await axios.get("http://localhost:8080/api/guest/products");
+        const data = response.data;
+
+        if (Array.isArray(data) && data.length > 0) {
+          setAllProducts(data);
+          setProducts(data);
+          setNoProductsFound(false);
+        } else {
+          setNoProductsFound(true);
+          toast.error("Không tìm thấy sản phẩm.");
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        toast.error("Có lỗi xảy ra khi kết nối với máy chủ.");
+      }
+    };
+    fetchInitialProducts();
+  }, []);
+
+  // Tìm kiếm sản phẩm theo từ khóa hoặc danh mục
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const keyword = searchParams.get("s");
+        const category = searchParams.get("category");
+
+        if (keyword || category) {
+          const response = await axios.get("http://localhost:8080/api/guest/products/search", {
+            params: { keyword, category },
+          });
+          const data = response.data;
+
+          if (Array.isArray(data) && data.length > 0) {
+            setProducts(data);
+            setNoProductsFound(false);
+          } else {
+            // Nếu không có sản phẩm, cập nhật trạng thái và chỉ thông báo một lần
+            if (!noProductsFound) {
+              setNoProductsFound(true);
+            }
+            setProducts([]); // Đặt rỗng sản phẩm
+          }
+        } else {
+          setProducts(allProducts); // Hiển thị toàn bộ sản phẩm nếu không có tìm kiếm
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        toast.error("Có lỗi xảy ra khi kết nối với máy chủ.");
+      }
+    };
+
     fetchProducts();
-  }, [param]);
+  }, [location.search, allProducts]); // Chỉ khi `noProductsFound` thay đổi
 
-
-  const fetchProducts = async () => {
+  // Xử lý khi chọn danh mục
+  const onCategoryChange = async (categoryId) => {
     try {
-      const response = param
-        ? await axios.get("http://localhost:8080/api/guest/products/search", {
-          params: { keyword: param, category: null }
-        })
-        : await axios.get("http://localhost:8080/api/guest/products");
-
+      const response = await axios.get(`http://localhost:8080/api/guest/products/category/${categoryId}`);
       const data = response.data;
 
       if (Array.isArray(data) && data.length > 0) {
-        setProducts(data);
+        setProducts(data);  // Cập nhật danh sách sản phẩm theo danh mục
         setNoProductsFound(false);
       } else {
+        setProducts([]);  // Đặt rỗng nếu không tìm thấy sản phẩm
         setNoProductsFound(true);
       }
+      setCurrentPage(1); // Reset trang về trang đầu tiên
     } catch (error) {
-      console.error("Error fetching products:", error);
-      toast.error("Có lỗi xảy ra khi kết nối với máy chủ.");
+      console.error("Lỗi khi lấy sản phẩm theo danh mục:", error);
+      toast.error("Có lỗi xảy ra khi lấy sản phẩm theo danh mục.");
     }
   };
 
+  // Cập nhật trạng thái checkbox cho danh mục, chỉ cho phép một danh mục được chọn
+  const checkboxHandler = (e) => {
+    const { name, checked } = e.target;
 
-  // Hiển thị thông báo chỉ khi không có sản phẩm
-  useEffect(() => {
-    if (noProductsFound) {
-      toast.error("Không tìm thấy sản phẩm.");
+    if (checked) {
+      // Nếu checkbox được chọn, lưu chỉ danh mục hiện tại
+      setFilter({ [name]: true });
+    } else {
+      // Nếu checkbox bị bỏ chọn, xóa danh mục khỏi filters
+      setFilter({});
     }
-  }, [noProductsFound]);
+  };
 
-  // Hàm để xử lý sự kiện thay đổi sắp xếp
   const handleSortChange = (e) => {
     setSortOrder(e.target.value);
   };
@@ -72,17 +126,7 @@ export default function AllProductPage() {
     }
   });
 
-  //tìm sản phẩm theo danh mục
-  const onCategoryChange = async (categoryId) => {
-    try {
-      const response = await axios.get(`http://localhost:8080/api/guest/products/category/${categoryId}`);
-      setProducts(response.data);
-      setCurrentPage(1);
-    } catch (error) {
-      console.error("Lỗi khi lấy sản phẩm:", error);
-    }
-  };
-
+  // Lọc theo khoảng giá
   const fetchProductsByPriceRange = async (minPrice, maxPrice) => {
     try {
       const response = await axios.get(`http://localhost:8080/api/guest/products/price-range`, {
@@ -96,44 +140,30 @@ export default function AllProductPage() {
   };
 
   const handleSearchByPrice = (volume) => {
-    const minPrice = volume[0]; // minPrice từ volume[0]
-    const maxPrice = volume[1]; // maxPrice từ volume[1]
+    const minPrice = volume[0];
+    const maxPrice = volume[1];
 
     if (minPrice !== "" && maxPrice !== "") {
       fetchProductsByPriceRange(minPrice, maxPrice);
-    } else {
-      fetchProducts(); // Gọi lại fetchProducts khi không có khoảng giá
     }
   };
+
   const volumeHandler = (volume) => {
-    // Gọi hàm handleSearchByPrice với phạm vi giá
     handleSearchByPrice(volume);
   };
-  
 
-  const checkboxHandler = (e) => {
-    const { name, checked } = e.target;
-
-    // Cập nhật filters, chỉ giữ checkbox hiện tại là true, tất cả checkbox khác là false
-    setFilter({
-      [name]: checked, // Đặt trạng thái của checkbox hiện tại
-    });
-  };
   const resetFilters = () => {
-    // Đặt lại tất cả các bộ lọc về giá trị mặc định
-    setFilter({}); // Giả sử setFilter là state setter để cập nhật các bộ lọc
-    
-    // Nếu cần, bạn có thể gọi lại API hoặc cập nhật lại sản phẩm mặc định khi reset
-    fetchProducts(); // Lấy lại tất cả sản phẩm khi bộ lọc bị reset
+    setFilter({});
   };
 
   // Tính toán các sản phẩm cần hiển thị trên trang hiện tại
-  const indexOfLastProduct = currentPage * productsPerPage; // Chỉ số sản phẩm cuối cùng
-  const indexOfFirstProduct = indexOfLastProduct - productsPerPage; // Chỉ số sản phẩm đầu tiên
-  const currentProducts = sortedProducts.slice(indexOfFirstProduct, indexOfLastProduct); // Sản phẩm hiển thị trên trang hiện tại
+  // Tính toán các sản phẩm cần hiển thị trên trang hiện tại
+const indexOfLastProduct = currentPage * productsPerPage;
+const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+const currentProducts = sortedProducts.slice(indexOfFirstProduct, indexOfLastProduct);
 
-  // Tính toán tổng số trang
-  const totalPages = Math.ceil(sortedProducts.length / productsPerPage);
+
+  const totalPages = Math.ceil(products.length / productsPerPage);
 
   return (
     <Layout>
@@ -149,11 +179,10 @@ export default function AllProductPage() {
                 onCategoryChange={onCategoryChange}
                 handleSearchByPrice={handleSearchByPrice}
                 checkboxHandler={checkboxHandler}
-                volumeHandler={volumeHandler} 
+                volumeHandler={volumeHandler}
                 resetFilters={resetFilters}
               />
             </div>
-
             <div className="flex-1">
               <div className="products-sorting w-full bg-white md:h-[70px] flex md:flex-row flex-col md:space-y-0 space-y-5 md:justify-between md:items-center p-[30px] mb-[40px]">
                 <div>
@@ -174,6 +203,12 @@ export default function AllProductPage() {
                   </select>
                 </div>
               </div>
+
+              {noProductsFound && (
+                <h1 className="text-center">Không tìm thấy sản phẩm phù hợp</h1>
+              )}
+
+
               <div className="grid xl:grid-cols-3 sm:grid-cols-2 grid-cols-1 xl:gap-[30px] gap-5 mb-[40px]">
                 <DataIteration datas={currentProducts} startLength={0} endLength={currentProducts.length}>
                   {({ data, index }) => (
@@ -183,7 +218,6 @@ export default function AllProductPage() {
                   )}
                 </DataIteration>
               </div>
-
               <div className="flex justify-center mb-[40px]">
                 <button
                   disabled={currentPage === 1}
@@ -198,7 +232,7 @@ export default function AllProductPage() {
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                   className="bg-qyellow text-white px-4 py-2 rounded-r-md"
                 >
-                  Kế tiếp
+                  Tiếp
                 </button>
               </div>
             </div>

@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import Cookies from 'js-cookie';
 import { jwtDecode } from "jwt-decode";
 import { AiOutlineEdit, AiOutlineDelete } from 'react-icons/ai';
+
 
 const ProductManagementPage = () => {
   const [products, setProducts] = useState([]);
@@ -12,7 +13,9 @@ const ProductManagementPage = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentProduct, setCurrentProduct] = useState(null);
   const [categories, setCategories] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
 
+  
   const [newProduct, setNewProduct] = useState({
     name: '',
     price: '',
@@ -70,6 +73,12 @@ const ProductManagementPage = () => {
     fetchProducts();
   }, [token]);
 
+
+  const filteredProducts = products.filter((product) =>
+    product.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  
   const handleEditProduct = (product) => {
     setCurrentProduct(product);
     setNewProduct({
@@ -204,6 +213,17 @@ const ProductManagementPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
+        {/* Form tìm kiếm */}
+        <div className="mb-4">
+        <label className="block text-gray-700 text-sm font-bold mb-2">Tìm kiếm sản phẩm</label>
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full border border-gray-300 p-2 rounded-lg"
+          placeholder="Nhập tên sản phẩm để tìm kiếm"
+        />
+      </div>
       {showForm && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl overflow-y-auto max-h-[90vh]">
@@ -350,7 +370,7 @@ const ProductManagementPage = () => {
             </tr>
           </thead>
           <tbody>
-            {products.map((product) => (
+            {filteredProducts.map((product) => (
               <tr key={product.id} className="border-b border-gray-300">
                 <td className="py-3 px-6">
                   <img
