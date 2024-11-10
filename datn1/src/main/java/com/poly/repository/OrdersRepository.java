@@ -24,4 +24,5 @@ public interface OrdersRepository extends JpaRepository<Orders, Integer> {
 	@Transactional
 	@Query("UPDATE Orders o SET o.status = :status WHERE o.id = :orderId")
 	int updateOrderStatusById(@Param("orderId") Integer orderId, @Param("status") String status);
+
 }
