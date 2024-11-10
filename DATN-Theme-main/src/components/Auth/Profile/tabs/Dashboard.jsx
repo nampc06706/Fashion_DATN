@@ -1,22 +1,80 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
-import {jwtDecode} from 'jwt-decode'; // Chỉ cần import một lần
+import {jwtDecode} from "jwt-decode"; // Updated import
+import axios from "axios";
 
 export default function Dashboard() {
+  const [newOrdersCount, setNewOrdersCount] = useState(0);
+  const [deliveringOrdersCount, setDeliveringOrdersCount] = useState(0);
+  const [completeOrdersCount, setCompleteOrdersCount] = useState(0);
+  const [accountId, setAccountId] = useState(null);
+  const [username, setUsername] = useState(null);
 
-  // Lấy thông tin người dùng từ cookie
-  const token = Cookies.get("token");
-  let username = "";
-
-  if (token) {
-    try {
-      const decodedToken = jwtDecode(token); // Giải mã token
-      username = decodedToken.sub || ""; // Lấy username từ trường sub (subject)
-      //console.log("profile" ,decodedToken)
-    } catch (error) {
-      console.error("Lỗi khi giải mã token:", error);
+  // Function to decode token and extract account ID
+  const getAccountIdFromToken = () => {
+    const token = Cookies.get("token");
+    if (token) {
+      try {
+        const decodedToken = jwtDecode(token);
+        console.log(decodedToken)
+        setUsername(decodedToken.sub)
+        setAccountId(decodedToken.accountId); // Assuming `sub` contains the accountId
+      } catch (error) {
+        console.error("Error decoding token:", error);
+      }
     }
-  }
+  };
+
+  // Fetch the order counts from the API
+  const fetchOrderCounts = async () => {
+    if (!accountId) return; // Wait for accountId to be set
+
+    const token = Cookies.get("token");
+
+    try {
+      // Fetch new orders count
+      const newOrdersResponse = await axios.get(
+        `http://localhost:8080/api/user/orders/count/new/${accountId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setNewOrdersCount(newOrdersResponse.data);
+
+      // Fetch delivering orders count
+      const deliveringOrdersResponse = await axios.get(
+        `http://localhost:8080/api/user/orders/count/delivering/${accountId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setDeliveringOrdersCount(deliveringOrdersResponse.data);
+
+      // Fetch complete orders count
+      const completeOrdersResponse = await axios.get(
+        `http://localhost:8080/api/user/orders/count/complete/${accountId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setCompleteOrdersCount(completeOrdersResponse.data);
+
+    } catch (error) {
+      console.error("Error fetching order counts:", error);
+    }
+  };
+
+  // Get accountId when component mounts or token changes
+  useEffect(() => {
+    getAccountIdFromToken();
+  }, []);
+
+  // Fetch order counts when accountId is available
+  useEffect(() => {
+    if (accountId) {
+      fetchOrderCounts();
+    }
+  }, [accountId]);
 
   return (
     <>
@@ -58,7 +116,7 @@ export default function Dashboard() {
           Đơn đặt hàng mới
           </p>
           <span className="text-[40px] text-white group-hover:text-qblacktext font-bold leading-none mt-1 block">
-            23
+          {newOrdersCount}
           </span>
         </div>
         <div className="qv-item w-[252px] h-[208px] bg-qblack group hover:bg-qyellow transition-all duration-300 ease-in-out p-6">
@@ -82,7 +140,7 @@ export default function Dashboard() {
           Đơn hàng đang giao
           </p>
           <span className="text-[40px] text-white group-hover:text-qblacktext font-bold leading-none mt-1 block">
-            15
+          {deliveringOrdersCount}
           </span>
         </div>
         <div className="qv-item w-[252px] h-[208px] bg-qblack group hover:bg-qyellow transition-all duration-300 ease-in-out p-6">
@@ -114,7 +172,7 @@ export default function Dashboard() {
           Đơn hàng hoàn thành
           </p>
           <span className="text-[40px] text-white group-hover:text-qblacktext font-bold leading-none mt-1 block">
-            5
+          {completeOrdersCount}
           </span>
         </div>
       </div>

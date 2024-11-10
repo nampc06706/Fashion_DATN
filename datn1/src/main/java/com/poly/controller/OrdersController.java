@@ -79,7 +79,7 @@ public class OrdersController {
 
 		return ResponseEntity.ok(orders); // Trả về danh sách hóa đơn
 	}
-	
+
 	@PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF', 'USER')")
 	@PutMapping("/{orderId}/setStatus")
 	public ResponseEntity<String> setOrderStatusToCompleted(@PathVariable int orderId) {
@@ -98,4 +98,26 @@ public class OrdersController {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Order not found or update failed.");
 		}
 	}
+
+	// API đếm số lượng đơn hàng có status = 1 theo accountId
+	@PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF', 'USER')")
+	@GetMapping("/count/new/{accountId}")
+	public long countNewOrdersByAccount(@PathVariable("accountId") Integer accountId) {
+		return ordersService.countOrdersWithStatusOneByAccountId(accountId);
+	}
+
+	// API đếm số lượng đơn hàng có status = 3 theo accountId
+	@PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF', 'USER')")
+	@GetMapping("/count/delivering/{accountId}")
+	public long countDeliveringOrdersByAccount(@PathVariable("accountId") Integer accountId) {
+		return ordersService.countOrdersWithStatusThreeByAccountId(accountId);
+	}
+
+	// API đếm số lượng đơn hàng có status = 5 theo accountId
+	@PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF', 'USER')")
+	@GetMapping("/count/complete/{accountId}")
+	public long countCompleteOrdersByAccount(@PathVariable("accountId") Integer accountId) {
+		return ordersService.countOrdersWithStatusFourByAccountId(accountId);
+	}
+
 }

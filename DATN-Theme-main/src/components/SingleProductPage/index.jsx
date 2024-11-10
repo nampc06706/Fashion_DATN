@@ -26,8 +26,8 @@ export default function SingleProductPage() {
   const reviewElement = useRef(null);
   const [report, setReport] = useState(false);
   const [comments, setComments] = useState([]); // Khởi tạo comments là mảng rỗng
+  const { id: productId } = useParams();
   const [id, setId] = useState(null); // Sửa thành setId để nhất quán về tên
-
   const token = Cookies.get('token');
   let userInfo = null;
 
@@ -39,42 +39,46 @@ export default function SingleProductPage() {
     }
   }
 
+  // Update state 'id' khi 'productId' thay đổi
   useEffect(() => {
-    const fetchRatings = async () => {
-      if (!userInfo) {
-        //toast.error("Không tìm thấy thông tin người dùng."); // Hiển thị thông báo lỗi
-        setLoading(false);
-        return;
-      }
+    setId(productId);
+  }, [productId]);
 
+  // Fetch dữ liệu đánh giá khi 'id' thay đổi
+  useEffect(() => {
+    if (!id) return; // Nếu id không tồn tại thì không thực hiện fetch
+  
+    const fetchRatings = async () => {
+      setLoading(true);
       try {
-        const response = await axios.get(`http://localhost:8080/api/user/ratings`, {
+        const response = await axios.get(`http://localhost:8080/api/user/ratings/product/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
-          },
-          withCredentials: true,
+          }
         });
-        console.log(response.data);
-        setComments(response.data); // Gán dữ liệu đánh giá từ API vào state
+  
+        console.log("Dữ liệu đánh giá từ API:", response.data);
+  
+        // Kiểm tra xem dữ liệu trả về có phải là mảng không
+        if (Array.isArray(response.data)) {
+          setComments(response.data); // Nếu là mảng, gán vào state
+        } else {
+          console.error("Dữ liệu trả về không phải là mảng, gán mảng rỗng");
+          setComments([]); // Nếu không phải mảng, gán mảng rỗng
+        }
       } catch (error) {
         console.error("Lỗi khi lấy dữ liệu đánh giá:", error);
-        if (error.response) {
-          if (error.response.status === 403) {
-            toast.error("Bạn không có quyền truy cập vào tài nguyên này.");
-          } else {
-            toast.error("Có lỗi xảy ra khi tải dữ liệu đánh giá.");
-          }
-        } else {
-          toast.error("Có lỗi xảy ra. Vui lòng thử lại sau.");
-        }
+        setComments([]); // Đảm bảo là mảng rỗng khi có lỗi
       } finally {
         setLoading(false);
       }
     };
-
-    fetchRatings(); // Gọi hàm fetch khi `userInfo` hoặc `token` thay đổi
-  }, [userInfo?.accountId, token]);
+  
+    fetchRatings(); // Gọi hàm fetch khi 'id' thay đổi
+  }, [id, token]); // Theo dõi id và token khi thay đổi
+  
+  
 
 
   // Sử dụng useParams để lấy productId từ URL
@@ -86,9 +90,6 @@ export default function SingleProductPage() {
       setId(newId);
     }
   }, [idFromURL]); // Bỏ id ra khỏi dependency array để tránh render không cần thiết
-
-
-  const displayedProducts = data.products.slice(4, 8);
 
 
   return (

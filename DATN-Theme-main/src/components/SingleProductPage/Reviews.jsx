@@ -54,7 +54,7 @@ export default function Reviews({
               ) : null  // Bỏ qua comment không có id
             ))
           ) : (
-            <p>No comments available</p>  // Hiển thị thông báo nếu không có comments
+            <p>Chưa có đánh giá nào! hãy mua và đánh giá nó nhé.</p>  // Hiển thị thông báo nếu không có comments
           )}
         </div>
       </div>

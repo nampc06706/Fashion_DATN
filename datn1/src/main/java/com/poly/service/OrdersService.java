@@ -63,7 +63,7 @@ public class OrdersService {
 
 	@Transactional
 	public Orders createOrder(OrderRequestDTO orderRequest) {
-	    
+
 		// Tạo đối tượng Orders mới
 		Orders order = new Orders();
 		order.setDate(LocalDateTime.now());
@@ -167,52 +167,52 @@ public class OrdersService {
 
 	@Transactional
 	public List<Orders> getOrdersByAccountId(Integer accountId) {
-	    List<Orders> orders = ordersRepository.findByAccountId(accountId);
-	    if (orders.isEmpty()) {
-	        throw new NoSuchElementException("Không tìm thấy hóa đơn cho người dùng với ID: " + accountId);
-	    }
+		List<Orders> orders = ordersRepository.findByAccountId(accountId);
+		if (orders.isEmpty()) {
+			throw new NoSuchElementException("Không tìm thấy hóa đơn cho người dùng với ID: " + accountId);
+		}
 
-	    System.out.println("Số hóa đơn tìm thấy: " + orders.size());
-	    for (Orders order : orders) {
-	        // Kiểm tra địa chỉ có phải là null không
-	        if (order.getAddress() == null) {
-	            System.out.println("Địa chỉ hóa đơn ID " + order.getId() + " là null");
-	            // Có thể gán một giá trị mặc định hoặc xử lý theo cách nào đó
-	        }
+		System.out.println("Số hóa đơn tìm thấy: " + orders.size());
+		for (Orders order : orders) {
+			// Kiểm tra địa chỉ có phải là null không
+			if (order.getAddress() == null) {
+				System.out.println("Địa chỉ hóa đơn ID " + order.getId() + " là null");
+				// Có thể gán một giá trị mặc định hoặc xử lý theo cách nào đó
+			}
 
-	        // Lấy OrderDetails
-	        List<OrderDetails> orderDetails = orderDetailsRepository.findByOrderId(order.getId());
+			// Lấy OrderDetails
+			List<OrderDetails> orderDetails = orderDetailsRepository.findByOrderId(order.getId());
 
-	        // Gán danh sách chi tiết vào đơn hàng
-	        for (OrderDetails detail : orderDetails) {
-	            if (detail != null) {
-	                Size size = detail.getSize();
-	                if (size != null) {
-	                    Products product = size.getProduct();
-	                    if (product != null) {
-	                        List<ProductImages> images = product.getImages();
-	                        detail.setImages(images);
-	                    }
-	                }
-	            }
-	        }
-	        order.setOrderDetails(orderDetails); // Gán danh sách chi tiết vào đơn hàng
-	    }
+			// Gán danh sách chi tiết vào đơn hàng
+			for (OrderDetails detail : orderDetails) {
+				if (detail != null) {
+					Size size = detail.getSize();
+					if (size != null) {
+						Products product = size.getProduct();
+						if (product != null) {
+							List<ProductImages> images = product.getImages();
+							detail.setImages(images);
+						}
+					}
+				}
+			}
+			order.setOrderDetails(orderDetails); // Gán danh sách chi tiết vào đơn hàng
+		}
 
-	    return orders; // Trả về danh sách đơn hàng cùng với chi tiết của chúng
+		return orders; // Trả về danh sách đơn hàng cùng với chi tiết của chúng
 	}
-	
+
 	public List<Orders> getAllOrders() {
-        return ordersRepository.findAll();
-    }
-	
-	public int updateOrderStatusById(int orderId,String status) {
-        return ordersRepository.updateOrderStatusById(orderId,status);
-    }
+		return ordersRepository.findAll();
+	}
+
+	public int updateOrderStatusById(int orderId, String status) {
+		return ordersRepository.updateOrderStatusById(orderId, status);
+	}
 
 	// Phương thức kiểm tra sự tồn tại của order
 	public boolean checkOrderExists(int orderID) {
-	    return ordersRepository.existsById(orderID);
+		return ordersRepository.existsById(orderID);
 	}
 
 	public boolean checkOrderStatus(Integer id) {
@@ -228,18 +228,17 @@ public class OrdersService {
 		// Tìm đơn hàng theo ID
 		Orders order = ordersRepository.findById(id)
 				.orElseThrow(() -> new RuntimeException("Order not found with ID: " + id));
-		
+
 		// Cập nhật trạng thái
 		order.setStatus(status);
-	
+
 		// Lưu thay đổi
 		ordersRepository.save(order);
 	}
-	
+
 	@Transactional
 	public void restoreOrderStock(int orderId) {
-		Orders order = ordersRepository.findById(orderId)
-				.orElseThrow(() -> new RuntimeException("Order not found"));
+		Orders order = ordersRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Order not found"));
 
 		List<OrderDetails> orderDetails = order.getOrderDetails();
 		for (OrderDetails orderDetail : orderDetails) {
@@ -247,12 +246,28 @@ public class OrdersService {
 			int quantity = orderDetail.getQuantity();
 
 			size.setQuantityInStock(size.getQuantityInStock() + quantity);
-			sizeRepository.save(size); 
+			sizeRepository.save(size);
 		}
 
 		ordersRepository.save(order);
 	}
+
 	public Orders findById(Integer valueOf) {
 		return ordersRepository.findById(valueOf).get();
+	}
+
+	// Phương thức đếm số lượng đơn hàng có status = 1 theo accountId
+	public long countOrdersWithStatusOneByAccountId(Integer accountId) {
+		return ordersRepository.countByStatusAndAccount_Id(1, accountId);
+	}
+
+	// Phương thức đếm số lượng đơn hàng có status = 3 theo accountId
+	public long countOrdersWithStatusThreeByAccountId(Integer accountId) {
+		return ordersRepository.countByStatusAndAccount_Id(3, accountId);
+	}
+
+	// Phương thức đếm số lượng đơn hàng có status = 5 theo accountId
+	public long countOrdersWithStatusFourByAccountId(Integer accountId) {
+		return ordersRepository.countByStatusAndAccount_Id(4, accountId);
 	}
 }

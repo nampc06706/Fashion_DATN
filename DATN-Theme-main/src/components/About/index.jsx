@@ -8,8 +8,19 @@ import LayoutHomeFive from "../Partials/LayoutHomeFive";
 
 import blog from "../../data/blogs.json";
 import DataIteration from "../Helpers/DataIteration";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode';
 
 export default function About() {
+  const [ratings, setRatings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  // Cấu hình slider
   const settings = {
     slidesToShow: 3,
     slidesToScroll: 3,
@@ -18,38 +29,66 @@ export default function About() {
     infinite: true,
     centerPadding: "60px",
     dots: false,
-    responsive: [
-      {
-        breakpoint: 1026,
-        settings: {
-          slidesToShow: 2,
-          slidesToScroll: 2,
-          centerMode: false,
-        },
-      },
-      {
-        breakpoint: 768,
-        settings: {
-          slidesToShow: 1,
-          slidesToScroll: 1,
-          centerMode: false,
-        },
-      },
-
-      // You can unslick at a given breakpoint now by adding:
-      // settings: "unslick"
-      // instead of a settings object
-    ],
   };
   const slider = useRef(null);
-  const prev = () => {
-    slider.current.slickPrev();
+  const prev = () => slider.current.slickPrev();
+  const next = () => slider.current.slickNext();
+
+  // Lấy token và giải mã
+  const token = Cookies.get("token");
+  let accountId;
+
+  if (token) {
+    try {
+      const userInfo = jwtDecode(token);
+      accountId = userInfo.accountId;
+    } catch (error) {
+      console.error("Lỗi giải mã token:", error);
+    }
+  }
+
+  // Hàm gọi API lấy đánh giá 5 sao
+  const fetchFiveStarRatings = async () => {
+    try {
+      if (!token) {
+        toast.error("Không tìm thấy token.");
+        return;
+      }
+
+      const response = await axios.get('http://localhost:8080/api/user/ratings/five-star', {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        withCredentials: true,
+      });
+
+      if (response.data && response.data.length > 0) {
+        setRatings(response.data);
+        console.log(response.data);
+        //toast.success('Lấy đánh giá 5 sao thành công!');
+      } else {
+        setRatings([]);
+        toast.info('Không có đánh giá 5 sao nào.');
+      }
+    } catch (error) {
+      //console.error('Lỗi khi lấy dữ liệu đánh giá:', error);
+      // setError('Có lỗi xảy ra khi tải đánh giá.');
+      // toast.error('Có lỗi xảy ra khi tải đánh giá.');
+    } finally {
+      setLoading(false);
+    }
   };
-  const next = () => {
-    slider.current.slickNext();
-  };
+
+  // Gọi API khi component được render
+  useEffect(() => {
+    fetchFiveStarRatings();
+  }, []);
+
+
   return (
     <LayoutHomeFive childrenClasses="pt-0 pb-0">
+      <ToastContainer autoClose={1000} />
       <div className="about-page-wrapper w-full">
         <div className="title-area w-full">
           <PageTitle
@@ -99,346 +138,47 @@ export default function About() {
           </div>
           <div className="feedback-slider-wrapper w-vw relative overflow-hidden">
             <SimpleSlider selector={slider} settings={settings}>
-              <div className="item h-[385px] bg-primarygray sm:px-10 sm:py-9 p-2">
-                <div className="flex flex-col justify-between h-full">
-                  <div className="rating flex space-x-1 items-center">
-                    <div className="flex items-center">
-                      <Star w="20" h="20" />
-                      <Star w="20" h="20" />
-                      <Star w="20" h="20" />
-                      <Star w="20" h="20" />
-                      <Star w="20" h="20" />
-                    </div>
-                    <span className="text-[13px] text-qblack">(5.0)</span>
-                  </div>
-                  <div className="text-[15px] text-qgraytwo leading-[30px] text-justify line-clamp-6">
-                    Lorem Ipsum is simply dummy text of the printing and
-                    typesetting industry. Lorem Ipsum has been the industry's
-                    standard dummy text ever since the 1500s, when an into the
-                    find unknown printer took a galley of type and scrambled it
-                    to make a type inot the specimen book. It has survived not
-                    only five centuries but also the on leap into find it a
-                    electronic typesetting, remaining end to make it.
-                  </div>
-                  <div className="flex items-center space-x-2.5 mt-3">
-                    <div className="w-[50px] h-[50px] rounded-full overflow-hidden">
-                      <img
-                        src={`/assets/images/comment-user-1.png`}
-                        alt="user"
-                      />
-                    </div>
-                    <div>
-                      <p className="text-[18px] text-qblack font-medium">
-                        Ridoy Rock
-                      </p>
-                      <p className="text-qgraytwo text-[13px]">London,UK</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="item h-[385px] bg-primarygray sm:px-10 sm:py-9 p-2">
-                <div className="flex flex-col justify-between h-full">
-                  <div className="rating flex space-x-1 items-center">
-                    <div className="flex items-center">
-                      <Star w="20" h="20" />
-                      <Star w="20" h="20" />
-                      <Star w="20" h="20" />
-                      <Star w="20" h="20" />
-                      <Star w="20" h="20" />
-                    </div>
-                    <span className="text-[13px] text-qblack">(5.0)</span>
-                  </div>
-                  <div className="text-[15px] text-qgraytwo leading-[30px] text-justify line-clamp-6">
-                    Lorem Ipsum is simply dummy text of the printing and
-                    typesetting industry. Lorem Ipsum has been the industry's
-                    standard dummy text ever since the 1500s, when an into the
-                    find unknown printer took a galley of type and scrambled it
-                    to make a type inot the specimen book. It has survived not
-                    only five centuries but also the on leap into find it a
-                    electronic typesetting, remaining end to make it.
-                  </div>
-                  <div className="flex items-center space-x-2.5 mt-3">
-                    <div className="w-[50px] h-[50px] rounded-full overflow-hidden">
-                      <img
-                        src={`/assets/images/comment-user-1.png`}
-                        alt="user"
-                      />
-                    </div>
-                    <div>
-                      <p className="text-[18px] text-qblack font-medium">
-                        Ridoy Rock
-                      </p>
-                      <p className="text-qgraytwo text-[13px]">London,UK</p>
+              {ratings.length > 0 ? (
+                ratings.map((rating) => (
+                  <div key={rating.id} className="item h-[385px] bg-primarygray sm:px-10 sm:py-9 p-2">
+                    <div className="flex flex-col justify-between h-full">
+                      <div className="rating flex space-x-1 items-center">
+                        <div className="flex items-center">
+                          {/* Hiển thị số sao dựa trên dữ liệu */}
+                          {[...Array(parseInt(rating.stars))].map((_, index) => (
+                            <Star key={index} w="20" h="20" />
+                          ))}
+                        </div>
+                        <span className="text-[13px] text-qblack">({rating.stars}.0)</span>
+                      </div>
+                      {/* Hiển thị nội dung đánh giá */}
+                      <div className="text-[15px] text-qgraytwo leading-[30px] text-justify line-clamp-6">
+                        {rating.review}
+                      </div>
+                      <div className="flex items-center space-x-2.5 mt-3">
+                        <div className="w-[50px] h-[50px] rounded-full overflow-hidden">
+                          <img
+                            src={rating.orders.account.image ? `/assets/images/${rating.orders.account.image}` : "/assets/images/comment-user-1.png"}
+                            alt="user"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+
+                        <div>
+                          <p className="text-[18px] text-qblack font-medium">
+                            {rating.orders.account.username}
+                          </p>
+                          <p className="text-qgraytwo text-[13px]">
+                            {rating.orders.account.location}
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-              <div className="item h-[385px] bg-primarygray sm:px-10 sm:py-9 p-2">
-                <div className="flex flex-col justify-between h-full">
-                  <div className="rating flex space-x-1 items-center">
-                    <div className="flex items-center">
-                      <Star w="20" h="20" />
-                      <Star w="20" h="20" />
-                      <Star w="20" h="20" />
-                      <Star w="20" h="20" />
-                      <Star w="20" h="20" />
-                    </div>
-                    <span className="text-[13px] text-qblack">(5.0)</span>
-                  </div>
-                  <div className="text-[15px] text-qgraytwo leading-[30px] text-justify line-clamp-6">
-                    Lorem Ipsum is simply dummy text of the printing and
-                    typesetting industry. Lorem Ipsum has been the industry's
-                    standard dummy text ever since the 1500s, when an into the
-                    find unknown printer took a galley of type and scrambled it
-                    to make a type inot the specimen book. It has survived not
-                    only five centuries but also the on leap into find it a
-                    electronic typesetting, remaining end to make it.
-                  </div>
-                  <div className="flex items-center space-x-2.5 mt-3">
-                    <div className="w-[50px] h-[50px] rounded-full overflow-hidden">
-                      <img
-                        src={`
-                        /assets/images/comment-user-1.png`}
-                        alt="user"
-                      />
-                    </div>
-                    <div>
-                      <p className="text-[18px] text-qblack font-medium">
-                        Ridoy Rock
-                      </p>
-                      <p className="text-qgraytwo text-[13px]">London,UK</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="item h-[385px] bg-primarygray sm:px-10 sm:py-9 p-2">
-                <div className="flex flex-col justify-between h-full">
-                  <div className="rating flex space-x-1 items-center">
-                    <div className="flex items-center">
-                      <Star w="20" h="20" />
-                      <Star w="20" h="20" />
-                      <Star w="20" h="20" />
-                      <Star w="20" h="20" />
-                      <Star w="20" h="20" />
-                    </div>
-                    <span className="text-[13px] text-qblack">(5.0)</span>
-                  </div>
-                  <div className="text-[15px] text-qgraytwo leading-[30px] text-justify line-clamp-6">
-                    Lorem Ipsum is simply dummy text of the printing and
-                    typesetting industry. Lorem Ipsum has been the industry's
-                    standard dummy text ever since the 1500s, when an into the
-                    find unknown printer took a galley of type and scrambled it
-                    to make a type inot the specimen book. It has survived not
-                    only five centuries but also the on leap into find it a
-                    electronic typesetting, remaining end to make it.
-                  </div>
-                  <div className="flex items-center space-x-2.5 mt-3">
-                    <div className="w-[50px] h-[50px] rounded-full overflow-hidden">
-                      <img
-                        src={`
-                        /assets/images/comment-user-1.png`}
-                        alt="user"
-                      />
-                    </div>
-                    <div>
-                      <p className="text-[18px] text-qblack font-medium">
-                        Ridoy Rock
-                      </p>
-                      <p className="text-qgraytwo text-[13px]">London,UK</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="item h-[385px] bg-primarygray sm:px-10 sm:py-9 p-2">
-                <div className="flex flex-col justify-between h-full">
-                  <div className="rating flex space-x-1 items-center">
-                    <div className="flex items-center">
-                      <Star w="20" h="20" />
-                      <Star w="20" h="20" />
-                      <Star w="20" h="20" />
-                      <Star w="20" h="20" />
-                      <Star w="20" h="20" />
-                    </div>
-                    <span className="text-[13px] text-qblack">(5.0)</span>
-                  </div>
-                  <div className="text-[15px] text-qgraytwo leading-[30px] text-justify line-clamp-6">
-                    Lorem Ipsum is simply dummy text of the printing and
-                    typesetting industry. Lorem Ipsum has been the industry's
-                    standard dummy text ever since the 1500s, when an into the
-                    find unknown printer took a galley of type and scrambled it
-                    to make a type inot the specimen book. It has survived not
-                    only five centuries but also the on leap into find it a
-                    electronic typesetting, remaining end to make it.
-                  </div>
-                  <div className="flex items-center space-x-2.5 mt-3">
-                    <div className="w-[50px] h-[50px] rounded-full overflow-hidden">
-                      <img
-                        src={`
-                        /assets/images/comment-user-1.png`}
-                        alt="user"
-                      />
-                    </div>
-                    <div>
-                      <p className="text-[18px] text-qblack font-medium">
-                        Ridoy Rock
-                      </p>
-                      <p className="text-qgraytwo text-[13px]">London,UK</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="item h-[385px] bg-primarygray sm:px-10 sm:py-9 p-2">
-                <div className="flex flex-col justify-between h-full">
-                  <div className="rating flex space-x-1 items-center">
-                    <div className="flex items-center">
-                      <Star w="20" h="20" />
-                      <Star w="20" h="20" />
-                      <Star w="20" h="20" />
-                      <Star w="20" h="20" />
-                      <Star w="20" h="20" />
-                    </div>
-                    <span className="text-[13px] text-qblack">(5.0)</span>
-                  </div>
-                  <div className="text-[15px] text-qgraytwo leading-[30px] text-justify line-clamp-6">
-                    Lorem Ipsum is simply dummy text of the printing and
-                    typesetting industry. Lorem Ipsum has been the industry's
-                    standard dummy text ever since the 1500s, when an into the
-                    find unknown printer took a galley of type and scrambled it
-                    to make a type inot the specimen book. It has survived not
-                    only five centuries but also the on leap into find it a
-                    electronic typesetting, remaining end to make it.
-                  </div>
-                  <div className="flex items-center space-x-2.5 mt-3">
-                    <div className="w-[50px] h-[50px] rounded-full overflow-hidden">
-                      <img
-                        src={`
-                        /assets/images/comment-user-1.png`}
-                        alt="user"
-                      />
-                    </div>
-                    <div>
-                      <p className="text-[18px] text-qblack font-medium">
-                        Ridoy Rock
-                      </p>
-                      <p className="text-qgraytwo text-[13px]">London,UK</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="item h-[385px] bg-primarygray sm:px-10 sm:py-9 p-2">
-                <div className="flex flex-col justify-between h-full">
-                  <div className="rating flex space-x-1 items-center">
-                    <div className="flex items-center">
-                      <Star w="20" h="20" />
-                      <Star w="20" h="20" />
-                      <Star w="20" h="20" />
-                      <Star w="20" h="20" />
-                      <Star w="20" h="20" />
-                    </div>
-                    <span className="text-[13px] text-qblack">(5.0)</span>
-                  </div>
-                  <div className="text-[15px] text-qgraytwo leading-[30px] text-justify line-clamp-6">
-                    Lorem Ipsum is simply dummy text of the printing and
-                    typesetting industry. Lorem Ipsum has been the industry's
-                    standard dummy text ever since the 1500s, when an into the
-                    find unknown printer took a galley of type and scrambled it
-                    to make a type inot the specimen book. It has survived not
-                    only five centuries but also the on leap into find it a
-                    electronic typesetting, remaining end to make it.
-                  </div>
-                  <div className="flex items-center space-x-2.5 mt-3">
-                    <div className="w-[50px] h-[50px] rounded-full overflow-hidden">
-                      <img
-                        src={`
-                        /assets/images/comment-user-1.png`}
-                        alt="user"
-                      />
-                    </div>
-                    <div>
-                      <p className="text-[18px] text-qblack font-medium">
-                        Ridoy Rock
-                      </p>
-                      <p className="text-qgraytwo text-[13px]">London,UK</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="item h-[385px] bg-primarygray sm:px-10 sm:py-9 p-2">
-                <div className="flex flex-col justify-between h-full">
-                  <div className="rating flex space-x-1 items-center">
-                    <div className="flex items-center">
-                      <Star w="20" h="20" />
-                      <Star w="20" h="20" />
-                      <Star w="20" h="20" />
-                      <Star w="20" h="20" />
-                      <Star w="20" h="20" />
-                    </div>
-                    <span className="text-[13px] text-qblack">(5.0)</span>
-                  </div>
-                  <div className="text-[15px] text-qgraytwo leading-[30px] text-justify line-clamp-6">
-                    Lorem Ipsum is simply dummy text of the printing and
-                    typesetting industry. Lorem Ipsum has been the industry's
-                    standard dummy text ever since the 1500s, when an into the
-                    find unknown printer took a galley of type and scrambled it
-                    to make a type inot the specimen book. It has survived not
-                    only five centuries but also the on leap into find it a
-                    electronic typesetting, remaining end to make it.
-                  </div>
-                  <div className="flex items-center space-x-2.5 mt-3">
-                    <div className="w-[50px] h-[50px] rounded-full overflow-hidden">
-                      <img
-                        src={`
-                        /assets/images/comment-user-1.png`}
-                        alt="user"
-                      />
-                    </div>
-                    <div>
-                      <p className="text-[18px] text-qblack font-medium">
-                        Ridoy Rock
-                      </p>
-                      <p className="text-qgraytwo text-[13px]">London,UK</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="item h-[385px] bg-primarygray sm:px-10 sm:py-9 p-2">
-                <div className="flex flex-col justify-between h-full">
-                  <div className="rating flex space-x-1 items-center">
-                    <div className="flex items-center">
-                      <Star w="20" h="20" />
-                      <Star w="20" h="20" />
-                      <Star w="20" h="20" />
-                      <Star w="20" h="20" />
-                      <Star w="20" h="20" />
-                    </div>
-                    <span className="text-[13px] text-qblack">(5.0)</span>
-                  </div>
-                  <div className="text-[15px] text-qgraytwo leading-[30px] text-justify line-clamp-6">
-                    Lorem Ipsum is simply dummy text of the printing and
-                    typesetting industry. Lorem Ipsum has been the industry's
-                    standard dummy text ever since the 1500s, when an into the
-                    find unknown printer took a galley of type and scrambled it
-                    to make a type inot the specimen book. It has survived not
-                    only five centuries but also the on leap into find it a
-                    electronic typesetting, remaining end to make it.
-                  </div>
-                  <div className="flex items-center space-x-2.5 mt-3">
-                    <div className="w-[50px] h-[50px] rounded-full overflow-hidden">
-                      <img
-                        src={`
-                        /assets/images/comment-user-1.png`}
-                        alt="user"
-                      />
-                    </div>
-                    <div>
-                      <p className="text-[18px] text-qblack font-medium">
-                        Ridoy Rock
-                      </p>
-                      <p className="text-qgraytwo text-[13px]">London,UK</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                ))
+              ) : (
+                <p>Không có đánh giá 5 sao nào.</p>
+              )}
             </SimpleSlider>
 
             <div className="slider-btns flex justify-center mt-[40px]">
@@ -543,7 +283,7 @@ export default function About() {
                 </div>
                 <div>
                   <p className="text-black text-[15px] font-700 tracking-wide mb-1 uppercase">
-                  Miễn phí vận chuyển
+                    Miễn phí vận chuyển
                   </p>
                   <p className="text-sm text-qblack">Khi đặt hàng trên 500k</p>
                 </div>
@@ -578,10 +318,10 @@ export default function About() {
                 </div>
                 <div>
                   <p className="text-black text-[15px] font-700 tracking-wide mb-1 uppercase">
-                  Trả lại miễn phí
+                    Trả lại miễn phí
                   </p>
                   <p className="text-sm text-qblack">
-                  Nhận lại trong vòng 3 ngày
+                    Nhận lại trong vòng 3 ngày
                   </p>
                 </div>
               </div>
@@ -623,10 +363,10 @@ export default function About() {
                 </div>
                 <div>
                   <p className="text-black text-[15px] font-700 tracking-wide mb-1 uppercase">
-                  Thanh toán an toàn
+                    Thanh toán an toàn
                   </p>
                   <p className="text-sm text-qblack">
-                  Thanh toán trực tuyến an toàn 100%
+                    Thanh toán trực tuyến an toàn 100%
                   </p>
                 </div>
               </div>
@@ -679,10 +419,10 @@ export default function About() {
                 </div>
                 <div>
                   <p className="text-black text-[15px] font-700 tracking-wide mb-1 uppercase">
-                  Chất lượng tốt nhất
+                    Chất lượng tốt nhất
                   </p>
                   <p className="text-sm text-qblack">
-                  Sản phẩm chính hãng được đảm bảo
+                    Sản phẩm chính hãng được đảm bảo
                   </p>
                 </div>
               </div>
@@ -694,7 +434,7 @@ export default function About() {
           <div className="container-x mx-auto">
             <div className="blog-post-title flex justify-center items-cente mb-[30px]">
               <h1 className="text-3xl font-semibold text-qblack">
-              Tin tức mới nhất của tôi
+                Tin tức mới nhất của tôi
               </h1>
             </div>
 
