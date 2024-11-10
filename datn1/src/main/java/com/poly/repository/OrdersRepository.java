@@ -24,11 +24,8 @@ public interface OrdersRepository extends JpaRepository<Orders, Integer> {
 	@Transactional
 	@Query("UPDATE Orders o SET o.status = :status WHERE o.id = :orderId")
 	int updateOrderStatusById(@Param("orderId") Integer orderId, @Param("status") String status);
-<<<<<<< HEAD
-	
-	// Đếm số lượng đơn hàng có status = 1 và thuộc accountId cụ thể
-    long countByStatusAndAccount_Id(Integer status, Integer accountId);
-=======
 
->>>>>>> b97986beb2ce2c5ab64793b749ce4788e405a605
+	// Đếm số lượng đơn hàng có status và thuộc accountId cụ thể
+    long countByStatusAndAccount_Id(Integer status, Integer accountId);
+
 }

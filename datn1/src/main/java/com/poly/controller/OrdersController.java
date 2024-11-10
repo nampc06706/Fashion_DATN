@@ -90,7 +90,7 @@ public class OrdersController {
 			logger.error("Authentication is null or not authenticated.");
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // Trả về mã 401 Unauthorized
 		}
-		int result = ordersService.updateOrderStatusById(orderId, "5");
+		int result = ordersService.updateOrderStatusById1(orderId, "5");
 
 		if (result > 0) {
 			return ResponseEntity.ok("Order status updated to 5 (completed).");
