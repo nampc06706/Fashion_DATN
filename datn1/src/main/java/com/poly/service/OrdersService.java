@@ -32,6 +32,7 @@ import com.poly.repository.PaymentRepository;
 import com.poly.repository.ShippingMethodsRepository;
 import com.poly.repository.SizeRepository;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -209,6 +210,22 @@ public class OrdersService {
 	public int updateOrderStatusById(int orderId, String status) {
 		return ordersRepository.updateOrderStatusById(orderId, status);
 	}
+<<<<<<< HEAD
+=======
+
+	public Orders updateOrderStatus(int orderId, String status) {
+		// Gọi phương thức cập nhật
+		int updatedCount = ordersRepository.updateOrderStatusById(orderId, status);
+
+		if (updatedCount > 0) {
+			// Nếu cập nhật thành công, lấy lại đối tượng Orders đã cập nhật
+			return ordersRepository.findById(orderId)
+					.orElseThrow(() -> new EntityNotFoundException("Không tìm thấy đơn hàng với ID: " + orderId));
+		} else {
+			throw new EntityNotFoundException("Cập nhật thất bại, không tìm thấy đơn hàng với ID: " + orderId);
+		}
+	}
+>>>>>>> b97986beb2ce2c5ab64793b749ce4788e405a605
 
 	// Phương thức kiểm tra sự tồn tại của order
 	public boolean checkOrderExists(int orderID) {

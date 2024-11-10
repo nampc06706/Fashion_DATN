@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { toast } from 'react-toastify';
 import { jwtDecode } from "jwt-decode"; // Sửa import cho jwtDecode
 
 export default function OrderTab({ accountId: initialAccountId }) {
@@ -11,6 +12,15 @@ export default function OrderTab({ accountId: initialAccountId }) {
   const [error, setError] = useState(null);
   const [paymentUrl, setPaymentUrl] = useState(null);
   const token = Cookies.get("token");
+
+  const [orderId, setOrderId] = useState('');
+  const [orderDate, setOrderDate] = useState('');
+  const [status, setStatus] = useState('');
+
+  const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
+  const [ordersPerPage, setOrdersPerPage] = useState(6); // Số lượng đơn hàng mỗi trang
+  const [totalPages, setTotalPages] = useState(0); // Tổng số trang
+
 
   useEffect(() => {
     if (token) {
@@ -25,11 +35,6 @@ export default function OrderTab({ accountId: initialAccountId }) {
     }
   }, [token]);
 
-  const formatDateArray = (dateArray) => {
-    const [year, month, day, hour, minute, second] = dateArray;
-    return new Date(year, month - 1, day, hour, minute, second); // `month - 1` vì tháng trong Date bắt đầu từ 0
-  };
-
   useEffect(() => {
     const fetchOrders = async () => {
       if (accountId) {
@@ -40,16 +45,34 @@ export default function OrderTab({ accountId: initialAccountId }) {
             },
           });
 
-          // Sắp xếp đơn hàng theo ngày mới nhất
           const sortedOrders = response.data.sort((a, b) =>
             formatDateArray(b.date) - formatDateArray(a.date)
           );
 
-          setOrders(sortedOrders);
-          //console.log(sortedOrders)
+          // Lọc đơn hàng theo các tiêu chí tìm kiếm
+          const filteredOrders = sortedOrders.filter((order) => {
+            const matchesOrderId = orderId ? order.id.toString().includes(orderId) : true;
+            const matchesOrderDate = orderDate
+              ? new Date(order.date[0], order.date[1] - 1, order.date[2]).toLocaleDateString() === new Date(orderDate).toLocaleDateString()
+              : true;
+            const matchesStatus = status ? order.status.toString() === status : true;
+
+            return matchesOrderId && matchesOrderDate && matchesStatus;
+          });
+
+          // Cập nhật số trang
+          setTotalPages(Math.ceil(filteredOrders.length / ordersPerPage));
+
+          // Lọc đơn hàng cho trang hiện tại
+          const currentOrders = filteredOrders.slice(
+            (currentPage - 1) * ordersPerPage,
+            currentPage * ordersPerPage
+          );
+
+          setOrders(currentOrders);
+
         } catch (error) {
           console.error("Lỗi khi lấy đơn hàng:", error);
-          //alert("Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại.");
         }
       } else {
         console.warn("Không có accountId.");
@@ -57,7 +80,12 @@ export default function OrderTab({ accountId: initialAccountId }) {
     };
 
     fetchOrders();
-  }, [accountId, token]);
+  }, [accountId, token, orderId, orderDate, status, currentPage, ordersPerPage]); // Thêm các state vào dependency array
+
+  const formatDateArray = (dateArray) => {
+    const [year, month, day, hour, minute, second] = dateArray;
+    return new Date(year, month - 1, day, hour, minute, second); // `month - 1` vì tháng trong Date bắt đầu từ 0
+  };
 
   const handleOpenModal = (order) => {
     setSelectedOrder(order);
@@ -120,8 +148,6 @@ export default function OrderTab({ accountId: initialAccountId }) {
     }
   };
 
-
-
   // Hàm tính tổng tiền từ orderDetails và giá của shippingMethod
   const calculateTotalPrice = (orderDetails, shippingMethod) => {
     const productTotal = orderDetails.reduce((total, detail) => {
@@ -132,15 +158,87 @@ export default function OrderTab({ accountId: initialAccountId }) {
     return productTotal + shippingCost;
   };
 
-  const handleStatusChange = (orderId, newStatus) => {
-    // Gọi API hoặc xử lý cập nhật trạng thái đơn hàng tại đây
-    console.log(`Order ID: ${orderId}, New Status: ${newStatus}`);
+  const handleStatusChange = async (orderId, newStatus) => {
+    try {
+
+      const order = orders.find(order => order.id === orderId);
+
+      if (order.status >= newStatus) {
+        toast.error("Không thể thay đổi trạng thái đơn hàng");
+        return;
+      }
+
+      // Gọi API để cập nhật trạng thái đơn hàng
+      const response = await axios.put('http://localhost:8080/api/admin/orders', null, {
+        params: { orderId, status: newStatus },
+        headers: {
+          'Authorization': `Bearer ${token}`, // Thay 'token' bằng token xác thực của bạn
+        },
+      });
+
+      // Giả sử `response.data` chứa đối tượng `Orders` đã cập nhật
+      const updatedOrder = response.data.data;
+
+      // Cập nhật danh sách `orders` trong state
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order.id === updatedOrder.id ? updatedOrder : order
+        )
+      );
+
+      if (response.data.status === "201") {
+        toast.success("Cập nhật trạng thái đơn hàng thành công");
+      }
+    } catch (error) {
+      if (error.response) {
+        // Kiểm tra mã lỗi từ server trả về
+        if (error.response.status === 401) {
+          toast.error("Bạn không có quyền truy cập. Vui lòng đăng nhập lại.");
+        } else if (error.response.status === 400) {
+          toast.error("Thông tin không hợp lệ. Vui lòng kiểm tra lại dữ liệu.");
+        } else {
+          toast.error("Lỗi cập nhật đơn hàng. Vui lòng thử lại.");
+        }
+      } else {
+        toast.error("Không thể kết nối đến máy chủ.");
+      }
+      console.error("Lỗi khi cập nhật trạng thái đơn hàng:", error);
+    }
   };
 
-  
   return (
     <>
       <div className="relative w-full overflow-x-auto sm:rounded-lg">
+
+        <div className="mb-4">
+          <input
+            type="text"
+            className="w-full p-2 border rounded mb-2"
+            placeholder="Tìm kiếm theo mã đơn hàng"
+            value={orderId}
+            onChange={(e) => setOrderId(e.target.value)}
+          />
+          <input
+            type="date"
+            className="w-full p-2 border rounded mb-2"
+            placeholder="Tìm kiếm theo ngày"
+            value={orderDate}
+            onChange={(e) => setOrderDate(e.target.value)}
+          />
+          <select
+            className="w-full p-2 border rounded mb-2"
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+          >
+            <option value="">Tìm kiếm theo trạng thái</option>
+            <option value="1">Chờ xác nhận</option>
+            <option value="2">Đã xác nhận</option>
+            <option value="3">Đang giao hàng</option>
+            <option value="4">Hoàn thành</option>
+            <option value="5">Đã hủy</option>
+          </select>
+        </div>
+
         <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
           <thead>
             <tr className="text-base text-qgray whitespace-nowrap px-2 border-b default-border-bottom">
@@ -202,6 +300,30 @@ export default function OrderTab({ accountId: initialAccountId }) {
             )}
           </tbody>
         </table>
+        <div className="flex justify-center items-center space-x-2 mt-4">
+          {/* Nút Previous */}
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className="px-4 py-2 bg-gray-300 text-gray-600 rounded-md hover:bg-gray-400"
+          >
+            <span>&larr;</span>
+          </button>
+
+          {/* Hiển thị trang hiện tại và tổng số trang */}
+          <span className="text-xl text-gray-700">
+            Trang {currentPage} / {totalPages}
+          </span>
+
+          {/* Nút Next */}
+          <button
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 bg-gray-300 text-gray-600 rounded-md hover:bg-gray-400"
+          >
+            <span>&rarr;</span>
+          </button>
+        </div>
       </div>
 
       {isModalOpen && selectedOrder && (
