@@ -45,7 +45,9 @@ const AdminLayout = ({ children }) => {
 
   // Hàm xử lý trở về trang chủ khi nhấn nút
   const handleClick = () => {
+    
     navigate('/'); // Điều hướng về trang chủ
+   
   };
   // Hàm xử lý đăng xuất
   const handleLogout = () => {
@@ -54,6 +56,7 @@ const AdminLayout = ({ children }) => {
 
     // Điều hướng về trang đăng nhập hoặc trang chủ sau khi đăng xuất
     navigate('/login');  // Hoặc navigate('/') nếu bạn muốn điều hướng về trang chủ
+    window.location.reload();
   };
 
   return (

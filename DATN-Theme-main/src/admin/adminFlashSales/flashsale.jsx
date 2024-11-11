@@ -12,6 +12,7 @@ const FlashSaleManagementPage = () => {
   const [productFlashSales, setProductFlashSales] = useState([]);
   const [flashSales, setFlashSales] = useState([]);
   const [discount, setDiscount] = useState('');
+  const [loading, setLoading] = useState(false);
   const [selectedFlashSale, setSelectedFlashSale] = useState(null); // Trạng thái lưu thông tin Flash Sale
   const token = Cookies.get('token');
   let userInfo = null;
@@ -46,6 +47,70 @@ const FlashSaleManagementPage = () => {
     };
     fetchProducts();
   }, [token]);
+
+  // Toggle isActive cho Flashsale
+  const handleToggleIsActive = async (id) => {
+    setLoading(true);
+    try {
+      // Gọi API toggle cho Flashsale
+      await axios.put(`http://localhost:8080/api/admin/product-flashsale/${id}/toggle-active`, null, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        withCredentials: true,
+      });
+
+      toast.success('Cập nhật trạng thái Flashsale thành công!');
+
+      // Lấy lại danh sách Flashsale sau khi cập nhật
+      await fetchFlashSales();
+    } catch (error) {
+      toast.error('Có lỗi xảy ra khi cập nhật trạng thái Flashsale.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Lấy danh sách FlashSale từ API
+  const fetchFlashSales = async () => {
+    if (!userInfo) {
+      return;
+    }
+    try {
+      const response = await axios.get(`http://localhost:8080/api/admin/product-flashsale/flashsales`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        withCredentials: true,
+      });
+      setFlashSales(response.data);
+    } catch (error) {
+      console.error('Lỗi khi lấy dữ liệu Flashsale:', error);
+      toast.error('Không thể lấy dữ liệu Flashsale.');
+    }
+  };
+  const fetchProductFlashSales = async () => {
+    if (!userInfo) {
+      return;
+    }
+    try {
+      const response = await axios.get(`http://localhost:8080/api/admin/product-flashsale`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        withCredentials: true,
+      });
+      //console.log(response.data)
+      setProductFlashSales(response.data);
+    } catch (error) {
+      // console.error('Lỗi khi lấy dữ liệu ProductFlashSale:', error);
+      // toast.error('Không thể lấy dữ liệu ProductFlashSale.');
+    }
+  };
+
 
   // Lấy danh sách FlashSale từ API
   useEffect(() => {
@@ -125,21 +190,32 @@ const FlashSaleManagementPage = () => {
     }
   };
 
-  // Hàm xử lý khi thêm sản phẩm vào Flash Sale
-  const handleAddToFlashSale = async () => {
-    if (!selectedProduct || !discount) {
-      toast.error('Vui lòng chọn sản phẩm và nhập mức giảm giá.');
+  // Thêm sản phẩm vào Flash Sale
+  const handleAddToFlashSale = async (e) => {
+    e.preventDefault();
+
+    // Kiểm tra điều kiện không hợp lệ cho discount
+    if (!selectedProduct || !selectedFlashSale || !discount) {
+      toast.error('Vui lòng chọn sản phẩm, flashsale và nhập mức giảm giá.');
       return;
     }
 
-    const newFlashSaleData = {
-      productId: selectedProduct,
-      discount: discount,
-    };
+    const discountValue = parseFloat(discount);
 
+    if (discountValue <= 0 || discountValue > 100) {
+      toast.error('Mức giảm giá phải nằm trong khoảng từ 0 đến 100.');
+      return;
+    }
+
+    setLoading(true);
     try {
-      // Giả sử có API để thêm sản phẩm vào Flash Sale
-      await axios.post('http://localhost:8080/api/admin/add-to-flashsale', newFlashSaleData, {
+      const requestData = {
+        productId: parseInt(selectedProduct),
+        flashsaleId: parseInt(selectedFlashSale),
+        discount: discountValue,
+      };
+
+      const response = await axios.post('http://localhost:8080/api/admin/product-flashsale/add', requestData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -147,12 +223,39 @@ const FlashSaleManagementPage = () => {
         withCredentials: true,
       });
 
-      toast.success('Sản phẩm đã được thêm vào Flash Sale thành công!');
+      if (response.status === 200) {
+        toast.success('Thêm sản phẩm vào Flash Sale thành công!');
+        // Lấy lại danh sách Flash Sale sau khi thêm sản phẩm
+        await fetchProductFlashSales();
+      }
     } catch (error) {
       console.error('Lỗi khi thêm sản phẩm vào Flash Sale:', error);
-      toast.error('Không thể thêm sản phẩm vào Flash Sale.');
+      toast.error('Có lỗi xảy ra khi thêm sản phẩm vào Flash Sale.');
+    } finally {
+      setLoading(false);
     }
   };
+
+  const handleDeleteProductFlashsale = async (productId, flashsaleId) => {
+    try {
+      const response = await axios.delete(`http://localhost:8080/api/admin/product-flashsale/delete/${productId}/${flashsaleId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Đảm bảo token đã được định nghĩa đúng
+        },
+      });
+
+      if (response.status === 200) {
+        toast.success(response.data); // Hiển thị thông báo thành công
+        // Cập nhật danh sách sản phẩm trong flashsale sau khi xóa
+        await fetchProductFlashSales(); // Gọi lại API để lấy danh sách cập nhật
+      }
+    } catch (error) {
+      console.error('Lỗi khi xóa ProductFlashsale:', error);
+      toast.error('Có lỗi xảy ra khi xóa ProductFlashsale.');
+    }
+  };
+
+
 
   return (
     <div className="container mx-auto p-6 bg-white rounded-lg shadow-lg">
@@ -177,6 +280,7 @@ const FlashSaleManagementPage = () => {
           </select>
         </label>
       </div>
+
       {/* Chọn chương trình giảm giá */}
       <div className="mb-6">
         <label className="block mb-4 text-lg font-semibold text-gray-800">
@@ -212,13 +316,13 @@ const FlashSaleManagementPage = () => {
 
       {/* Nút thêm vào Flash Sale */}
       <button
+        type="button"
         onClick={handleAddToFlashSale}
+        disabled={loading}
         className="w-30 p-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-500"
       >
-        Thêm vào Flash Sale
+        {loading ? 'Đang xử lý...' : 'Thêm sản phẩm'}
       </button>
-
-
 
       {/* Danh sách Flash Sale */}
       <div className="container mx-auto p-6 bg-white rounded-lg shadow-lg mt-6">
@@ -252,9 +356,11 @@ const FlashSaleManagementPage = () => {
                   </td>
                   <td className="px-4 py-3">
                     <button
+                      onClick={() => handleToggleIsActive(item.id)}
+                      disabled={loading}
                       className={`py-2 px-6 rounded-lg font-semibold focus:outline-none transition duration-300 ease-in-out transform ${item.isactive
-                          ? "bg-green-100 text-green-600 hover:bg-green-200 hover:scale-105 focus:ring-2 focus:ring-green-500"
-                          : "bg-red-100 text-red-600 hover:bg-red-200 hover:scale-105 focus:ring-2 focus:ring-red-500"
+                        ? "bg-green-100 text-green-600 hover:bg-green-200 hover:scale-105 focus:ring-2 focus:ring-green-500"
+                        : "bg-red-100 text-red-600 hover:bg-red-200 hover:scale-105 focus:ring-2 focus:ring-red-500"
                         }`}
                     >
                       {item.isactive ? (
@@ -333,11 +439,13 @@ const FlashSaleManagementPage = () => {
                           {Math.floor(product.price)}VND
                         </td>
                         <td className="px-6 py-3 border-b">
-                          <button className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">
+                          <button
+                            onClick={() => handleDeleteProductFlashsale(product.id, selectedFlashSale.flashsale.id)}
+                            className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+                          >
                             XÓA
                           </button>
                         </td>
-
                       </tr>
                     ))}
                 </tbody>
@@ -346,6 +454,7 @@ const FlashSaleManagementPage = () => {
           </div>
         </div>
       )}
+
 
 
     </div>
