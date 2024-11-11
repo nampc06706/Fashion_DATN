@@ -11,11 +11,11 @@ export default function ProductsFilter({
   filterToggle,
   onCategoryChange,
   handleSearchByPrice,
-  resetFilters
+  resetFilters // Sử dụng resetFilters từ component cha
 }) {
   const [categories, setCategories] = useState([]);
   const [error, setError] = useState(null);
-  const [volume, setVolume] = useState([100000, 1000000]); // Khởi tạo khoảng giá hợp lệ
+  const [volume, setVolume] = useState([100000, 1000000]);
 
   useEffect(() => {
     handleSearchByPrice(volume);
@@ -37,9 +37,9 @@ export default function ProductsFilter({
     onCategoryChange(categoryId);
   };
 
-
-  // Hàm reset phạm vi giá
-  const handleResetPriceRange = () => {
+  // Hàm reset bộ lọc
+  const handleResetFilters = () => {
+    resetFilters(); // Gọi hàm reset từ component cha để reset các filters
     setVolume([100000, 1000000]); // Reset phạm vi giá về giá trị mặc định
     handleSearchByPrice([100000, 1000000]); // Gọi lại hàm tìm kiếm với phạm vi giá mặc định
   };
@@ -65,10 +65,10 @@ export default function ProductsFilter({
                   <Checkbox
                     id={id}
                     name={name}
-                    checked={!!filters[name]} // Ép giá trị thành Boolean
+                    checked={!!filters[name]}
                     handleChange={(e) => {
                       handleCategoryClick(id);
-                      checkboxHandler(e); // Cập nhật trạng thái filters
+                      checkboxHandler(e);
                     }}
                   />
                   <label htmlFor={id} className="text-xs font-black font-400 capitalize">
@@ -87,7 +87,7 @@ export default function ProductsFilter({
         </div>
         <button
           className="reset-button mt-4 px-4 py-2 bg-gray-200 text-sm text-black rounded hover:bg-gray-300"
-          onClick={resetFilters} // Gọi hàm resetFilters khi nhấn nút Reset
+          onClick={handleResetFilters} // Gọi hàm handleResetFilters khi nhấn nút Reset
         >
           Đặt Lại Bộ Lọc
         </button>
@@ -107,7 +107,7 @@ export default function ProductsFilter({
             values={volume}
             onChange={(values) => {
               setVolume(values);
-              volumeHandler(values); // Cập nhật giá trị volume
+              volumeHandler(values);
             }}
             renderTrack={({ props, children }) => (
               <div {...props} className="h-1 w-full bg-qgray-border rounded-md">
@@ -124,7 +124,7 @@ export default function ProductsFilter({
         </p>
         <button
           className="reset-button mt-4 px-4 py-2 bg-gray-200 text-sm text-black rounded hover:bg-gray-300"
-          onClick={handleResetPriceRange} // Gọi hàm resetPriceRange khi nhấn nút Reset
+          onClick={handleResetFilters} // Gọi lại hàm handleResetFilters khi nhấn nút Reset phạm vi giá
         >
           Đặt Lại Phạm Vi Giá
         </button>
