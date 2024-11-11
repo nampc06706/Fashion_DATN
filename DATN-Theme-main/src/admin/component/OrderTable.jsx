@@ -18,7 +18,7 @@ export default function OrderTab({ accountId: initialAccountId }) {
   const [status, setStatus] = useState('');
 
   const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
-  const [ordersPerPage, setOrdersPerPage] = useState(6); // Số lượng đơn hàng mỗi trang
+  const [ordersPerPage, setOrdersPerPage] = useState(10); // Số lượng đơn hàng mỗi trang
   const [totalPages, setTotalPages] = useState(0); // Tổng số trang
 
 
@@ -37,9 +37,8 @@ export default function OrderTab({ accountId: initialAccountId }) {
 
   useEffect(() => {
     const fetchOrders = async () => {
-      if (accountId) {
         try {
-          const response = await axios.get(`http://localhost:8080/api/user/orders/${accountId}`, {
+          const response = await axios.get(`http://localhost:8080/api/admin/orders`, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -74,9 +73,6 @@ export default function OrderTab({ accountId: initialAccountId }) {
         } catch (error) {
           console.error("Lỗi khi lấy đơn hàng:", error);
         }
-      } else {
-        console.warn("Không có accountId.");
-      }
     };
 
     fetchOrders();

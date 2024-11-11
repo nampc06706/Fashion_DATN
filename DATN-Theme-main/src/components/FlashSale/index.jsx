@@ -11,6 +11,7 @@ export default function FlashSale() {
     startDate: null,
     endDate: null,
   });
+  const [isExpired, setIsExpired] = useState(false); // Trạng thái kiểm tra hết hạn
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -34,6 +35,12 @@ export default function FlashSale() {
               startDate,
               endDate,
             });
+
+            // Kiểm tra xem flash sale đã hết hạn chưa
+            const currentDate = new Date();
+            if (currentDate > endDate) {
+              setIsExpired(true); // Đánh dấu hết hạn
+            }
           }
         } else {
           console.error("Data is not an array:", data);
@@ -48,7 +55,6 @@ export default function FlashSale() {
 
   // Gọi hàm CountDown với endDate
   const { showDate, showHour, showMinute, showSecound } = CountDown(flashSaleInfo.endDate);
-
 
   return (
     <LayoutHomeFive>
@@ -74,49 +80,56 @@ export default function FlashSale() {
                   Kết thúc: <span className="font-semibold">{flashSaleInfo.endDate ? new Date(flashSaleInfo.endDate).toLocaleString() : ''}</span>
                 </p>
 
-                <div className="countdown-wrapper w-full flex sm:space-x-6 space-x-3 sm:justify-between justify-evenly">
-                  <div className="countdown-item">
-                    <div className="countdown-number sm:w-[100px] sm:h-[100px] w-[50px] h-[50px] rounded-full bg-white flex justify-center items-center">
-                      <span className="font-700 sm:text-[30px] text-base text-[#EB5757]">
-                        {showDate}
-                      </span>
+                {isExpired ? (
+                  <p className="text-lg text-red-500 font-semibold">Flash Sale đã kết thúc!</p>
+                ) : (
+                  <div className="countdown-wrapper w-full flex sm:space-x-6 space-x-3 sm:justify-between justify-evenly">
+                    <div className="countdown-item">
+                      <div className="countdown-number sm:w-[100px] sm:h-[100px] w-[50px] h-[50px] rounded-full bg-white flex justify-center items-center">
+                        <span className="font-700 sm:text-[30px] text-base text-[#EB5757]">
+                          {showDate}
+                        </span>
+                      </div>
+                      <p className="sm:text-[18px] text-xs font-500 text-center leading-8 text-white">Ngày</p>
                     </div>
-                    <p className="sm:text-[18px] text-xs font-500 text-center leading-8 text-white">Ngày</p>
-                  </div>
-                  <div className="countdown-item">
-                    <div className="countdown-number sm:w-[100px] sm:h-[100px] w-[50px] h-[50px] rounded-full bg-white flex justify-center items-center">
-                      <span className="font-700 sm:text-[30px] text-base text-[#2F80ED]">{showHour}</span>
+                    <div className="countdown-item">
+                      <div className="countdown-number sm:w-[100px] sm:h-[100px] w-[50px] h-[50px] rounded-full bg-white flex justify-center items-center">
+                        <span className="font-700 sm:text-[30px] text-base text-[#2F80ED]">{showHour}</span>
+                      </div>
+                      <p className="sm:text-[18px] text-xs font-500 text-center leading-8 text-white">Giờ</p>
                     </div>
-                    <p className="sm:text-[18px] text-xs font-500 text-center leading-8 text-white">Giờ</p>
-                  </div>
-                  <div className="countdown-item">
-                    <div className="countdown-number sm:w-[100px] sm:h-[100px] w-[50px] h-[50px] rounded-full bg-white flex justify-center items-center">
-                      <span className="font-700 sm:text-[30px] text-base text-[#219653]">{showMinute}</span>
+                    <div className="countdown-item">
+                      <div className="countdown-number sm:w-[100px] sm:h-[100px] w-[50px] h-[50px] rounded-full bg-white flex justify-center items-center">
+                        <span className="font-700 sm:text-[30px] text-base text-[#219653]">{showMinute}</span>
+                      </div>
+                      <p className="sm:text-[18px] text-xs font-500 text-center leading-8 text-white">Phút</p>
                     </div>
-                    <p className="sm:text-[18px] text-xs font-500 text-center leading-8 text-white">Phút</p>
-                  </div>
-                  <div className="countdown-item">
-                    <div className="countdown-number sm:w-[100px] sm:h-[100px] w-[50px] h-[50px] rounded-full bg-white flex justify-center items-center">
-                      <span className="font-700 sm:text-[30px] text-base text-[#EF5DA8]">{showSecound}</span>
+                    <div className="countdown-item">
+                      <div className="countdown-number sm:w-[100px] sm:h-[100px] w-[50px] h-[50px] rounded-full bg-white flex justify-center items-center">
+                        <span className="font-700 sm:text-[30px] text-base text-[#EF5DA8]">{showSecound}</span>
+                      </div>
+                      <p className="sm:text-[18px] text-xs font-500 text-center leading-8 text-white">Giây</p>
                     </div>
-                    <p className="sm:text-[18px] text-xs font-500 text-center leading-8 text-white">Giây</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="products grid xl:grid-cols-4 lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 xl:gap-[30px] gap-5">
-              <DataIteration
-                datas={products}
-                startLength={0}
-                endLength={products.length}
-              >
-                {({ data }) => (
-                  <div key={data.id} className="item">
-                    <ProductCardStyleThree2 datas={data} />
                   </div>
                 )}
-              </DataIteration>
+              </div>
             </div>
+            {/* Hiển thị sản phẩm chỉ khi Flash Sale chưa kết thúc */}
+            {!isExpired && (
+              <div className="products grid xl:grid-cols-4 lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 xl:gap-[30px] gap-5">
+                <DataIteration
+                  datas={products}
+                  startLength={0}
+                  endLength={products.length}
+                >
+                  {({ data }) => (
+                    <div key={data.id} className="item">
+                      <ProductCardStyleThree2 datas={data} />
+                    </div>
+                  )}
+                </DataIteration>
+              </div>
+            )}
           </div>
         </div>
       </div>

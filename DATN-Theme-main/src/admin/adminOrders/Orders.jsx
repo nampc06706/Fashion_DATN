@@ -20,6 +20,7 @@ const OrderDetailsPage = () => {
           'Content-Type': 'application/json'
         }
       });
+      //console.log(response.data)
       setOrder(response.data);
     } catch (error) {
       setError("Lỗi khi tải chi tiết đơn hàng.");

@@ -2,22 +2,26 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   FaTachometerAlt, FaBox, FaShoppingCart, FaUsers,
-  FaTags, FaRuler, FaPalette, FaSignOutAlt, FaBars, FaTimes
+  FaTags, FaRuler, FaPalette, FaSignOutAlt, FaBars, FaTimes, FaHome
 } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import Cookies from 'js-cookie';
 
 const AdminLayout = ({ children }) => {
   const location = useLocation(); // Lấy thông tin vị trí hiện tại
   const [activeLink, setActiveLink] = useState(location.pathname);
   const [navbarTitle, setNavbarTitle] = useState('Thống kê');
   const [sidebarOpen, setSidebarOpen] = useState(true); // Trạng thái mở/tắt sidebar
-
+  const navigate = useNavigate(); // Khởi tạo navigate
   const links = [
     { to: '/admin', label: 'Thống kê', icon: <FaTachometerAlt /> },
     { to: '/admin/products', label: 'Sản phẩm', icon: <FaBox /> },
     { to: '/admin/orders', label: 'Đơn hàng', icon: <FaShoppingCart /> },
     { to: '/admin/users', label: 'Người dùng', icon: <FaUsers /> },
     { to: '/admin/category', label: 'Loại sản phẩm', icon: <FaTags /> },
-    { to: '/admin/size', label: 'Kích thước', icon: <FaRuler /> }
+    { to: '/admin/size', label: 'Kích thước', icon: <FaRuler /> },
+    // Cập nhật mục đăng xuất để gọi hàm logout thay vì link
+    { label: 'Đăng xuất', icon: <FaSignOutAlt />, action: 'logout' }
   ];
 
   const handleSidebarClick = (link) => {
@@ -38,6 +42,19 @@ const AdminLayout = ({ children }) => {
     setSidebarOpen(!sidebarOpen);
   };
 
+  // Hàm xử lý trở về trang chủ khi nhấn nút
+  const handleClick = () => {
+    navigate('/'); // Điều hướng về trang chủ
+  };
+  // Hàm xử lý đăng xuất
+  const handleLogout = () => {
+    // Xóa token trong cookies
+    Cookies.remove('token');
+
+    // Điều hướng về trang đăng nhập hoặc trang chủ sau khi đăng xuất
+    navigate('/login');  // Hoặc navigate('/') nếu bạn muốn điều hướng về trang chủ
+  };
+
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
@@ -53,20 +70,33 @@ const AdminLayout = ({ children }) => {
         </div>
 
         <div className="flex flex-col">
-          {links.map((link) => (
-            <Link
-              key={link.to}
-              to={link.to}
-              className={`p-4 flex items-center gap-2 text-left rounded-tl-full rounded-bl-full transition duration-300 ease-in-out ${activeLink === link.to
+        {links.map((link, index) => (
+            link.action === 'logout' ? (
+              <button
+                key={index}
+                onClick={handleLogout}  // Gọi hàm đăng xuất khi nhấn
+                className={`p-4 flex items-center gap-2 text-left rounded-tl-full rounded-bl-full transition duration-300 ease-in-out text-gray-100 hover:bg-white hover:text-black hover:text-xl`}
+              >
+                {link.icon}
+                <span className={`${sidebarOpen ? 'block' : 'hidden'} transition-transform duration-300 ease-in-out transform hover:scale-110`}>
+                  {link.label}
+                </span>
+              </button>
+            ) : (
+              <Link
+                key={link.to}
+                to={link.to}
+                className={`p-4 flex items-center gap-2 text-left rounded-tl-full rounded-bl-full transition duration-300 ease-in-out ${activeLink === link.to
                   ? 'bg-white text-black text-lg font-semibold'
                   : 'text-gray-100 hover:bg-white hover:text-black hover:text-xl'
-                }`}
-              onClick={() => handleSidebarClick(link)}
-              aria-current={activeLink === link.to ? 'page' : undefined}
-            >
-              {link.icon}
-              <span className={`${sidebarOpen ? 'block' : 'hidden'} transition-transform duration-300 ease-in-out transform hover:scale-110`}>{link.label}</span>
-            </Link>
+                  }`}
+                onClick={() => handleSidebarClick(link)}
+                aria-current={activeLink === link.to ? 'page' : undefined}
+              >
+                {link.icon}
+                <span className={`${sidebarOpen ? 'block' : 'hidden'} transition-transform duration-300 ease-in-out transform hover:scale-110`}>{link.label}</span>
+              </Link>
+            )
           ))}
         </div>
       </div>
@@ -78,21 +108,24 @@ const AdminLayout = ({ children }) => {
           <h1 className="text-xl font-semibold text-gray-800">
             {navbarTitle === 'Thống kê' ? navbarTitle : `Quản lý ${navbarTitle.toLowerCase()}`}
           </h1>
-          <button className="relative inline-flex items-center justify-center p-4 px-6 py-3 overflow-hidden font-medium text-blue-600 transition duration-300 ease-out border-2 border-blue-500 rounded-lg shadow-md group">
+          <button
+            onClick={handleClick}
+            className="relative inline-flex items-center justify-center p-4 px-6 py-3 overflow-hidden font-medium text-blue-600 transition duration-300 ease-out border-2 border-blue-500 rounded-lg shadow-md group">
             {/* Hiệu ứng nền xanh khi hover */}
             <span className="absolute inset-0 flex items-center justify-center w-full h-full text-white bg-blue-500 transition-all duration-300 -translate-x-full group-hover:translate-x-0 ease">
               <FaSignOutAlt className="mr-2" />
-              Logout
+              Trở về
             </span>
 
             {/* Chỉ hiển thị "Logout" khi không hover */}
             <span className="absolute flex items-center justify-center w-full h-full text-blue-500 transition-all duration-300 transform group-hover:translate-x-full ease">
-              Logout
+              <FaHome className="mr-2" />
+              Trang chủ
             </span>
 
             {/* Ẩn ban đầu */}
             <span className="relative invisible">
-              Logout
+              Trang chủ
             </span>
           </button>
 

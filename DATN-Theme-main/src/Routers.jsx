@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, Navigate } from "react-router-dom";
 import About from "./components/About/index.jsx";
 import AllProductPage from "./components/AllProductPage/index.jsx";
 import Login from "./components/Auth/Login/index";
@@ -22,6 +22,9 @@ import TrackingOrder from "./components/TrackingOrder/index.jsx";
 import Wishlist from "./components/Wishlist/index.jsx";
 import HomeFive from "./components/HomeFive/index.jsx";
 
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode'; // Sửa lại jwtDecode
+import { useEffect, useState } from 'react';
 
 import AdminDashboard from "./admin/adminDashboard/AdminDashboard.jsx";
 import AdminLayout from "./admin/layout/AdminLayout.jsx";
@@ -55,16 +58,38 @@ const AdminRoutes = () => (
 );
 
 export default function Routers() {
+  const [isAdmin, setIsAdmin] = useState(false);  // State để lưu thông tin isAdmin
+  const [userInfo, setUserInfo] = useState(null);  // State để lưu thông tin user
+  const [isTokenChecked, setIsTokenChecked] = useState(false);  // Cờ để kiểm tra token đã được kiểm tra
+
+  useEffect(() => {
+    const token = Cookies.get("token");
+    if (token) {
+      try {
+        const decodedToken = jwtDecode(token);  // Giải mã token
+        setUserInfo(decodedToken);  // Lưu thông tin người dùng vào state
+        if (decodedToken.roles && decodedToken.roles.includes('ADMIN')) {
+          setIsAdmin(true);  // Kiểm tra quyền admin
+        } else {
+          setIsAdmin(false);  // Nếu không phải admin
+        }
+      } catch (error) {
+        console.error("Token decoding error:", error);
+      }
+    }
+    setIsTokenChecked(true);  // Đánh dấu là đã kiểm tra token
+  }, []);  // Chạy useEffect một lần khi component được mount
+
+  // Kiểm tra xem token đã được kiểm tra chưa
+  if (!isTokenChecked) {
+    return null;  // Hoặc bạn có thể hiển thị loading spinner trong khi kiểm tra token
+  }
+
+
+
   return (
     <Routes>
       <Route exact path="/" element={<HomeFive />} />
-      <Route exact path="/all-products" element={<AllProductPage />} />
-      <Route exact path="/products/:id" element={<SingleProductPage />} />
-      <Route exact path="/cart" element={<CardPage />} />
-      <Route exact path="/checkout" element={<CheakoutPage />} />
-      <Route exact path="/checkout/succes" element={<Succes />} />
-      <Route exact path="/checkout/payment-failed" element={<Failer />} />
-      <Route exact path="/orders" element={<OrdersPage />} />
       <Route exact path="/wishlist" element={<Wishlist />} />
       <Route exact path="/flash-sale" element={<FlashSale />} />
       <Route exact path="/saller-page" element={<SallerPage />} />
@@ -75,17 +100,60 @@ export default function Routers() {
       <Route exact path="/tracking-order" element={<TrackingOrder />} />
       <Route exact path="/contact" element={<Contact />} />
       <Route exact path="/faq" element={<Faq />} />
-      <Route exact path="/login" element={<Login />} />
-      <Route exact path="/forgot-password" element={<Forgotpassword />} />
-      <Route exact path="/verify-otp" element={<Otp />} />
-      <Route exact path="/new-password" element={<Newpassword />} />
-      <Route exact path="/signup" element={<Signup />} />
+      <Route exact path="/all-products" element={<AllProductPage />} />
+      <Route exact path="/products/:id" element={<SingleProductPage />} />
+      <Route exact path="/cart" element={<CardPage />} />
       <Route exact path="/profile" element={<Profile />} />
       <Route exact path="/become-saller" element={<BecomeSaller />} />
       <Route exact path="/terms-condition" element={<TermsCondition />} />
+      <Route exact path="/forgot-password" element={<Forgotpassword />} />
+
+      {/* Kiểm tra token trước khi cho phép vào các trang cần đăng nhập */}
+      <Route
+        exact
+        path="/checkout"
+        element={userInfo ? <CheakoutPage /> : <Navigate to="/login" />}
+      />
+      <Route
+        exact
+        path="/checkout/success"
+        element={userInfo ? <Succes /> : <Navigate to="/login" />}
+      />
+      <Route
+        exact
+        path="/checkout/payment-failed"
+        element={userInfo ? <Failer /> : <Navigate to="/login" />}
+      />
+      <Route
+        exact
+        path="/orders"
+        element={userInfo ? <OrdersPage /> : <Navigate to="/login" />}
+      />
+
+      <Route
+        exact
+        path="/verify-otp"
+        element={userInfo ? <Navigate to="/" /> : <Otp />}
+      />
+      <Route
+        exact
+        path="/new-password"
+        element={userInfo ? <Navigate to="/" /> : <Newpassword />}
+      />
+
+      <Route
+        exact path="/signup"
+        element={userInfo ? <Navigate to="/" /> : <Signup />}
+      />
+      <Route
+        exact path="/login"
+        element={userInfo ? <Navigate to="/" /> : <Login />} />
+
+
       <Route exact path="*" element={<FourZeroFour />} />
 
-      <Route path="/admin/*" element={<AdminRoutes />} />
+      {/* Kiểm tra quyền admin trước khi cho phép vào trang admin */}
+      <Route path="/admin/*" element={isAdmin ? <AdminRoutes /> : <Navigate to="/login" />} />
     </Routes>
   );
 }
