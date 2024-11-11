@@ -14,8 +14,6 @@ const ProductManagementPage = () => {
   const [currentProduct, setCurrentProduct] = useState(null);
   const [categories, setCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-
-  
   const [newProduct, setNewProduct] = useState({
     name: '',
     price: '',
@@ -78,7 +76,7 @@ const ProductManagementPage = () => {
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  
+
   const handleEditProduct = (product) => {
     setCurrentProduct(product);
     setNewProduct({
@@ -119,7 +117,6 @@ const ProductManagementPage = () => {
     }
   };
 
-
   const handleFormSubmit = async () => {
     if (isEditMode && currentProduct) {
       try {
@@ -158,8 +155,6 @@ const ProductManagementPage = () => {
     }
   };
 
-
-
   const handleImageChange = (index, value) => {
     const updatedImages = [...newProduct.images];
     updatedImages[index] = value;
@@ -172,16 +167,12 @@ const ProductManagementPage = () => {
     setNewProduct({ ...newProduct, sizes: updatedSizes });
   };
 
-
-
   const handleCancelForm = () => {
     setShowForm(false);
     setIsEditMode(false);
     setCurrentProduct(null);
     setNewProduct({ name: '', price: '', description: '', category: '', images: [], sizes: [] });
   };
-
-
 
   const handleFileChange = (e, index) => {
     const file = e.target.files[0];
@@ -200,8 +191,12 @@ const ProductManagementPage = () => {
     }
   };
 
-
-
+  const handleAddProduct = () => {
+    setIsEditMode(false);
+    setShowForm(true);
+    setCurrentProduct(null);
+    setNewProduct({ name: '', price: '', description: '', category: { id: null }, images: [], sizes: [] });
+  };
 
   if (loading) {
     return <div>Đang tải dữ liệu...</div>;
@@ -213,23 +208,40 @@ const ProductManagementPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-        {/* Form tìm kiếm */}
-        <div className="mb-4">
-        <label className="block text-gray-700 text-sm font-bold mb-2">Tìm kiếm sản phẩm</label>
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full border border-gray-300 p-2 rounded-lg"
-          placeholder="Nhập tên sản phẩm để tìm kiếm"
-        />
+      {/* Form tìm kiếm */}
+
+      <div className="mb-4 flex flex-col md:flex-row justify-between items-center space-y-2 md:space-y-0">
+        <div className="relative w-full md:w-2/3">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring focus:ring-blue-200 focus:border-blue-400"
+            placeholder="🔍 Nhập tên sản phẩm để tìm kiếm"
+          />
+        </div>
+        <button
+          onClick={handleAddProduct}
+          className="flex items-center bg-green-500 text-white px-5 py-3 rounded-lg shadow-md hover:bg-green-600 transition duration-300 transform hover:scale-105"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+            className="w-5 h-5 mr-2"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+          Thêm sản phẩm mới
+        </button>
       </div>
+
       {showForm && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl overflow-y-auto max-h-[90vh]">
-            <h2 className="text-xl font-bold mb-4">
-              {isEditMode ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới'}
-            </h2>
+            <h2 className="text-xl font-bold mb-4">{isEditMode ? "Chỉnh sửa sản phẩm" : "Thêm sản phẩm mới"}</h2>
             <form>
               <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2">Tên sản phẩm</label>
@@ -241,11 +253,12 @@ const ProductManagementPage = () => {
                   className="w-full border border-gray-300 p-2 rounded-lg"
                 />
               </div>
+
               <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2">Loại sản phẩm</label>
                 <select
                   name="categoryId"
-                  value={newProduct.category.id || ''}
+                  value={newProduct.category.id || ""}
                   onChange={handleFormChange}
                   className="w-full border border-gray-300 p-2 rounded-lg"
                 >
@@ -268,6 +281,7 @@ const ProductManagementPage = () => {
                   className="w-full border border-gray-300 p-2 rounded-lg"
                 />
               </div>
+
               <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2">Mô tả</label>
                 <textarea
@@ -277,39 +291,43 @@ const ProductManagementPage = () => {
                   className="w-full border border-gray-300 p-2 rounded-lg"
                 />
               </div>
+
               <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2">Hình ảnh</label>
                 {newProduct.images.map((imageObj, index) => (
                   <div key={index} className="mb-2 flex items-center">
-                    {/* Hiển thị ảnh, khi ấn vào sẽ mở hộp thoại chọn file */}
                     <img
-                      src={`/assets/images/${imageObj.image}`}
+                      src={imageObj.image || "/assets/images/placeholder.png"}
                       alt={`Product image ${index + 1}`}
                       className="w-20 h-20 object-cover rounded mr-2 cursor-pointer"
-                      onClick={() => document.getElementById(`fileInput-${index}`).click()} // Khi nhấn vào ảnh, mở input file tương ứng
+                      onClick={() => document.getElementById(`fileInput-${index}`).click()}
                     />
-
-                    {/* Input để hiển thị tên file, không cho phép chỉnh sửa */}
                     <input
                       type="text"
-                      value={imageObj.image || ''}
+                      value={imageObj.fileName || ""}
                       readOnly
                       className="border border-gray-300 p-2 rounded-lg w-full mr-2"
                     />
-
-                    {/* Input file được ẩn, chỉ hiện khi click vào ảnh */}
                     <input
                       type="file"
                       accept="image/*"
-                      id={`fileInput-${index}`} // Đặt id duy nhất cho mỗi input file
-                      style={{ display: "none" }} // Ẩn input file
-                      onChange={(e) => handleFileChange(e, index)} // Cập nhật hình ảnh khi chọn file mới
+                      id={`fileInput-${index}`}
+                      style={{ display: "none" }}
+                      onChange={(e) => handleFileChange(e, index)}
                     />
                   </div>
                 ))}
-
-
+                <button
+                  type="button"
+                  onClick={() =>
+                    setNewProduct((prev) => ({ ...prev, images: [...prev.images, { image: "" }] }))
+                  }
+                  className="bg-green-500 text-white px-4 py-2 rounded-lg mt-2 hover:bg-green-600 transition duration-300"
+                >
+                  Thêm hình ảnh
+                </button>
               </div>
+
               <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2">Kích thước và số lượng</label>
                 {newProduct.sizes.map((size, index) => (
@@ -318,26 +336,39 @@ const ProductManagementPage = () => {
                       type="text"
                       placeholder="Kích thước"
                       value={size.name}
-                      onChange={(e) => handleSizeChange(index, 'name', e.target.value)}
+                      onChange={(e) => handleSizeChange(index, "name", e.target.value)}
                       className="w-1/3 border border-gray-300 p-2 rounded-lg mr-2"
                     />
                     <input
                       type="text"
                       placeholder="Màu sắc"
-                      value={size.color.name}
-                      onChange={(e) => handleSizeChange(index, 'color', { name: e.target.value })}
+                      value={size.color?.name || ""}
+                      onChange={(e) => handleSizeChange(index, "color", { name: e.target.value })}
                       className="w-1/3 border border-gray-300 p-2 rounded-lg mr-2"
                     />
                     <input
                       type="number"
                       placeholder="Số lượng"
                       value={size.quantityInStock}
-                      onChange={(e) => handleSizeChange(index, 'quantityInStock', e.target.value)}
+                      onChange={(e) => handleSizeChange(index, "quantityInStock", e.target.value)}
                       className="w-1/3 border border-gray-300 p-2 rounded-lg"
                     />
                   </div>
                 ))}
+                <button
+                  type="button"
+                  onClick={() =>
+                    setNewProduct((prev) => ({
+                      ...prev,
+                      sizes: [...prev.sizes, { name: "", color: { name: "" }, quantityInStock: 0 }],
+                    }))
+                  }
+                  className="bg-green-500 text-white px-4 py-2 rounded-lg mt-2 hover:bg-green-600 transition duration-300"
+                >
+                  Thêm size
+                </button>
               </div>
+
               <div className="flex justify-end">
                 <button
                   type="button"
@@ -351,7 +382,7 @@ const ProductManagementPage = () => {
                   onClick={handleFormSubmit}
                   className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-300"
                 >
-                  {isEditMode ? 'Lưu thay đổi' : 'Thêm sản phẩm'}
+                  {isEditMode ? "Lưu thay đổi" : "Thêm sản phẩm"}
                 </button>
               </div>
             </form>
@@ -386,6 +417,12 @@ const ProductManagementPage = () => {
                     className="bg-yellow-500 text-white px-3 py-1 rounded-lg mr-2 hover:bg-yellow-600 transition duration-300"
                   >
                     <AiOutlineEdit />
+                  </button>
+                  <button
+                    // onClick={() => handleEditProduct(product)}
+                    className="bg-red-500 text-white px-3 py-1 rounded-lg mr-2 hover:bg-yellow-600 transition duration-300"
+                  >
+                    <AiOutlineDelete />
                   </button>
                 </td>
               </tr>
