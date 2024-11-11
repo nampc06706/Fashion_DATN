@@ -34,6 +34,7 @@ import AdminOrders from "./admin/adminOrders/Orders.jsx";
 import AdminOrderDetails from "./admin/adminOrderDetails/OrderDetails.jsx";
 import AdminUsers from "./admin/adminUsers/Users.jsx";
 import AdminSize from "./admin/adminSize/Size.jsx";
+import AdminFlashSales from "./admin/adminFlashSales/flashsale.jsx";
 import AdminColor from "./admin/adminColor/Color.jsx";
 import Forgotpassword from "./components/Auth/Forgotpassword/index.jsx";
 import Otp from "./components/Auth/Forgotpassword/otp.jsx";
@@ -53,6 +54,7 @@ const AdminRoutes = () => (
       <Route path="/users" element={<AdminUsers />} />
       <Route path="/size" element={<AdminSize />} />
       <Route path="/color" element={<AdminColor />} />
+      <Route path="/flash-sales" element={<AdminFlashSales />} />
     </Routes>
   </AdminLayout>
 );
@@ -68,7 +70,9 @@ export default function Routers() {
       try {
         const decodedToken = jwtDecode(token);  // Giải mã token
         setUserInfo(decodedToken);  // Lưu thông tin người dùng vào state
-        if (decodedToken.roles && decodedToken.roles.includes('ADMIN')) {
+        // console.log(decodedToken)
+        // console.log(isAdmin)
+        if (decodedToken.roles && decodedToken.roles.includes("ADMIN")) {
           setIsAdmin(true);  // Kiểm tra quyền admin
         } else {
           setIsAdmin(false);  // Nếu không phải admin

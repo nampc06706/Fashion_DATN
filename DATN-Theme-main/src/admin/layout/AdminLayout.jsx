@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   FaTachometerAlt, FaBox, FaShoppingCart, FaUsers,
-  FaTags, FaRuler, FaPalette, FaSignOutAlt, FaBars, FaTimes, FaHome
+  FaTags, FaRuler, FaPalette, FaSignOutAlt, FaBars, FaTimes, FaHome,FaBolt
 } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
@@ -20,6 +20,7 @@ const AdminLayout = ({ children }) => {
     { to: '/admin/users', label: 'Người dùng', icon: <FaUsers /> },
     { to: '/admin/category', label: 'Loại sản phẩm', icon: <FaTags /> },
     { to: '/admin/size', label: 'Kích thước', icon: <FaRuler /> },
+    { to: '/admin/flash-sales', label: 'Flash sales', icon: <FaBolt /> },
     // Cập nhật mục đăng xuất để gọi hàm logout thay vì link
     { label: 'Đăng xuất', icon: <FaSignOutAlt />, action: 'logout' }
   ];

@@ -33,7 +33,6 @@ export default function Navbar({ className }) {
     }
   }, [categoryToggle]);
 
-console.log(categories);
   // useEffect để gọi API và tải danh mục sản phẩm
   useEffect(() => {
     const loadCategories = async () => {

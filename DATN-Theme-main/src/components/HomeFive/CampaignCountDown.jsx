@@ -16,7 +16,7 @@ export default function CampaignCountDown({ className, lastDate }) {
       try {
         const response = await fetch("http://localhost:8080/api/guest/product-flashsale");
         const data = await response.json();
-        console.log(data);
+        //console.log(data);
 
         if (Array.isArray(data)) {
           setProducts(data);

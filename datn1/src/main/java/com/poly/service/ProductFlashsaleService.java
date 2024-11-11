@@ -30,7 +30,13 @@ public class ProductFlashsaleService {
                 .collect(Collectors.toList());
     }
 
-
+    // Lấy tất cả sản phẩm Flash Sale bao gồm cả isactive = 0 và 1
+    public List<ProductDTO> findAllIncludingInactive() {
+        return productFlashsaleRepository.findAll().stream()
+                .map(this::convertToDtoo)
+                .collect(Collectors.toList());
+    }
+    
     public ProductDTO save(ProductFlashsale productFlashsale) {
         ProductFlashsale savedProductFlashsale = productFlashsaleRepository.save(productFlashsale);
         return convertToDto(savedProductFlashsale);
@@ -126,6 +132,74 @@ public class ProductFlashsaleService {
 
 
 
+ // Hàm chuyển đổi từ ProductFlashsale sang ProductDTO
+    private ProductDTO convertToDtoo(ProductFlashsale productFlashsale) {
+        if (productFlashsale == null) {
+            return null;
+        }
 
+        ProductDTO productDTO = new ProductDTO();
+
+        // Gán các thuộc tính từ ProductFlashsale
+        productDTO.setId(productFlashsale.getProduct().getId());
+        productDTO.setName(productFlashsale.getProduct().getName());
+
+        // Tính toán giá sau khi giảm giá
+        BigDecimal originalPrice = productFlashsale.getProduct().getPrice();
+        BigDecimal discountPercent = productFlashsale.getDiscount();
+
+        BigDecimal discountAmount = originalPrice.multiply(discountPercent).divide(BigDecimal.valueOf(100));
+        BigDecimal discountedPrice = originalPrice.subtract(discountAmount).setScale(2, BigDecimal.ROUND_HALF_UP);
+
+        productDTO.setPrice(discountedPrice);
+        productDTO.setOriginalPrice(originalPrice);
+        productDTO.setDiscount(discountPercent);
+        productDTO.setDescription(productFlashsale.getProduct().getDescription());
+
+        // Lấy hình ảnh đầu tiên (nếu có)
+        if (productFlashsale.getProduct().getImages() != null && !productFlashsale.getProduct().getImages().isEmpty()) {
+            productDTO.setFirstImage(productFlashsale.getProduct().getImages().get(0).getImage());
+        }
+
+        // Chuyển đổi hình ảnh
+        if (productFlashsale.getProduct().getImages() != null) {
+            List<ProductImageDTO> imageDTOs = productFlashsale.getProduct().getImages().stream()
+                    .map(image -> new ProductImageDTO(image.getImage()))
+                    .collect(Collectors.toList());
+            productDTO.setImages(imageDTOs);
+        }
+
+        // Chuyển đổi kích thước
+        if (productFlashsale.getProduct().getSizes() != null) {
+            List<SizeDTO> sizeDTOs = productFlashsale.getProduct().getSizes().stream()
+                    .map(size -> new SizeDTO(size.getId(),
+                            size.getProduct().getId(),
+                            size.getName(),
+                            size.getQuantityInStock(),
+                            new ColorDTO(size.getColor().getId(), size.getColor().getName())))
+                    .collect(Collectors.toList());
+            productDTO.setSizes(sizeDTOs);
+        }
+
+        // Chuyển đổi danh mục
+        if (productFlashsale.getProduct().getCategory() != null) {
+            productDTO.setCategory(new CategoryDTO(productFlashsale.getProduct().getCategory().getId(),
+                    productFlashsale.getProduct().getCategory().getName()));
+        }
+
+        // Thêm thông tin Flash Sale
+        if (productFlashsale.getFlashsale() != null) {
+            FlashsaleDTO flashsaleDTO = new FlashsaleDTO();
+            flashsaleDTO.setId(productFlashsale.getFlashsale().getId());
+            flashsaleDTO.setName(productFlashsale.getFlashsale().getName());
+            flashsaleDTO.setStartdate(productFlashsale.getFlashsale().getStartdate());
+            flashsaleDTO.setEnddate(productFlashsale.getFlashsale().getEnddate());
+            flashsaleDTO.setIsactive(productFlashsale.getFlashsale().isIsactive());
+
+            productDTO.setFlashsale(flashsaleDTO);
+        }
+
+        return productDTO;
+    }
 
 }

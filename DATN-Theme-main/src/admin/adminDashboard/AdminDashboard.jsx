@@ -198,7 +198,7 @@ const StatisticsPage = () => {
 
         {/* Card 3: Tổng số đơn hàng */}
         <div className="bg-white shadow-lg rounded-lg p-6 flex flex-col items-center justify-center">
-          <h2 className="text-xl font-semibold">Tổng số đơn hàng</h2>
+          <h2 className="text-xl font-semibold">Tổng số đơn hàng hoàn thành</h2>
           <p className="text-3xl font-bold text-red-600">{statistics.totalOrders}</p>
         </div>
       </div>
