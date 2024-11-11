@@ -6,6 +6,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const FlashSaleManagementPage = () => {
+  const [isFormVisible, setFormVisible] = useState(false);
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState('');
   const [productFlashSales, setProductFlashSales] = useState([]);
@@ -46,9 +47,9 @@ const FlashSaleManagementPage = () => {
     fetchProducts();
   }, [token]);
 
-  // Lấy danh sách ProductFlashSale từ API
+  // Lấy danh sách FlashSale từ API
   useEffect(() => {
-    const fetchProductFlashSales = async () => {
+    const fetchFlashSales = async () => {
       if (!userInfo) {
         return;
       }
@@ -66,6 +67,29 @@ const FlashSaleManagementPage = () => {
         toast.error('Không thể lấy dữ liệu ProductFlashSale.');
       }
     };
+    fetchFlashSales();
+  }, [token]);
+  // Lấy danh sách ProductFlashSale từ API
+  useEffect(() => {
+    const fetchProductFlashSales = async () => {
+      if (!userInfo) {
+        return;
+      }
+      try {
+        const response = await axios.get(`http://localhost:8080/api/admin/product-flashsale`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true,
+        });
+        //console.log(response.data)
+        setProductFlashSales(response.data);
+      } catch (error) {
+        // console.error('Lỗi khi lấy dữ liệu ProductFlashSale:', error);
+        // toast.error('Không thể lấy dữ liệu ProductFlashSale.');
+      }
+    };
     fetchProductFlashSales();
   }, [token]);
 
@@ -81,10 +105,24 @@ const FlashSaleManagementPage = () => {
     );
   };
 
-  // Hàm xử lý khi nhấn nút "Xem chi tiết"
-  const handleShowDetails = (flashSaleId) => {
-    const flashSale = productFlashSales.find(flashSale => flashSale.id === flashSaleId);
-    setSelectedFlashSale(flashSale); // Cập nhật trạng thái với chương trình Flash Sale đã chọn
+  const handleShowDetails = (id) => {
+    //console.log("Product ID clicked:", id);  // Debug log id
+    const selected = productFlashSales.find(item => item.flashsale && item.flashsale.id === id);
+    //console.log("Selected FlashSale:", selected);  // Debug log selected product
+
+    if (selected) {
+      setSelectedFlashSale(selected);  // Lưu sản phẩm được chọn vào state
+      setFormVisible(true);  // Hiển thị form chi tiết
+    }
+  };
+
+
+  // Hàm đóng form khi click bên ngoài
+  const handleOutsideClick = (e) => {
+    if (e.target.id === 'overlay') {
+      setFormVisible(false);
+      setSelectedFlashSale(null);
+    }
   };
 
   // Hàm xử lý khi thêm sản phẩm vào Flash Sale
@@ -118,6 +156,7 @@ const FlashSaleManagementPage = () => {
 
   return (
     <div className="container mx-auto p-6 bg-white rounded-lg shadow-lg">
+      <ToastContainer position="top-right" autoClose={1000} />
       <h2 className="text-2xl font-bold mb-6 text-gray-800">Quản lý Flash Sale</h2>
 
       {/* Chọn sản phẩm */}
@@ -133,6 +172,24 @@ const FlashSaleManagementPage = () => {
             {products.map((product) => (
               <option key={product.id} value={product.id}>
                 {product.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+      {/* Chọn chương trình giảm giá */}
+      <div className="mb-6">
+        <label className="block mb-4 text-lg font-semibold text-gray-800">
+          Chọn chương trình giảm giá:
+          <select
+            value={selectedFlashSale}
+            onChange={(e) => setSelectedFlashSale(e.target.value)}
+            className="block w-full p-3 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">-- Chọn chương trình giảm giá --</option>
+            {flashSales.map((flashsale) => (
+              <option key={flashsale.id} value={flashsale.id}>
+                {flashsale.name}
               </option>
             ))}
           </select>
@@ -156,12 +213,12 @@ const FlashSaleManagementPage = () => {
       {/* Nút thêm vào Flash Sale */}
       <button
         onClick={handleAddToFlashSale}
-        className="w-full p-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-500"
+        className="w-30 p-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-500"
       >
         Thêm vào Flash Sale
       </button>
 
-      <ToastContainer position="top-center" autoClose={3000} />
+
 
       {/* Danh sách Flash Sale */}
       <div className="container mx-auto p-6 bg-white rounded-lg shadow-lg mt-6">
@@ -174,6 +231,7 @@ const FlashSaleManagementPage = () => {
               <th className="px-4 py-3 text-left">Ngày Bắt Đầu</th>
               <th className="px-4 py-3 text-left">Ngày Kết Thúc</th>
               <th className="px-4 py-3 text-left">Trạng Thái</th>
+              <th className="px-4 py-3 text-left"></th>
               <th className="px-4 py-3 text-left"></th>
             </tr>
           </thead>
@@ -189,17 +247,33 @@ const FlashSaleManagementPage = () => {
                     {item.isactive ? (
                       <span className="text-green-600 font-semibold">Đang diễn ra</span>
                     ) : (
-                      <span className="text-red-600 font-semibold">Kết thúc</span>
+                      <span className="text-red-600 font-semibold">Đã kết thúc</span>
                     )}
                   </td>
                   <td className="px-4 py-3">
                     <button
-                      onClick={() => handleShowDetails(item.id)}
+                      className={`py-2 px-6 rounded-lg font-semibold focus:outline-none transition duration-300 ease-in-out transform ${item.isactive
+                          ? "bg-green-100 text-green-600 hover:bg-green-200 hover:scale-105 focus:ring-2 focus:ring-green-500"
+                          : "bg-red-100 text-red-600 hover:bg-red-200 hover:scale-105 focus:ring-2 focus:ring-red-500"
+                        }`}
+                    >
+                      {item.isactive ? (
+                        <span className="text-green-600">Tắt</span>
+                      ) : (
+                        <span className="text-red-600">Bật</span>
+                      )}
+                    </button>
+                  </td>
+
+                  <td className="px-4 py-3">
+                    <button
+                      onClick={() => item.id && handleShowDetails(item.id)} // Kiểm tra item.id trước khi gọi hàm
                       className="text-blue-500 hover:text-blue-700 font-semibold py-2 px-4 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                     >
                       Xem chi tiết
                     </button>
                   </td>
+
                 </tr>
               ))
             ) : (
@@ -213,19 +287,67 @@ const FlashSaleManagementPage = () => {
         </table>
       </div>
 
-      {/* Hiển thị chi tiết chương trình Flash Sale */}
-      {selectedFlashSale && (
-        <div className="container mx-auto p-6 bg-white rounded-lg shadow-lg mt-6">
-          <h2 className="text-2xl font-bold mb-6 text-gray-800">Chi tiết chương trình Flash Sale</h2>
-          <div className="mb-4">
-            <p className="text-gray-600">ID: {selectedFlashSale.id}</p>
-            <p className="text-gray-600">Tên chương trình: {selectedFlashSale.name}</p>
-            <p className="text-gray-600">Ngày bắt đầu: {new Date(convertArrayToDate(selectedFlashSale.startdate)).toLocaleString()}</p>
-            <p className="text-gray-600">Ngày kết thúc: {new Date(convertArrayToDate(selectedFlashSale.enddate)).toLocaleString()}</p>
-            <p className="text-gray-600">Trạng thái: {selectedFlashSale.isactive ? 'Đang diễn ra' : 'Kết thúc'}</p>
+
+      {selectedFlashSale && selectedFlashSale.flashsale && selectedFlashSale.flashsale.id && isFormVisible && (
+        <div
+          id="overlay"
+          className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+          onClick={handleOutsideClick}
+        >
+          <div className="bg-white p-8 rounded-lg shadow-xl w-4/5 md:w-3/4 lg:w-2/3 xl:w-1/2 max-h-[90vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-3xl font-semibold mb-6 text-gray-900 whitespace-nowrap overflow-hidden text-ellipsis">
+              Chi tiết Flash Sale {selectedFlashSale.flashsale.name}
+            </h2>
+            <div className="overflow-x-auto">
+              <table className="table-auto w-full text-left">
+                <thead>
+                  <tr className="bg-blue-600 text-white">
+                    <th className="px-6 py-4 text-left">Hình ảnh</th>
+                    <th className="px-6 py-4 text-left">Sản phẩm</th>
+                    <th className="px-6 py-4 text-left">%</th>
+                    <th className="px-6 py-4 text-left">Giá cũ</th>
+                    <th className="px-6 py-4 text-left">Giá mới</th>
+                    <th className="px-6 py-4 text-left"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {productFlashSales
+                    .filter(product => product.flashsale && product.flashsale.id === selectedFlashSale.flashsale.id)
+                    .map((product, index) => (
+                      <tr key={index} className="hover:bg-gray-100">
+                        <td className="px-6 py-3 border-b">
+                          <img
+                            src={`/assets/images/${product.firstImage}`}
+                            alt="Product"
+                            className="w-16 h-16 object-cover rounded-md"
+                          />
+                        </td>
+                        <td className="px-6 py-3 border-b">{product.name}</td>
+                        <td className="px-6 py-3 border-b font-bold text-green-500">
+                          {parseInt(product.discount, 10)}%
+                        </td>
+                        <td className="px-6 py-3 border-b text-gray-600 line-through">
+                          {Math.floor(product.originalPrice)}VND
+                        </td>
+                        <td className="px-6 py-3 border-b font-bold text-red-500">
+                          {Math.floor(product.price)}VND
+                        </td>
+                        <td className="px-6 py-3 border-b">
+                          <button className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">
+                            XÓA
+                          </button>
+                        </td>
+
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}
+
+
     </div>
   );
 };

@@ -70,8 +70,6 @@ export default function Routers() {
       try {
         const decodedToken = jwtDecode(token);  // Giải mã token
         setUserInfo(decodedToken);  // Lưu thông tin người dùng vào state
-        // console.log(decodedToken)
-        // console.log(isAdmin)
         if (decodedToken.roles && decodedToken.roles.includes("ADMIN")) {
           setIsAdmin(true);  // Kiểm tra quyền admin
         } else {
@@ -86,7 +84,7 @@ export default function Routers() {
 
   // Kiểm tra xem token đã được kiểm tra chưa
   if (!isTokenChecked) {
-    return null;  // Hoặc bạn có thể hiển thị loading spinner trong khi kiểm tra token
+    return <div>Loading...</div>;  // Hiển thị loading khi đang kiểm tra token
   }
 
 
@@ -116,22 +114,22 @@ export default function Routers() {
       <Route
         exact
         path="/checkout"
-        element={userInfo ? <CheakoutPage /> : <Navigate to="/login" />}
+        element={userInfo ? <CheakoutPage /> : <Navigate to="/" />}
       />
       <Route
         exact
         path="/checkout/success"
-        element={userInfo ? <Succes /> : <Navigate to="/login" />}
+        element={userInfo ? <Succes /> : <Navigate to="/" />}
       />
       <Route
         exact
         path="/checkout/payment-failed"
-        element={userInfo ? <Failer /> : <Navigate to="/login" />}
+        element={userInfo ? <Failer /> : <Navigate to="/" />}
       />
       <Route
         exact
         path="/orders"
-        element={userInfo ? <OrdersPage /> : <Navigate to="/login" />}
+        element={userInfo ? <OrdersPage /> : <Navigate to="/" />}
       />
 
       <Route
@@ -157,7 +155,7 @@ export default function Routers() {
       <Route exact path="*" element={<FourZeroFour />} />
 
       {/* Kiểm tra quyền admin trước khi cho phép vào trang admin */}
-      <Route path="/admin/*" element={isAdmin ? <AdminRoutes /> : <Navigate to="/login" />} />
+      <Route path="/admin/*" element={isAdmin ? <AdminRoutes /> : <Navigate to="/" />} />
     </Routes>
   );
 }

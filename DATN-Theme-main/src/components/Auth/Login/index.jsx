@@ -44,6 +44,7 @@ export default function Login() {
 
     Cookies.remove('user');
     Cookies.remove('token');
+    Cookies.remove('cart')
 
     try {
       const loginResponse = await axios.post('http://localhost:8080/api/login', null, {
@@ -67,7 +68,7 @@ export default function Login() {
 
       toast.success('Đăng nhập thành công!', {
         position: 'top-right',
-        autoClose: 3000,
+        autoClose: 500,
       });
 
       setUserInfo({
@@ -75,14 +76,15 @@ export default function Login() {
         role: decodedToken.role,
         accountId: decodedToken.accountId,
       });
-
+      window.location.reload();
       navigate('/');
+
     } catch (error) {
       const message = error.response?.data || 'Có lỗi xảy ra khi đăng nhập.';
       setError(message);
       toast.error(message, {
         position: 'top-right',
-        autoClose: 3000,
+        autoClose: 500,
       });
     } finally {
       setLoading(false);
