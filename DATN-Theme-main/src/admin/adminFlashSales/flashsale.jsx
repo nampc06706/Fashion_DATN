@@ -4,11 +4,14 @@ import { jwtDecode } from 'jwt-decode';
 import Cookies from 'js-cookie';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { confirmAlert } from 'react-confirm-alert'; // Nhập confirmAlert
-import 'react-confirm-alert/src/react-confirm-alert.css'; // Nhập CSS của confirmAlert
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
 
 
 const FlashSaleManagementPage = () => {
+
+  const MySwal = withReactContent(Swal);
+
   const [isFormVisible, setFormVisible] = useState(false);
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState('');
@@ -239,43 +242,41 @@ const FlashSaleManagementPage = () => {
     }
   };
 
-const handleDeleteProductFlashsale = (productId, flashsaleId) => {
-  confirmAlert({
-    title: 'Xác nhận xóa',
-    message: 'Bạn có chắc chắn muốn xóa sản phẩm này khỏi Flash Sale?',
-    buttons: [
-      {
-        label: 'Có',
-        onClick: async () => {
-          try {
-            const response = await axios.delete(`http://localhost:8080/api/admin/product-flashsale/delete/${productId}/${flashsaleId}`, {
-              headers: {
-                Authorization: `Bearer ${token}`, // Đảm bảo token đã được định nghĩa đúng
-              },
-            });
+  const handleDeleteProductFlashsale = (productId, flashsaleId) => {
+    MySwal.fire({
+      title: "Xác nhận xóa",
+      text: "Bạn có chắc chắn muốn xóa sản phẩm này khỏi Flash Sale?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Có",
+      cancelButtonText: "Không",
+      customClass: {
+        confirmButton: 'btn btn-success', // Sử dụng Bootstrap cho nút xác nhận
+        cancelButton: 'btn btn-secondary', // Sử dụng Bootstrap cho nút hủy
+      },
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const response = await axios.delete(`http://localhost:8080/api/admin/product-flashsale/delete/${productId}/${flashsaleId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`, // Đảm bảo token đã được định nghĩa đúng
+            },
+          });
 
-            if (response.status === 200) {
-              toast.success(response.data); // Hiển thị thông báo thành công
-              // Cập nhật danh sách sản phẩm trong flashsale sau khi xóa
-              await fetchProductFlashSales(); // Gọi lại API để lấy danh sách cập nhật
-            }
-          } catch (error) {
-            console.error('Lỗi khi xóa ProductFlashsale:', error);
-            toast.error('Có lỗi xảy ra khi xóa ProductFlashsale.');
+          if (response.status === 200) {
+            toast.success(response.data); // Hiển thị thông báo thành công
+            // Cập nhật danh sách sản phẩm trong flashsale sau khi xóa
+            await fetchProductFlashSales(); // Gọi lại API để lấy danh sách cập nhật
           }
-        },
-      },
-      {
-        label: 'Không',
-        onClick: () => {
-          toast.info('Hành động xóa đã bị hủy.');
-        },
-      },
-    ],
-  });
-};
-
-
+        } catch (error) {
+          console.error("Lỗi khi xóa ProductFlashsale:", error);
+          toast.error("Có lỗi xảy ra khi xóa ProductFlashsale.");
+        }
+      } else {
+        toast.info("Hành động xóa đã bị hủy.");
+      }
+    });
+  };
 
   return (
     <div className="container mx-auto p-6 bg-white rounded-lg shadow-lg">
