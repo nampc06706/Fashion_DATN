@@ -6,7 +6,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { confirmAlert } from 'react-confirm-alert'; // Nhập confirmAlert
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Nhập CSS của confirmAlert
-
+import Select from 'react-select';
 
 const FlashSaleManagementPage = () => {
   const [isFormVisible, setFormVisible] = useState(false);
@@ -17,6 +17,7 @@ const FlashSaleManagementPage = () => {
   const [discount, setDiscount] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectedFlashSale, setSelectedFlashSale] = useState(null); // Trạng thái lưu thông tin Flash Sale
+  
   const token = Cookies.get('token');
   let userInfo = null;
 
@@ -27,6 +28,7 @@ const FlashSaleManagementPage = () => {
       console.error('Token decoding error:', error);
     }
   }
+
 
   // Lấy danh sách sản phẩm
   useEffect(() => {
@@ -184,6 +186,16 @@ const FlashSaleManagementPage = () => {
     }
   };
 
+  // Chuyển đổi dữ liệu thành định dạng phù hợp với react-select
+  const flashSaleOptions = flashSales.map((flashsale) => ({
+    value: flashsale.id,
+    label: flashsale.name,
+  }));
+  // Chuyển đổi dữ liệu sản phẩm sang định dạng mà react-select yêu cầu
+  const productOptions = products.map((product) => ({
+    value: product.id,
+    label: product.name,
+  }));
 
   // Hàm đóng form khi click bên ngoài
   const handleOutsideClick = (e) => {
@@ -239,110 +251,175 @@ const FlashSaleManagementPage = () => {
     }
   };
 
-const handleDeleteProductFlashsale = (productId, flashsaleId) => {
-  confirmAlert({
-    title: 'Xác nhận xóa',
-    message: 'Bạn có chắc chắn muốn xóa sản phẩm này khỏi Flash Sale?',
-    buttons: [
-      {
-        label: 'Có',
-        onClick: async () => {
-          try {
-            const response = await axios.delete(`http://localhost:8080/api/admin/product-flashsale/delete/${productId}/${flashsaleId}`, {
-              headers: {
-                Authorization: `Bearer ${token}`, // Đảm bảo token đã được định nghĩa đúng
-              },
-            });
+  const handleDeleteProductFlashsale = (productId, flashsaleId) => {
+    confirmAlert({
+      title: 'Xác nhận xóa',
+      message: 'Bạn có chắc chắn muốn xóa sản phẩm này khỏi Flash Sale?',
+      buttons: [
+        {
+          label: 'Có',
+          onClick: async () => {
+            try {
+              const response = await axios.delete(`http://localhost:8080/api/admin/product-flashsale/delete/${productId}/${flashsaleId}`, {
+                headers: {
+                  Authorization: `Bearer ${token}`, // Đảm bảo token đã được định nghĩa đúng
+                },
+              });
 
-            if (response.status === 200) {
-              toast.success(response.data); // Hiển thị thông báo thành công
-              // Cập nhật danh sách sản phẩm trong flashsale sau khi xóa
-              await fetchProductFlashSales(); // Gọi lại API để lấy danh sách cập nhật
+              if (response.status === 200) {
+                toast.success(response.data); // Hiển thị thông báo thành công
+                // Cập nhật danh sách sản phẩm trong flashsale sau khi xóa
+                await fetchProductFlashSales(); // Gọi lại API để lấy danh sách cập nhật
+              }
+            } catch (error) {
+              console.error('Lỗi khi xóa ProductFlashsale:', error);
+              toast.error('Có lỗi xảy ra khi xóa ProductFlashsale.');
             }
-          } catch (error) {
-            console.error('Lỗi khi xóa ProductFlashsale:', error);
-            toast.error('Có lỗi xảy ra khi xóa ProductFlashsale.');
-          }
+          },
         },
-      },
-      {
-        label: 'Không',
-        onClick: () => {
-          toast.info('Hành động xóa đã bị hủy.');
+        {
+          label: 'Không',
+          onClick: () => {
+            toast.info('Hành động xóa đã bị hủy.');
+          },
         },
-      },
-    ],
-  });
-};
+      ],
+    });
+  };
 
 
 
   return (
     <div className="container mx-auto p-6 bg-white rounded-lg shadow-lg">
       <ToastContainer position="top-right" autoClose={1000} />
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">Quản lý Flash Sale</h2>
 
-      {/* Chọn sản phẩm */}
-      <div className="mb-6">
-        <label className="block mb-4 text-lg font-semibold text-gray-800">
-          Chọn sản phẩm:
-          <select
-            value={selectedProduct}
-            onChange={(e) => setSelectedProduct(e.target.value)}
-            className="block w-full p-3 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+      <div className="container mx-auto p-6">
+        <h2 className="text-4xl font-extrabold text-red-600 mb-6">
+          Quản lý Chương Trình Giảm Giá
+        </h2>
+        <form className="space-y-6">
+          {/* Tên Chương Trình */}
+          <div className="mb-4">
+            <label htmlFor="name" className="block text-lg font-semibold text-gray-700">
+              Tên chương trình:
+            </label>
+            <input
+              type="text"
+              id="name"
+              placeholder="Nhập tên chương trình"
+              required
+              className="w-full p-3 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          {/* Ngày Bắt Đầu */}
+          <div className="mb-4">
+            <label htmlFor="startdate" className="block text-lg font-semibold text-gray-700">
+              Ngày bắt đầu:
+            </label>
+            <input
+              type="datetime-local"
+              id="startdate"
+              required
+              className="w-full p-3 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          {/* Ngày Kết Thúc */}
+          <div className="mb-4">
+            <label htmlFor="enddate" className="block text-lg font-semibold text-gray-700">
+              Ngày kết thúc:
+            </label>
+            <input
+              type="datetime-local"
+              id="enddate"
+              required
+              className="w-full p-3 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          {/* Mức Giảm Giá */}
+          <div className="mb-4">
+            <label htmlFor="discount" className="block text-lg font-semibold text-gray-700">
+              Mức giảm giá (%):
+            </label>
+            <input
+              type="number"
+              id="discount"
+              min="1"
+              max="100"
+              required
+              className="w-full p-3 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          {/* Nút Thêm */}
+          <button
+            type="button"
+            disabled={loading}
+            className="w-30 p-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-500"
           >
-            <option value="">-- Chọn sản phẩm --</option>
-            {products.map((product) => (
-              <option key={product.id} value={product.id}>
-                {product.name}
-              </option>
-            ))}
-          </select>
-        </label>
+            {loading ? 'Đang xử lý...' : 'Thêm mới'}
+          </button>
+        </form>
       </div>
 
-      {/* Chọn chương trình giảm giá */}
-      <div className="mb-6">
-        <label className="block mb-4 text-lg font-semibold text-gray-800">
-          Chọn chương trình giảm giá:
-          <select
-            value={selectedFlashSale}
-            onChange={(e) => setSelectedFlashSale(e.target.value)}
-            className="block w-full p-3 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">-- Chọn chương trình giảm giá --</option>
-            {flashSales.map((flashsale) => (
-              <option key={flashsale.id} value={flashsale.id}>
-                {flashsale.name}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
+      <div className="mt-6">
+        <h2 className="text-4xl font-extrabold text-red-600 mb-6">
+          Quản lý Sản Phẩm Trong Chương Trình Giảm Giá
+        </h2>
 
-      {/* Mức giảm giá */}
-      <div className="mb-6">
-        <label className="block mb-4 text-lg font-semibold text-gray-800">
-          Mức giảm giá (%):
-          <input
-            type="number"
-            value={discount}
-            onChange={(e) => setDiscount(e.target.value)}
-            placeholder="Nhập mức giảm giá"
-            className="block w-full p-3 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </label>
-      </div>
+        {/* Chọn sản phẩm */}
+        <div className="mb-6">
+          <label className="block mb-4 text-lg font-semibold text-gray-800">
+            Chọn sản phẩm:
+            <Select
+              value={selectedProduct}
+              onChange={(selectedOption) => setSelectedProduct(selectedOption)}
+              options={productOptions}
+              placeholder="Tìm sản phẩm..."
+              className="mt-2"
+            />
+          </label>
+        </div>
 
-      {/* Nút thêm vào Flash Sale */}
-      <button
-        type="button"
-        onClick={handleAddToFlashSale}
-        disabled={loading}
-        className="w-30 p-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-500"
-      >
-        {loading ? 'Đang xử lý...' : 'Thêm sản phẩm'}
-      </button>
+        {/* Chọn chương trình giảm giá */}
+        <div className="mb-6">
+          <label className="block mb-4 text-lg font-semibold text-gray-800">
+            Chọn chương trình giảm giá:
+            <Select
+              value={selectedFlashSale}
+              onChange={(selectedOption) => setSelectedFlashSale(selectedOption)}
+              options={flashSaleOptions}
+              placeholder="Tìm chương trình giảm giá..."
+              className="mt-2"
+            />
+          </label>
+        </div>
+
+        {/* Mức giảm giá */}
+        <div className="mb-6">
+          <label className="block mb-4 text-lg font-semibold text-gray-800">
+            Mức giảm giá (%):
+            <input
+              type="number"
+              value={discount}
+              onChange={(e) => setDiscount(e.target.value)}
+              placeholder="Nhập mức giảm giá"
+              className="block w-full p-3 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </label>
+        </div>
+
+        {/* Nút thêm vào Flash Sale */}
+        <button
+          type="button"
+          onClick={handleAddToFlashSale}
+          disabled={loading}
+          className="w-30 p-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-500"
+        >
+          {loading ? 'Đang xử lý...' : 'Thêm sản phẩm'}
+        </button>
+      </div>
 
       {/* Danh sách Flash Sale */}
       <div className="container mx-auto p-6 bg-white rounded-lg shadow-lg mt-6">
