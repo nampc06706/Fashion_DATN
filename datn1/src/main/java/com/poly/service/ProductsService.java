@@ -1,11 +1,16 @@
 package com.poly.service;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -252,8 +257,13 @@ public class ProductsService {
 		// Thêm hình ảnh
 		List<ProductImages> images = productDTO.getImages().stream().map(img -> {
 			ProductImages image = new ProductImages();
-			image.setImage(img.getImage());
+			image.setImage(img.getFileName());
 			image.setProduct(product);
+			try {
+				saveImages(img.getImage(), img.getFileName());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			return image;
 		}).collect(Collectors.toList());
 		product.setImages(images);
@@ -300,15 +310,30 @@ public class ProductsService {
 				.orElseThrow(() -> new RuntimeException("Danh mục không tồn tại"));
 		product.setCategory(category);
 
-		// Xóa các hình ảnh cũ và thêm hình ảnh mới
-		productImageRepository.deleteByProduct(product);
 		List<ProductImages> updatedImages = productDTO.getImages().stream().map(img -> {
 			ProductImages image = new ProductImages();
-			image.setImage(img.getImage());
-			image.setProduct(product);
-			return image;
-		}).collect(Collectors.toList());
-		product.setImages(updatedImages);
+			try {
+				// Kiểm tra xem img.getImage() có phải là Base64 không
+				if (img.getImage() != null && img.getImage().startsWith("data:image/")) {
+					// Lưu hình ảnh nếu là Base64
+					saveImages(img.getImage(), img.getFileName());
+					image.setImage(img.getFileName()); // Gán tên tệp hình ảnh đã lưu
+					image.setProduct(product); // Gán sản phẩm liên quan
+				} else {
+					// Nếu không phải Base64, bạn có thể bỏ qua hoặc xử lý khác
+					return null; // Trả về null nếu không phải Base64
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+				return null; // Nếu có lỗi, trả về null
+			}
+			return image; // Trả về đối tượng image hợp lệ
+		}).filter(Objects::nonNull) // Lọc bỏ các đối tượng null
+				.collect(Collectors.toList());
+
+		if (updatedImages != null && !updatedImages.isEmpty()) {
+			product.setImages(updatedImages); // Cập nhật danh sách hình ảnh cho sản phẩm
+		}
 
 		// Xóa các kích thước cũ
 		sizeRepository.deleteByProduct(product);
@@ -375,15 +400,6 @@ public class ProductsService {
 		return categories.stream().map(category -> new CategoryDTO(category.getId(), category.getName()))
 				.collect(Collectors.toList());
 	}
-
-//	 public List<ProductDTO> searchProducts(String keyword, String categoryName) {
-//	        // Gọi phương thức trong repository để tìm kiếm sản phẩm theo từ khóa và tên danh mục
-//	        List<Products> products = productsRepository.findByKeywordAndCategory(keyword, categoryName);
-//
-//	        return products.stream()
-//	                .map(this::convertToDTO) // Chuyển đổi sản phẩm sang ProductDTO
-//	                .collect(Collectors.toList());
-//	    }
 
 	public List<ProductDTO> searchProducts(String keyword, String category) {
 		// Ghi log tham số
@@ -503,19 +519,50 @@ public class ProductsService {
 
 		return productDTOList;
 	}
-	
-	//hiện sản phẩm theo giá từ dến
-    public List<SimpleProductDTO> getProductsByPriceRange(BigDecimal minPrice, BigDecimal maxPrice) {
-        List<Products> products = productsRepository.findByPriceBetween(minPrice, maxPrice);
-        List<SimpleProductDTO> productDTOList = new ArrayList<>();
 
-        for (Products product : products) {
-            String firstImage = product.getImages().isEmpty() ? null : product.getImages().get(0).getImage();
-            SimpleProductDTO productDTO = new SimpleProductDTO(product.getId(), product.getName(), product.getPrice(), firstImage);
-            productDTOList.add(productDTO);
-        }
+	// hiện sản phẩm theo giá từ dến
+	public List<SimpleProductDTO> getProductsByPriceRange(BigDecimal minPrice, BigDecimal maxPrice) {
+		List<Products> products = productsRepository.findByPriceBetween(minPrice, maxPrice);
+		List<SimpleProductDTO> productDTOList = new ArrayList<>();
 
-        return productDTOList;
-    }
+		for (Products product : products) {
+			String firstImage = product.getImages().isEmpty() ? null : product.getImages().get(0).getImage();
+			SimpleProductDTO productDTO = new SimpleProductDTO(product.getId(), product.getName(), product.getPrice(),
+					firstImage);
+			productDTOList.add(productDTO);
+		}
 
+		return productDTOList;
+	}
+
+	public void saveImages(String base64Image, String fileName) throws IOException {
+		// Nếu chuỗi Base64 có tiền tố, loại bỏ nó
+		if (base64Image.contains(",")) {
+			base64Image = base64Image.split(",")[1];
+		}
+
+		// Giải mã chuỗi Base64 thành mảng byte
+		byte[] imageBytes = Base64.getDecoder().decode(base64Image);
+
+		// Đường dẫn tới thư mục mà bạn muốn lưu hình ảnh
+		String projectPath = System.getProperty("user.dir");
+		String uploadDirectory = projectPath + "\\DATN-Theme-main\\public\\assets\\images";
+		String updatedPath = uploadDirectory.replace("\\datn1", "");
+
+		// Tạo thư mục nếu chưa tồn tại
+		File directory = new File(updatedPath);
+		if (!directory.exists()) {
+			directory.mkdirs();
+		}
+
+		// Đường dẫn đầy đủ đến tệp cần lưu
+		String filePath = updatedPath + "\\" + fileName;
+
+		// Tạo file và lưu mảng byte vào tệp
+		try (FileOutputStream fos = new FileOutputStream(filePath)) {
+			fos.write(imageBytes);
+			fos.flush();
+			System.out.println("Image saved: " + fileName);
+		}
+	}
 }

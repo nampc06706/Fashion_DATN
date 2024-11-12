@@ -3,6 +3,7 @@ import axios from "axios";
 import Cookies from 'js-cookie';
 import { jwtDecode } from "jwt-decode";
 import { AiOutlineEdit, AiOutlineDelete } from 'react-icons/ai';
+import { toast } from 'react-toastify';
 
 
 const ProductManagementPage = () => {
@@ -34,40 +35,40 @@ const ProductManagementPage = () => {
     }
   }
 
+  const fetchProducts = async () => {
+    if (!userInfo) {
+      setError("Không tìm thấy thông tin người dùng.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await axios.get(`http://localhost:8080/api/admin/products`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        withCredentials: true,
+      });
+
+      const responseCategory = await axios.get(`http://localhost:8080/api/admin/categoryadmin`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        withCredentials: true,
+      });
+      setCategories(responseCategory.data);
+      setProducts(response.data);
+    } catch (error) {
+      console.error("Lỗi khi lấy dữ liệu sản phẩm:", error);
+      setError("Có lỗi xảy ra. Vui lòng thử lại sau.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchProducts = async () => {
-      if (!userInfo) {
-        setError("Không tìm thấy thông tin người dùng.");
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const response = await axios.get(`http://localhost:8080/api/admin/products`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          withCredentials: true,
-        });
-
-        const responseCategory = await axios.get(`http://localhost:8080/api/admin/categoryadmin`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          withCredentials: true,
-        });
-        setCategories(responseCategory.data);
-        setProducts(response.data);
-      } catch (error) {
-        console.error("Lỗi khi lấy dữ liệu sản phẩm:", error);
-        setError("Có lỗi xảy ra. Vui lòng thử lại sau.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchProducts();
   }, [token]);
 
@@ -79,6 +80,7 @@ const ProductManagementPage = () => {
 
   const handleEditProduct = (product) => {
     setCurrentProduct(product);
+
     setNewProduct({
       name: product.name,
       price: product.price,
@@ -87,11 +89,13 @@ const ProductManagementPage = () => {
       images: product.images || [],
       sizes: product.sizes || [],
     });
+    setNewProduct(product);
     setIsEditMode(true);
     setShowForm(true);
   };
 
   const updateProduct = async (id, productData) => {
+
     const token = Cookies.get('token');
     if (!token) {
       console.error("Không có token xác thực.");
@@ -109,33 +113,64 @@ const ProductManagementPage = () => {
         },
         withCredentials: true,
       });
-      console.log("Cập nhật sản phẩm thành công:", response.data);
-      return response.data;
+
+      var status = response.status;
+      if (status == 200) {
+        toast.success("Cập nhật sản phẩm thành công!");
+        return response.data;
+      } else {
+        toast.error("Thêm sản phẩm thất bại");
+        return;
+      }
+
     } catch (error) {
       console.error("Lỗi khi cập nhật sản phẩm:", error);
       throw error;
     }
   };
 
-  const handleFormSubmit = async () => {
-    if (isEditMode && currentProduct) {
-      try {
-        // Gọi API để cập nhật sản phẩm
-        const updatedProduct = await updateProduct(currentProduct.id, newProduct);
-
-        // Cập nhật danh sách sản phẩm với sản phẩm đã chỉnh sửa
-        const updatedProducts = products.map((product) =>
-          product.id === currentProduct.id ? { ...product, ...updatedProduct } : product
-        );
-        setProducts(updatedProducts);
-
-        // Reset lại trạng thái và ẩn form
-        handleCancelForm(); // Gọi hàm này để reset trạng thái
-      } catch (error) {
-        setError("Có lỗi xảy ra khi cập nhật sản phẩm. Vui lòng thử lại.");
-      }
+  const handleFormSubmit = async (newProduct) => {
+    const validationErrors = validateProductData(newProduct);
+    if (!validationErrors) {
+      return;
     } else {
-      // Logic để thêm sản phẩm mới (nếu cần thiết)
+      if (isEditMode && currentProduct) {
+        try {
+          // Gọi API để cập nhật sản phẩm
+          const updatedProduct = await updateProduct(currentProduct.id, newProduct);
+          // Cập nhật danh sách sản phẩm với sản phẩm đã chỉnh sửa
+          const updatedProducts = products.map((product) =>
+            product.id === currentProduct.id ? { ...product, ...updatedProduct } : product
+          );
+          setProducts(updatedProducts);
+          fetchProducts();
+          // Reset lại trạng thái và ẩn form
+          handleCancelForm(); // Gọi hàm này để reset trạng thái
+        } catch (error) {
+          setError("Có lỗi xảy ra khi cập nhật sản phẩm. Vui lòng thử lại.");
+        }
+      } else {
+        try {
+          const response = await axios.post("http://localhost:8080/api/admin/products", newProduct, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              "Content-Type": "application/json"
+            }
+          });
+          var status = response.status;
+          if (status == 201) {
+            toast.success("Thêm sản phẩm thành công!");
+            fetchProducts();
+            handleCancelForm();
+          } else {
+            toast.error("Thêm sản phẩm thất bại");
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          toast.error("Thêm sản phẩm thất bại");
+        }
+      }
+
     }
   };
 
@@ -197,6 +232,66 @@ const ProductManagementPage = () => {
     setCurrentProduct(null);
     setNewProduct({ name: '', price: '', description: '', category: { id: null }, images: [], sizes: [] });
   };
+
+  const handleDelete = async (productId) => {
+
+    try {
+      const response = await axios.delete(`http://localhost:8080/api/admin/products/${productId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 200) {
+
+        toast.success("Xóa sản phẩm thành công!");
+      }
+    } catch (error) {
+      if (error.response) {
+        // Lỗi trả về từ API
+        toast.error(error.response.data || "Xóa sản phẩm thất bại");
+      } else {
+        // Lỗi không phải từ API
+        toast.error("Có lỗi xảy ra khi xóa sản phẩm");
+      }
+    }
+    fetchProducts(); // Gọi lại hàm fetchProducts()
+  };
+
+  const validateProductData = (product) => {
+    // Kiểm tra tên sản phẩm
+    if (!product.name || product.name.trim() === "") {
+      toast.error("Tên sản phẩm không được để trống.");
+      return false;
+    }
+
+    // Kiểm tra giá sản phẩm
+    if (!product.price || isNaN(product.price) || product.price <= 0) {
+      toast.error("Giá sản phẩm phải là một số hợp lệ và lớn hơn 0.");
+      return false;
+    }
+
+    // Kiểm tra mô tả sản phẩm
+    if (!product.description || product.description.trim() === "") {
+      toast.error("Mô tả sản phẩm không được để trống.");
+      return false;
+    }
+
+    // Kiểm tra category.id
+    if (product.category.id == "" || product.category && (product.category.id === null || isNaN(product.category.id))) {
+      toast.error("Vui lòng chọn loại sản phẩm");
+      return false;
+    }
+
+    // Kiểm tra hình ảnh
+    if (!Array.isArray(product.images) || product.images.length === 0) {
+      toast.error("Chọn ít nhật một hỉnh ảnh");
+      return false;
+    }
+
+    return true; // Không có lỗi, trả về true
+  };
+
 
   if (loading) {
     return <div>Đang tải dữ liệu...</div>;
@@ -295,16 +390,17 @@ const ProductManagementPage = () => {
               <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2">Hình ảnh</label>
                 {newProduct.images.map((imageObj, index) => (
+
                   <div key={index} className="mb-2 flex items-center">
                     <img
-                      src={imageObj.image || "/assets/images/placeholder.png"}
+                      src={"/assets/images/" + imageObj.image || "/assets/images/placeholder.png"}
                       alt={`Product image ${index + 1}`}
                       className="w-20 h-20 object-cover rounded mr-2 cursor-pointer"
                       onClick={() => document.getElementById(`fileInput-${index}`).click()}
                     />
                     <input
                       type="text"
-                      value={imageObj.fileName || ""}
+                      value={imageObj.fileName || imageObj.image}
                       readOnly
                       className="border border-gray-300 p-2 rounded-lg w-full mr-2"
                     />
@@ -355,18 +451,6 @@ const ProductManagementPage = () => {
                     />
                   </div>
                 ))}
-                <button
-                  type="button"
-                  onClick={() =>
-                    setNewProduct((prev) => ({
-                      ...prev,
-                      sizes: [...prev.sizes, { name: "", color: { name: "" }, quantityInStock: 0 }],
-                    }))
-                  }
-                  className="bg-green-500 text-white px-4 py-2 rounded-lg mt-2 hover:bg-green-600 transition duration-300"
-                >
-                  Thêm size
-                </button>
               </div>
 
               <div className="flex justify-end">
@@ -379,7 +463,7 @@ const ProductManagementPage = () => {
                 </button>
                 <button
                   type="button"
-                  onClick={handleFormSubmit}
+                  onClick={() => handleFormSubmit(newProduct)}
                   className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-300"
                 >
                   {isEditMode ? "Lưu thay đổi" : "Thêm sản phẩm"}
@@ -396,6 +480,7 @@ const ProductManagementPage = () => {
             <tr className="bg-gray-500">
               <th className="py-3 px-6 text-left text-sm font-semibold text-white">Hình ảnh</th>
               <th className="py-3 px-6 text-left text-sm font-semibold text-white">Tên sản phẩm</th>
+              <th className="py-3 px-6 text-left text-sm font-semibold text-white">Loại</th>
               <th className="py-3 px-6 text-left text-sm font-semibold text-white">Giá</th>
               <th className="py-3 px-6 text-left text-sm font-semibold text-white">Thao tác</th>
             </tr>
@@ -410,7 +495,13 @@ const ProductManagementPage = () => {
                   />
                 </td>
                 <td className="py-3 px-6">{product.name}</td>
-                <td className="py-3 px-6">{product.price}</td>
+                <td className="py-3 px-6">{product.category.name}</td>
+                <td className="py-3 px-6">
+                  {new Intl.NumberFormat('vi-VN', {
+                    style: 'currency',
+                    currency: 'VND'
+                  }).format(product.price)}
+                </td>
                 <td className="py-3 px-6">
                   <button
                     onClick={() => handleEditProduct(product)}
@@ -419,7 +510,7 @@ const ProductManagementPage = () => {
                     <AiOutlineEdit />
                   </button>
                   <button
-                    // onClick={() => handleEditProduct(product)}
+                    onClick={() => handleDelete(product.id)}
                     className="bg-red-500 text-white px-3 py-1 rounded-lg mr-2 hover:bg-yellow-600 transition duration-300"
                   >
                     <AiOutlineDelete />

@@ -7,7 +7,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ProductImageDTO {
     private String image;
-
+    private String fileName;
+    
     public ProductImageDTO(String image) {
         this.image = image;
     }

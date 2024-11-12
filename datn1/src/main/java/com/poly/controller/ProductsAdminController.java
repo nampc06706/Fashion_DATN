@@ -84,6 +84,7 @@ public class ProductsAdminController {
 	@PutMapping("/{id}")
 	public ResponseEntity<?> updateProduct(@PathVariable("id") Integer productId, @RequestBody ProductDTO productDTO) {
 		try {
+	
 			ProductDTO updatedProduct = productService.updateProduct(productId, productDTO);
 			// Lấy thông tin xác thực người dùng
 			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
