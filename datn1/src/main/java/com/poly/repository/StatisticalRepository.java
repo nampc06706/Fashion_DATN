@@ -13,7 +13,7 @@ public interface StatisticalRepository extends JpaRepository<StatisticalDTO, Int
 	@Query(value = "SELECT COUNT(o.id) AS SumOrder " 
 			+ "FROM db1.orders o "
 			+ "INNER JOIN db1.orderdetails d ON o.id = d.OrderID " 
-			+ "WHERE o.Status = 1", nativeQuery = true)
+			+ "WHERE o.Status = 4", nativeQuery = true)
 	int countOrdersWithStatusOne();
 	
 	@Query(value = "SELECT count(p) FROM Products p")
@@ -22,7 +22,7 @@ public interface StatisticalRepository extends JpaRepository<StatisticalDTO, Int
 	@Query(value = "SELECT sum(price) as SumPrice\r\n"
 			+ "FROM db1.orderdetails\r\n"
 			+ "inner join orders on OrderID = orders.id\r\n"
-			+ "where Status = 1;", nativeQuery = true)
+			+ "where Status = 4;", nativeQuery = true)
 	double sumTotalPrice();
 	
 	@Query(value = "SELECT \r\n"
@@ -33,7 +33,7 @@ public interface StatisticalRepository extends JpaRepository<StatisticalDTO, Int
 			+ "    SUM(od.Price * od.Quantity) AS Total\r\n"
 			+ "FROM Orders o\r\n"
 			+ "JOIN orderdetails od ON o.ID = od.orderid\r\n"
-			+ "WHERE STATUS = 1\r\n"
+			+ "WHERE STATUS = 4\r\n"
 			+ "GROUP BY o.id, YEAR(o.Date), MONTH(o.Date), DAY(o.Date);\r\n"
 			,nativeQuery = true)
 	List<StatisticalDTO> fetchMonthlySalesData();	
