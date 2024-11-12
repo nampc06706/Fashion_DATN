@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.poly.dto.ProductDTO;
-import com.poly.dto.SimpleProductDTO;
 import com.poly.entity.Products;
 import com.poly.service.ProductsService;
 
@@ -126,7 +125,7 @@ public class ProductsAdminController {
 
 	@PreAuthorize("hasAnyAuthority('ADMIN')")
 	@DeleteMapping("/delete/{imageId}")
-	public ResponseEntity<?> deleteImageProduct(@PathVariable("imageId") Integer imageId) {
+	public ResponseEntity<?> deleteImageProduct(@PathVariable Integer imageId) {
 
 		try {
 
@@ -140,10 +139,7 @@ public class ProductsAdminController {
 			logger.info("Người dùng hiện tại: {}, với quyền: {}", authentication.getName(),
 					authentication.getAuthorities());
 
-			System.out.println(imageId);
-			System.out.println(imageId);
-			System.out.println(imageId);
-
+			productService.deleteImage(imageId);
 			return ResponseEntity.ok(200);
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().body(e.getMessage());

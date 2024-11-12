@@ -289,7 +289,7 @@ const ProductManagementPage = () => {
     console.log("Removing image with ID:", imageId);
 
     // Gọi API DELETE để xóa hình ảnh
-    axios.delete(`http://localhost:8080/api/products/delete/${imageId}`, {
+    axios.delete(`http://localhost:8080/api/admin/products/delete/${imageId}`, {
       headers: {
         'Authorization': `Bearer ${token}`, // Đảm bảo token đã được định nghĩa
         'Content-Type': 'application/json',
@@ -303,7 +303,7 @@ const ProductManagementPage = () => {
       .catch(error => {
         console.error("Error occurred while removing image:", error);
       });
-    fetchProducts();
+    // fetchProducts();
   };
 
 
@@ -450,7 +450,6 @@ const ProductManagementPage = () => {
                 <label className="block text-gray-700 text-sm font-bold mb-2">Hình ảnh</label>
                 {newProduct.images.map((imageObj, index) => (
                   <div key={index} className="mb-2 flex items-center">
-                    <span>{imageObj.id}</span>
                     <img
                       src={imageObj.image ? `/assets/images/${imageObj.image}` : "/assets/images/placeholder.png"}
                       alt={`Product image ${index + 1}`}

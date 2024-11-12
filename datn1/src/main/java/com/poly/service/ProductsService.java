@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import com.poly.dto.CategoryDTO;
@@ -36,6 +37,7 @@ import com.poly.repository.ProductImagesRepository;
 import com.poly.repository.ProductsRepository;
 import com.poly.repository.SizeRepository;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -80,8 +82,8 @@ public class ProductsService {
 
 			// Truy vấn hình ảnh
 			List<ProductImageDTO> imageDTOs = productImageRepository.findByProductId(product.getId()).stream()
-				    .map(img -> new ProductImageDTO(img.getId(), img.getImage()))  // Thêm id vào constructor
-				    .collect(Collectors.toList());
+					.map(img -> new ProductImageDTO(img.getId(), img.getImage())) // Thêm id vào constructor
+					.collect(Collectors.toList());
 
 			// Truy vấn kích thước và màu sắc
 			List<SizeDTO> sizeDTOs = sizeRepository.findByProductId(product.getId()).stream().map(size -> new SizeDTO(
@@ -96,7 +98,8 @@ public class ProductsService {
 
 			// Tạo ProductDTO cho sản phẩm với giá đã được tính toán
 			return new ProductDTO(product.getId(), product.getName(), price, product.getDescription(),
-					imageDTOs.isEmpty() ? null : imageDTOs.get(0).getImage(),imageDTOs.get(0).getId(), imageDTOs, sizeDTOs, categoryDTO);
+					imageDTOs.isEmpty() ? null : imageDTOs.get(0).getImage(), imageDTOs,
+					sizeDTOs, categoryDTO);
 		}).collect(Collectors.toList());
 	}
 
@@ -566,4 +569,17 @@ public class ProductsService {
 			System.out.println("Image saved: " + fileName);
 		}
 	}
+
+	public void deleteImage(Integer imageId) {
+		try {
+			productImageRepository.deleteById(imageId);
+			System.out.println("Deleted image with ID: " + imageId);
+		} catch (EmptyResultDataAccessException e) {
+			System.out.println("Image with ID " + imageId + " does not exist.");
+		} catch (Exception e) {
+			System.out.println("An error occurred while deleting image with ID " + imageId + ": " + e.getMessage());
+			e.printStackTrace(); // In chi tiết lỗi ra console để kiểm tra
+		}
+	}
+
 }
