@@ -78,13 +78,12 @@ public class ProductsAdminController {
 		return new ResponseEntity<>(products, HttpStatus.OK);
 	}
 
-	
 	// sửa sản phẩm
 	@PreAuthorize("hasAnyAuthority('ADMIN')")
 	@PutMapping("/{id}")
 	public ResponseEntity<?> updateProduct(@PathVariable("id") Integer productId, @RequestBody ProductDTO productDTO) {
 		try {
-	
+
 			ProductDTO updatedProduct = productService.updateProduct(productId, productDTO);
 			// Lấy thông tin xác thực người dùng
 			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -123,5 +122,32 @@ public class ProductsAdminController {
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
+	}
+
+	@PreAuthorize("hasAnyAuthority('ADMIN')")
+	@DeleteMapping("/delete/{imageId}")
+	public ResponseEntity<?> deleteImageProduct(@PathVariable("imageId") Integer imageId) {
+
+		try {
+
+			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+			if (authentication == null || !authentication.isAuthenticated()) {
+				logger.error("Authentication is null or not authenticated.");
+				return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null); // Trả về 403 nếu không xác thực
+			}
+
+			logger.info("Người dùng hiện tại: {}, với quyền: {}", authentication.getName(),
+					authentication.getAuthorities());
+
+			System.out.println(imageId);
+			System.out.println(imageId);
+			System.out.println(imageId);
+
+			return ResponseEntity.ok(200);
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
+
 	}
 }

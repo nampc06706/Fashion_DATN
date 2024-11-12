@@ -11,5 +11,8 @@ import com.poly.entity.Products;
 @Repository
 public interface ProductImagesRepository extends JpaRepository<ProductImages, Integer> {
 	List<ProductImages> findByProductId(Integer productId);
-	 void deleteByProduct(Products product);
+
+	void deleteByProduct(Products product);
+	
+	void deleteByProductIdAndImage(Long productId, String image);
 }

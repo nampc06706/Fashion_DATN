@@ -59,5 +59,17 @@ public class ProductDTO {
 		this.category = category;
 		this.discount = discount;
 	}
+	
+	public ProductDTO(Integer id, String name, BigDecimal price, String description, String firstImage,
+			 Integer imageId ,List<ProductImageDTO> images, List<SizeDTO> sizes, CategoryDTO category) {
+		this.id = id;
+		this.name = name;
+		this.price = price;
+		this.description = description;
+		this.firstImage = firstImage;
+		this.images = images;
+		this.sizes = sizes;
+		this.category = category;
+	}
 
 }

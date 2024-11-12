@@ -100,8 +100,6 @@ const ProductManagementPage = () => {
   }, [token]);
 
 
-
-
   const handleEditProduct = (product) => {
     setCurrentProduct(product);
 
@@ -287,6 +285,27 @@ const ProductManagementPage = () => {
     });
   };
 
+  const handleRemoveImage = (imageId) => {
+    console.log("Removing image with ID:", imageId);
+
+    // Gọi API DELETE để xóa hình ảnh
+    axios.delete(`http://localhost:8080/api/products/delete/${imageId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`, // Đảm bảo token đã được định nghĩa
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(response => {
+        console.log(response);
+        console.log("Image removed successfully.");
+        // Gọi lại fetchProducts để làm mới danh sách
+      })
+      .catch(error => {
+        console.error("Error occurred while removing image:", error);
+      });
+    fetchProducts();
+  };
+
 
   const validateProductData = (product) => {
     // Kiểm tra tên sản phẩm
@@ -430,10 +449,10 @@ const ProductManagementPage = () => {
               <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2">Hình ảnh</label>
                 {newProduct.images.map((imageObj, index) => (
-
                   <div key={index} className="mb-2 flex items-center">
+                    <span>{imageObj.id}</span>
                     <img
-                      src={"/assets/images/" + imageObj.image || "/assets/images/placeholder.png"}
+                      src={imageObj.image ? `/assets/images/${imageObj.image}` : "/assets/images/placeholder.png"}
                       alt={`Product image ${index + 1}`}
                       className="w-20 h-20 object-cover rounded mr-2 cursor-pointer"
                       onClick={() => document.getElementById(`fileInput-${index}`).click()}
@@ -451,13 +470,18 @@ const ProductManagementPage = () => {
                       style={{ display: "none" }}
                       onChange={(e) => handleFileChange(e, index)}
                     />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveImage(imageObj.id)}
+                      className="bg-red-500 text-white px-2 py-1 rounded-lg hover:bg-red-600 transition duration-300"
+                    >
+                      Xóa
+                    </button>
                   </div>
                 ))}
                 <button
                   type="button"
-                  onClick={() =>
-                    setNewProduct((prev) => ({ ...prev, images: [...prev.images, { image: "" }] }))
-                  }
+                  onClick={() => setNewProduct((prev) => ({ ...prev, images: [...prev.images, { image: "" }] }))}
                   className="bg-green-500 text-white px-4 py-2 rounded-lg mt-2 hover:bg-green-600 transition duration-300"
                 >
                   Thêm hình ảnh
