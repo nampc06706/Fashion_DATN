@@ -6,7 +6,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-
+import Select from 'react-select';
 const FlashSaleManagementPage = () => {
 
   const MySwal = withReactContent(Swal);
@@ -19,7 +19,7 @@ const FlashSaleManagementPage = () => {
   const [discount, setDiscount] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectedFlashSale, setSelectedFlashSale] = useState(null); // Trạng thái lưu thông tin Flash Sale
-  
+
   const token = Cookies.get('token');
   let userInfo = null;
 
