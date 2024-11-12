@@ -6,6 +6,7 @@ import { AiOutlineEdit, AiOutlineDelete } from 'react-icons/ai';
 import { SketchPicker } from 'react-color';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Select from 'react-select';
 
 
 const SizeManagementPage = () => {
@@ -30,6 +31,13 @@ const SizeManagementPage = () => {
       console.error("Token decoding error:", error);
     }
   }
+
+  // Chuyển đổi danh sách sản phẩm sang định dạng options của react-select
+  const productOptions = products.map((product) => ({
+    value: product.id,
+    label: product.name,
+  }));
+
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -66,164 +74,164 @@ const SizeManagementPage = () => {
 
 
   // Hàm gọi API để thêm Size và tạo Color mới
-const addSize = async () => {
-  // Kiểm tra nếu không chọn màu sắc, sản phẩm hoặc kích thước
-  if (!selectedColor || !selectedProduct || !selectedSize) {
-    console.log('Vui lòng chọn đủ thông tin trước khi thêm Size!');
-    toast.error('Vui lòng chọn đủ thông tin trước khi thêm Size!', {
-      position: "top-right",
-      autoClose: 2000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
-    return;
-  }
+  const addSize = async () => {
+    // Kiểm tra nếu không chọn màu sắc, sản phẩm hoặc kích thước
+    if (!selectedColor || !selectedProduct || !selectedSize) {
+      console.log('Vui lòng chọn đủ thông tin trước khi thêm Size!');
+      toast.error('Vui lòng chọn đủ thông tin trước khi thêm Size!', {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      return;
+    }
 
-  try {
-    // Log dữ liệu trước khi gửi
-    console.log('Dữ liệu sẽ được gửi:', {
-      colorName: selectedColor,
-      productId: selectedProduct,
-      sizeName: selectedSize.name,
-      quantityInStock: selectedStock
-    });
+    try {
+      // Log dữ liệu trước khi gửi
+      console.log('Dữ liệu sẽ được gửi:', {
+        colorName: selectedColor,
+        productId: selectedProduct,
+        sizeName: selectedSize.name,
+        quantityInStock: selectedStock
+      });
 
-    // Mã hóa màu sắc
-    const colorName = encodeURIComponent(selectedColor);
-    const sizeName = selectedSize.name;
-    const productId = selectedProduct;
-    const quantityInStock = selectedStock;
+      // Mã hóa màu sắc
+      const colorName = encodeURIComponent(selectedColor);
+      const sizeName = selectedSize.name;
+      const productId = selectedProduct;
+      const quantityInStock = selectedStock;
 
-    // Gửi yêu cầu thêm Size
-    const response = await axios.post(
-      `http://localhost:8080/api/admin/size/add?colorName=${colorName}&productId=${productId}`,
-      {
-        name: sizeName,
-        quantityInStock: quantityInStock,
-      },
-      {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
+      // Gửi yêu cầu thêm Size
+      const response = await axios.post(
+        `http://localhost:8080/api/admin/size/add?colorName=${colorName}&productId=${productId}`,
+        {
+          name: sizeName,
+          quantityInStock: quantityInStock,
         },
-        withCredentials: true,
-      }
-    );
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true,
+        }
+      );
 
-    console.log('Thêm Size thành công:', response.data);
-    toast.success('Thêm Size thành công!', {
-      position: "top-right",
-      autoClose: 1000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
+      console.log('Thêm Size thành công:', response.data);
+      toast.success('Thêm Size thành công!', {
+        position: "top-right",
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
 
-    // Cập nhật lại danh sách các item trong state
-    setAddedItems([...addedItems, response.data]);
+      // Cập nhật lại danh sách các item trong state
+      setAddedItems([...addedItems, response.data]);
 
-  } catch (error) {
-    console.error('Lỗi khi thêm Size:', error);
-    toast.error('Lỗi khi thêm Size!', {
-      position: "top-right",
-      autoClose: 1000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
-  }
-};
+    } catch (error) {
+      console.error('Lỗi khi thêm Size:', error);
+      toast.error('Lỗi khi thêm Size!', {
+        position: "top-right",
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
+  };
 
-// Hàm gọi API để cập nhật Size
-const updateSize = async () => {
-  if (!selectedSize || !selectedSize.id) {
-    console.log('Vui lòng chọn một size để cập nhật!');
-    toast.error('Vui lòng chọn một size để cập nhật!', {
-      position: "top-right",
-      autoClose: 2000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
-    return; // Dừng lại nếu chưa chọn size
-  }
+  // Hàm gọi API để cập nhật Size
+  const updateSize = async () => {
+    if (!selectedSize || !selectedSize.id) {
+      console.log('Vui lòng chọn một size để cập nhật!');
+      toast.error('Vui lòng chọn một size để cập nhật!', {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      return; // Dừng lại nếu chưa chọn size
+    }
 
-  try {
-    // Log dữ liệu trước khi gửi
-    console.log('Dữ liệu sẽ được gửi:', {
-      id: selectedSize.id,
-      name: selectedSize.name,
-      colorName: selectedColor,
-      productId: selectedProduct,
-      quantityInStock: selectedStock
-    });
+    try {
+      // Log dữ liệu trước khi gửi
+      console.log('Dữ liệu sẽ được gửi:', {
+        id: selectedSize.id,
+        name: selectedSize.name,
+        colorName: selectedColor,
+        productId: selectedProduct,
+        quantityInStock: selectedStock
+      });
 
-    const { id, name } = selectedSize;
-    const colorName = selectedColor;
-    const productId = selectedProduct;
-    const quantityInStock = selectedStock;
+      const { id, name } = selectedSize;
+      const colorName = selectedColor;
+      const productId = selectedProduct;
+      const quantityInStock = selectedStock;
 
-    const response = await axios.post(
-      `http://localhost:8080/api/admin/size/update?colorName=${encodeURIComponent(colorName)}&productId=${productId}`,
-      {
-        id: id, // Gửi id size
-        name: name, // Gửi name size
-        quantityInStock: quantityInStock
-      },
-      {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
+      const response = await axios.post(
+        `http://localhost:8080/api/admin/size/update?colorName=${encodeURIComponent(colorName)}&productId=${productId}`,
+        {
+          id: id, // Gửi id size
+          name: name, // Gửi name size
+          quantityInStock: quantityInStock
         },
-        withCredentials: true,
-      }
-    );
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true,
+        }
+      );
 
-    console.log('Cập nhật Size thành công:', response.data);
-    toast.success('Cập nhật Size thành công!', {
-      position: "top-right",
-      autoClose: 1000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
+      console.log('Cập nhật Size thành công:', response.data);
+      toast.success('Cập nhật Size thành công!', {
+        position: "top-right",
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
 
-    // Cập nhật lại danh sách các item trong state
-    const updatedItems = addedItems.map(item =>
-      item.id === id ? response.data : item
-    );
-    setAddedItems(updatedItems);
+      // Cập nhật lại danh sách các item trong state
+      const updatedItems = addedItems.map(item =>
+        item.id === id ? response.data : item
+      );
+      setAddedItems(updatedItems);
 
-  } catch (error) {
-    console.error('Lỗi khi cập nhật Size:', error);
-    toast.error('Lỗi khi cập nhật Size!', {
-      position: "top-right",
-      autoClose: 1000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
-  }
-};
-
-
+    } catch (error) {
+      console.error('Lỗi khi cập nhật Size:', error);
+      toast.error('Lỗi khi cập nhật Size!', {
+        position: "top-right",
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
+  };
 
 
-  const handleProductChange = (e) => {
-    setSelectedProduct(e.target.value);
+
+
+  const handleProductChange = (selectedOption) => {
+    setSelectedProduct(selectedOption ? selectedOption.value : ""); // Lưu giá trị khi có lựa chọn
   };
 
 
@@ -325,18 +333,23 @@ const updateSize = async () => {
       <div className="mb-6">
         <label className="block mb-4 text-lg font-semibold text-gray-800">
           Chọn sản phẩm:
-          <select
-            value={selectedProduct}
+          <Select
+            value={productOptions.find((option) => option.value === selectedProduct)} // Gán giá trị hiện tại
             onChange={handleProductChange}
-            className="block w-full p-3 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-          >
-            <option value="">-- Chọn sản phẩm --</option>
-            {products.map((product) => (
-              <option key={product.id} value={product.id}>
-                {product.name}
-              </option>
-            ))}
-          </select>
+            options={productOptions} // Danh sách sản phẩm
+            placeholder="-- Chọn sản phẩm --"
+            className="mt-2"
+            styles={{
+              control: (base) => ({
+                ...base,
+                padding: "3px",
+                border: "1px solid #d1d5db",
+                borderRadius: "0.5rem",
+                boxShadow: "none",
+                "&:hover": { borderColor: "#3b82f6" },
+              }),
+            }}
+          />
         </label>
 
         <label className="block mb-4 text-lg font-semibold text-gray-800">

@@ -4,11 +4,13 @@ import { jwtDecode } from 'jwt-decode';
 import Cookies from 'js-cookie';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { confirmAlert } from 'react-confirm-alert'; // Nhập confirmAlert
-import 'react-confirm-alert/src/react-confirm-alert.css'; // Nhập CSS của confirmAlert
-import Select from 'react-select';
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
 
 const FlashSaleManagementPage = () => {
+
+  const MySwal = withReactContent(Swal);
+
   const [isFormVisible, setFormVisible] = useState(false);
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState('');

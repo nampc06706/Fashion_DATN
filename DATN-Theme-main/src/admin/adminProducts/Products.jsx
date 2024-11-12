@@ -4,9 +4,14 @@ import Cookies from 'js-cookie';
 import { jwtDecode } from "jwt-decode";
 import { AiOutlineEdit, AiOutlineDelete } from 'react-icons/ai';
 import { toast } from 'react-toastify';
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
 
 
 const ProductManagementPage = () => {
+
+  const MySwal = withReactContent(Swal);
+
   const [products, setProducts] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -23,6 +28,28 @@ const ProductManagementPage = () => {
     images: [],
     sizes: [],
   });
+
+  const filteredProducts = products.filter((product) =>
+    product.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
+  const pageSize = 6; // Số sản phẩm mỗi trang
+  const totalPages = Math.ceil(filteredProducts.length / pageSize); // Tổng số trang dựa trên tổng sản phẩm đã lọc
+  const currentProducts = filteredProducts.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
 
   const token = Cookies.get('token');
   let userInfo = null;
@@ -73,9 +100,6 @@ const ProductManagementPage = () => {
   }, [token]);
 
 
-  const filteredProducts = products.filter((product) =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
 
   const handleEditProduct = (product) => {
@@ -233,30 +257,36 @@ const ProductManagementPage = () => {
     setNewProduct({ name: '', price: '', description: '', category: { id: null }, images: [], sizes: [] });
   };
 
-  const handleDelete = async (productId) => {
+  const handleDelete = (productId) => {
+    MySwal.fire({
+      title: "Xác nhận xóa",
+      text: "Bạn có chắc chắn muốn xóa sản phẩm này?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "xóa",
+      cancelButtonText: "Không",
+      customClass: {
+        confirmButton: 'btn btn-success', // Áp dụng !important cho nút xác nhận
+        cancelButton: 'btn btn-secondary',   // Tùy chỉnh nút hủy
+      },
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const response = await axios.delete(`http://localhost:8080/api/admin/products/${productId}`, {
+            headers: { 'Authorization': `Bearer ${token}` },
+          });
 
-    try {
-      const response = await axios.delete(`http://localhost:8080/api/admin/products/${productId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (response.status === 200) {
-
-        toast.success("Xóa sản phẩm thành công!");
+          if (response.status === 200) {
+            toast.success("Xóa sản phẩm thành công!");
+            fetchProducts();
+          }
+        } catch (error) {
+          toast.error("Có lỗi xảy ra khi xóa sản phẩm");
+        }
       }
-    } catch (error) {
-      if (error.response) {
-        // Lỗi trả về từ API
-        toast.error(error.response.data || "Xóa sản phẩm thất bại");
-      } else {
-        // Lỗi không phải từ API
-        toast.error("Có lỗi xảy ra khi xóa sản phẩm");
-      }
-    }
-    fetchProducts(); // Gọi lại hàm fetchProducts()
+    });
   };
+
 
   const validateProductData = (product) => {
     // Kiểm tra tên sản phẩm
@@ -285,11 +315,21 @@ const ProductManagementPage = () => {
 
     // Kiểm tra hình ảnh
     if (!Array.isArray(product.images) || product.images.length === 0) {
-      toast.error("Chọn ít nhật một hỉnh ảnh");
+      toast.error("Chọn ít nhất một hình ảnh");
       return false;
     }
 
-    return true; // Không có lỗi, trả về true
+    for (let i = 0; i < product.images.length; i++) {
+      const imageObj = product.images[i];
+
+      // Kiểm tra nếu `image` là null hoặc rỗng
+      if (!imageObj.image || imageObj.image.trim() === "") {
+        toast.error("Chưa chọn hình ảnh.");
+        return false;
+      }
+    }
+
+    return true;
   };
 
 
@@ -427,28 +467,48 @@ const ProductManagementPage = () => {
               <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2">Kích thước và số lượng</label>
                 {newProduct.sizes.map((size, index) => (
-                  <div key={index} className="mb-2 flex">
-                    <input
-                      type="text"
-                      placeholder="Kích thước"
-                      value={size.name}
-                      onChange={(e) => handleSizeChange(index, "name", e.target.value)}
-                      className="w-1/3 border border-gray-300 p-2 rounded-lg mr-2"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Màu sắc"
-                      value={size.color?.name || ""}
-                      onChange={(e) => handleSizeChange(index, "color", { name: e.target.value })}
-                      className="w-1/3 border border-gray-300 p-2 rounded-lg mr-2"
-                    />
-                    <input
-                      type="number"
-                      placeholder="Số lượng"
-                      value={size.quantityInStock}
-                      onChange={(e) => handleSizeChange(index, "quantityInStock", e.target.value)}
-                      className="w-1/3 border border-gray-300 p-2 rounded-lg"
-                    />
+                  <div key={index} className="mb-6">
+                    <div className="mb-4">
+                      <label htmlFor={`size-name-${index}`} className="block text-gray-600 text-sm font-medium mb-1">
+                        Kích thước
+                      </label>
+                      <input
+                        type="text"
+                        id={`size-name-${index}`}
+                        placeholder="Kích thước"
+                        value={size.name}
+                        onChange={(e) => handleSizeChange(index, "name", e.target.value)}
+                        className="w-full border border-gray-300 p-2 rounded-lg"
+                      />
+                    </div>
+
+                    <div className="mb-4">
+                      <label htmlFor={`size-color-${index}`} className="block text-gray-600 text-sm font-medium mb-1">
+                        Màu sắc
+                      </label>
+                      <input
+                        type="text"
+                        id={`size-color-${index}`}
+                        placeholder="Màu sắc"
+                        value={size.color?.name || ""}
+                        onChange={(e) => handleSizeChange(index, "color", { name: e.target.value })}
+                        className="w-full border border-gray-300 p-2 rounded-lg"
+                      />
+                    </div>
+
+                    <div className="mb-4">
+                      <label htmlFor={`quantity-${index}`} className="block text-gray-600 text-sm font-medium mb-1">
+                        Số lượng
+                      </label>
+                      <input
+                        type="number"
+                        id={`quantity-${index}`}
+                        placeholder="Số lượng"
+                        value={size.quantityInStock}
+                        onChange={(e) => handleSizeChange(index, "quantityInStock", e.target.value)}
+                        className="w-full border border-gray-300 p-2 rounded-lg"
+                      />
+                    </div>
                   </div>
                 ))}
               </div>
@@ -486,7 +546,7 @@ const ProductManagementPage = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredProducts.map((product) => (
+            {currentProducts.map((product) => (
               <tr key={product.id} className="border-b border-gray-300">
                 <td className="py-3 px-6">
                   <img
@@ -520,6 +580,26 @@ const ProductManagementPage = () => {
             ))}
           </tbody>
         </table>
+      </div>
+      {/* Điều khiển phân trang */}
+      <div className="flex justify-center mt-4">
+        <button
+          onClick={handlePreviousPage}
+          disabled={currentPage === 1}
+          className={`px-4 py-2 mr-2 ${currentPage === 1 ? 'bg-gray-300' : 'bg-blue-500 hover:bg-blue-600'} text-white rounded-lg`}
+        >
+          ←
+        </button>
+
+        <span className="px-4 py-2">Trang {currentPage} / {totalPages}</span>
+
+        <button
+          onClick={handleNextPage}
+          disabled={currentPage === totalPages}
+          className={`px-4 py-2 ml-2 ${currentPage === totalPages ? 'bg-gray-300' : 'bg-blue-500 hover:bg-blue-600'} text-white rounded-lg`}
+        >
+          →
+        </button>
       </div>
     </div>
 
