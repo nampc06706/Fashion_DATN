@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function ProductsTable({ onSelectedTotalChange, accountId }) {
   const [cartItems, setCartItems] = useState([]);
@@ -96,27 +98,50 @@ export default function ProductsTable({ onSelectedTotalChange, accountId }) {
   };
 
   const handleQuantityChange = async (id, change) => {
+    // Tìm sản phẩm trong giỏ hàng
+    const itemToUpdate = cartItems.find(item => item.id === id);
+    if (!itemToUpdate) {
+      console.error('Không tìm thấy sản phẩm trong giỏ hàng.');
+      return;
+    }
+
+    // Lấy thông tin tồn kho từ sản phẩm
+    const selectedSizeInfo = itemToUpdate.size;  // Dữ liệu size từ cart item đã có thông tin tồn kho
+    if (!selectedSizeInfo) {
+      console.error('Không tìm thấy thông tin kích cỡ sản phẩm.');
+      return;
+    }
+
+    // Tính toán số lượng mới
+    const newQuantity = Math.max(Number(itemToUpdate.quantity) + Number(change), 1);
+
+    // Kiểm tra tồn kho
+    if (newQuantity > selectedSizeInfo.quantityInStock) {
+      toast.error(`Số lượng vượt quá tồn kho. Chỉ còn ${selectedSizeInfo.quantityInStock} sản phẩm.`);
+      return;
+    }
+
+    // Cập nhật số lượng trong giỏ hàng
     const updatedCartItems = cartItems.map(item => {
       if (item.id === id) {
-        const newQuantity = Math.max(Number(item.quantity) + Number(change), 1);
         return { ...item, quantity: newQuantity };
       }
       return item;
     });
 
+    // Cập nhật giỏ hàng trong state và cookie
     setCartItems(updatedCartItems);
     Cookies.set('cart', JSON.stringify(updatedCartItems), { expires: 7 });
 
-    const itemToUpdate = updatedCartItems.find(item => item.id === id);
-
+    // Nếu người dùng đã đăng nhập, gửi yêu cầu cập nhật lên server
     if (accountId) {
       try {
         await axios.put(
           `http://localhost:8080/api/guest/carts/quantity`,
           {
-            id: itemToUpdate.id,              // Gửi ID sản phẩm
-            accountId: accountId,              // Gửi accountId vào body
-            newQuantity: itemToUpdate.quantity  // Gửi số lượng mới
+            id: itemToUpdate.id,
+            accountId: accountId,
+            newQuantity: newQuantity
           },
           {
             headers: {
@@ -125,15 +150,14 @@ export default function ProductsTable({ onSelectedTotalChange, accountId }) {
             }
           }
         );
+        toast.success('Cập nhật số lượng giỏ hàng thành công.');
       } catch (error) {
         console.error("Lỗi khi cập nhật số lượng trong cơ sở dữ liệu:", error.response?.data || error.message);
         setError("Không thể cập nhật số lượng sản phẩm.");
       }
-    } else {
-      // Nếu người dùng chưa đăng nhập, có thể xử lý cập nhật giỏ hàng trong cookie ở đây nếu cần
-      //console.log("Người dùng chưa đăng nhập, cập nhật trong cookie.");
     }
   };
+
 
   const handleRemoveItem = async (id) => {
     //console.log("ID sản phẩm cần xóa:", id);
@@ -266,12 +290,12 @@ export default function ProductsTable({ onSelectedTotalChange, accountId }) {
                     </td>
                     <td className="text-center py-4 px-2">
                       <span className="text-[15px] font-normal">
-                       {formatCurrency(product.price)}
+                        {formatCurrency(product.price)}
                       </span>
                     </td>
                     <td className="text-center py-4 px-2">
                       <span className="text-[15px] font-normal">
-                      {formatCurrency(item.quantity * product.price)}
+                        {formatCurrency(item.quantity * product.price)}
                       </span>
                     </td>
                     <td className="text-center py-4 px-2">
@@ -288,6 +312,7 @@ export default function ProductsTable({ onSelectedTotalChange, accountId }) {
           </tbody>
         </table>
       </div>
+      <ToastContainer autoClose={1000} />
     </div>
   );
 }

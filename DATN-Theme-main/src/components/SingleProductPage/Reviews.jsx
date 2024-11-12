@@ -2,6 +2,7 @@ import Star from "../Helpers/icons/Star";
 
 export default function Reviews({
   comments
+  
 }) {
   return (
     <div className="review-wrapper w-full">

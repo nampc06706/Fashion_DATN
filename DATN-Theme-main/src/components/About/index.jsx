@@ -51,7 +51,7 @@ export default function About() {
   const fetchFiveStarRatings = async () => {
     try {
       if (!token) {
-        toast.error("Không tìm thấy token.");
+        //toast.error("Không tìm thấy token.");
         return;
       }
 

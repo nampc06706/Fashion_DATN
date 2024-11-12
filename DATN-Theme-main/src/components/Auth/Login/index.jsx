@@ -28,14 +28,50 @@ export default function Login() {
         } catch (error) {
           // console.error("Error:", error.response ? error.response.data : error.message);
           // toast.error(`Error: ${error.response ? error.response.data : 'Unknown error'}`);
+        }
+
       }
-      
-      }
-   };   
+    };
     takeData();
   }, [dataGoogle]);
 
   const rememberMe = () => setChecked(!checked);
+
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      const token = credentialResponse.credential;
+      const decodedToken = jwtDecode(token);
+
+      const { name: username, email } = decodedToken;
+      setDataGoogle({ username, email, fullname: username });
+
+      // Gửi yêu cầu đến API để lấy thông tin đăng nhập
+      const response = await axios.post('http://localhost:8080/api/guest/takeData', {
+        fullname: username,
+        username: username,
+        email: email,
+      });
+
+      // Lấy token và role từ phản hồi của API
+      const { token: userToken, role } = response.data;
+      setUserInfo({ username, role });
+
+      // Thiết lập cookie
+      const cookieExpiry = 7; // Thời gian cookie tồn tại là 7 ngày
+      Cookies.set('token', userToken, { expires: cookieExpiry, path: '/' });
+      Cookies.set('role', role, { expires: cookieExpiry, path: '/' });
+
+      // Chuyển hướng người dùng
+      navigate('/');
+    } catch (error) {
+      console.error('Error saving account:', error);
+      toast.error('Có lỗi xảy ra khi lưu tài khoản Google.', {
+        position: 'top-right',
+        autoClose: 3000,
+      });
+    }
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -91,41 +127,13 @@ export default function Login() {
     }
   };
 
-  const handleGoogleSuccess = async (credentialResponse) => {
-    try {
-      const token = credentialResponse.credential;
-      const decodedToken = jwtDecode(token);
-  
-      const { name: username, email } = decodedToken;
-      setDataGoogle({ username, email, fullname: username });
-  
-      // Gửi yêu cầu đến API để lấy thông tin đăng nhập
-      const response = await axios.post('http://localhost:8080/api/guest/takeData', {
-        fullname: username,
-        username: username,
-        email: email,
-      });
-  
-      // Lấy token và role từ phản hồi của API
-      const { token: userToken, role } = response.data;
-      setUserInfo({ username, role });
-  
-      // Thiết lập cookie
-      const cookieExpiry = 7; // Thời gian cookie tồn tại là 7 ngày
-      Cookies.set('token', userToken, { expires: cookieExpiry, path: '/' });
-      Cookies.set('role', role, { expires: cookieExpiry, path: '/' });
-  
-      // Chuyển hướng người dùng
-      navigate('/');
-    } catch (error) {
-      console.error('Error saving account:', error);
-      toast.error('Có lỗi xảy ra khi lưu tài khoản Google.', {
-        position: 'top-right',
-        autoClose: 3000,
-      });
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault(); // Ngừng hành động mặc định của Enter
+      handleLogin(e); // Truyền đối số e vào hàm handleLogin
     }
   };
-  
 
   return (
     <LayoutHomeFive childrenClasses="pt-0 pb-0">
@@ -151,6 +159,7 @@ export default function Login() {
                       type="text"
                       value={username}
                       inputHandler={(e) => setUsername(e.target.value)}
+                      onKeyDown={handleKeyDown} 
                     />
                   </div>
                   <div className="input-item mb-5">
@@ -161,6 +170,7 @@ export default function Login() {
                       type="password"
                       value={password}
                       inputHandler={(e) => setPassword(e.target.value)}
+                      onKeyDown={handleKeyDown}
                     />
                   </div>
                   <div className="forgot-password-area flex justify-between items-center mb-7">
@@ -183,11 +193,14 @@ export default function Login() {
                     </div>
                   </div>
                   <div className="signin-area mb-3.5">
-                    <button onClick={handleLogin} type="button" className="black-btn text-sm text-white w-full h-[50px] font-semibold flex justify-center bg-purple items-center">
+                    <button
+                      onClick={handleLogin}
+                      type="button"
+                      className="black-btn text-sm text-white w-full h-[50px] font-semibold flex justify-center bg-purple items-center">
                       {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
                     </button>
                   </div>
-                  <p className="text-red-500">{error}</p>
+
                   <div className="line-or flex justify-center items-center my-5 relative">
                     <div className="line w-2/5 h-0.5 bg-light-gray"></div>
                     <span className="text-xs text-qblack mx-2">hoặc</span>

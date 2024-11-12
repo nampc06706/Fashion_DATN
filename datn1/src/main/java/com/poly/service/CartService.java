@@ -164,31 +164,46 @@ public class CartService {
 	}
 
 	private void saveCartToDatabase(CartDTO cartDTO) {
-		validateCartDTO(cartDTO); // Kiểm tra đầu vào
+	    validateCartDTO(cartDTO); // Kiểm tra đầu vào
 
-		// Tìm Size
-		Size size = sizeService.getSizeById(cartDTO.getSize().getId());
-		if (size == null) {
-			throw new IllegalArgumentException("Không tìm thấy kích thước.");
-		}
+	    // Tìm Size
+	    Size size = sizeService.getSizeById(cartDTO.getSize().getId());
+	    if (size == null) {
+	        throw new IllegalArgumentException("Không tìm thấy kích thước.");
+	    }
 
-		// Tìm giỏ hàng có cùng Account, Size và Color
-		List<Carts> existingCarts = cartRepository.findByAccountIdAndSizeIdAndColorId(cartDTO.getAccountId(),
-				size.getId(), cartDTO.getSize().getColor().getId());
+	    // Kiểm tra stock
+	    int stock = size.getQuantityInStock();
+	    if (cartDTO.getQuantity() > stock) {
+	        throw new IllegalArgumentException("Số lượng vượt quá số lượng tồn kho.");
+	    }
 
-		Carts cart;
-		if (!existingCarts.isEmpty()) {
-			cart = existingCarts.get(0);
-			cart.setQuantity(cart.getQuantity() + cartDTO.getQuantity());
-		} else {
-			cart = new Carts();
-			cart.setAccount(accountService.getAccountById(cartDTO.getAccountId())); // Lấy tài khoản
-			cart.setSize(size);
-			cart.setQuantity(cartDTO.getQuantity());
-			// Không cần gán ID ở đây vì cơ sở dữ liệu sẽ tự động gán
-		}
+	    // Tìm giỏ hàng có cùng Account, Size và Color
+	    List<Carts> existingCarts = cartRepository.findByAccountIdAndSizeIdAndColorId(
+	            cartDTO.getAccountId(), size.getId(), cartDTO.getSize().getColor().getId());
 
-		cartRepository.save(cart);
+	    Carts cart;
+	    if (!existingCarts.isEmpty()) {
+	        cart = existingCarts.get(0);
+
+	        // Kiểm tra tổng số lượng sau khi cộng
+	        int newQuantity = cart.getQuantity() + cartDTO.getQuantity();
+	        if (newQuantity > stock) {
+	            throw new IllegalArgumentException("Số lượng vượt quá số lượng tồn kho.");
+	        }
+
+	        // Cập nhật số lượng
+	        cart.setQuantity(newQuantity);
+	    } else {
+	        // Nếu không tồn tại, tạo mới giỏ hàng
+	        cart = new Carts();
+	        cart.setAccount(accountService.getAccountById(cartDTO.getAccountId())); // Lấy tài khoản
+	        cart.setSize(size);
+	        cart.setQuantity(cartDTO.getQuantity());
+	    }
+
+	    // Lưu vào cơ sở dữ liệu
+	    cartRepository.save(cart);
 	}
 
 	@Transactional
