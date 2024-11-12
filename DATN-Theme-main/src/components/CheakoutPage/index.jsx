@@ -251,7 +251,7 @@ export default function CheckoutPage() {
       toast.error("Vui lòng chọn địa chỉ, phương thức vận chuyển và phương thức thanh toán."); // Thông báo lỗi
       return;
     }
-  
+
     const orderData = {
       accountId: userInfo.accountId,
       addressId: selectedAddressId,
@@ -271,9 +271,9 @@ export default function CheckoutPage() {
         }
       }))
     };
-  
-   // console.log("Order Data: ", orderData); // Log thông tin đơn hàng
-  
+
+    // console.log("Order Data: ", orderData); // Log thông tin đơn hàng
+
     try {
       // Sử dụng endpoint của PaymentController
       const response = await fetch('http://localhost:8080/api/user/payments/create-payment-url', {
@@ -285,17 +285,17 @@ export default function CheckoutPage() {
         body: JSON.stringify(orderData),
         credentials: 'include', // Để gửi cookie
       });
-  
+
       const data = await response.json();
-      console.log("Payment Response: ", data);
-  
+      //console.log("Payment Response: ", data);
+
       // Kiểm tra nếu phương thức thanh toán là VNPAY
-      console.log("Selected Payment Method: ", selectedPaymentMethod); // Log giá trị phương thức thanh toán
-  
+      //console.log("Selected Payment Method: ", selectedPaymentMethod); // Log giá trị phương thức thanh toán
+
       if (selectedPaymentMethod == 1) {
         const vnpayUrl = data.vnpayUrl;
         console.log("VNPAY URL: ", vnpayUrl); // Log URL VNPAY
-  
+
         if (vnpayUrl) {
           console.log("Redirecting to VNPAY URL: ", vnpayUrl);
           window.location.href = vnpayUrl; // Chuyển hướng tự động
@@ -306,14 +306,14 @@ export default function CheckoutPage() {
           return; // Ngừng thực hiện nếu không có URL
         }
       }
-  
+
       // Nếu không phải là phương thức VNPAY
       toast.success("Đặt hàng thành công!"); // Thông báo thành công
-  
+
       // Reset lại trạng thái sau khi đặt hàng thành công
       const orderCartItemIds = cartItems.map(item => item.id); // Lấy danh sách ID sản phẩm đã đặt hàng
       setCartItems(prevCartItems => prevCartItems.filter(item => !orderCartItemIds.includes(item.id))); // Lọc ra sản phẩm đã đặt hàng
-  
+
       // Reset các giá trị trạng thái
       setSelectedAddressId(null);
       setSelectedShippingMethod(null);
@@ -321,7 +321,7 @@ export default function CheckoutPage() {
       setShippingFee(0);
       setTotalAmount(0);
 
-      navigate('/profile#order');
+      // navigate('/profile#order');
     } catch (error) {
       console.error("Error creating order: ", error); // Log lỗi
       if (error.response) {
@@ -341,7 +341,7 @@ export default function CheckoutPage() {
       }
     }
   };
-  
+
 
 
 
@@ -598,7 +598,12 @@ export default function CheckoutPage() {
                                     <sup className="text-[13px] text-qgray ml-2 mt-2">x{item.quantity}</sup>
                                   </h4>
                                   <p className="text-[13px] text-qgray">
-                                    {item.size.color.name}, {item.size.name}, {formatCurrency(product.price)}
+                                    <span
+                                      className="w-[20px] h-[20px] block rounded-full border border-gray-400"
+                                      style={{ backgroundColor: item.size.color.name }}
+                                    ></span>
+                                     {item.size.name}, 
+                                     {formatCurrency(product.price)}
                                   </p>
                                 </div>
                                 <div>

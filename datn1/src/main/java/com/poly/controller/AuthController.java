@@ -229,14 +229,14 @@ public class AuthController {
 						account.getEmail());
 				return ResponseEntity.ok(new JwtResponse(token, role));
 			} else {
-				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No roles assigned to this account");
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Không có vai trò nào được chỉ định cho tài khoản này");
 			}
 		} catch (UsernameNotFoundException e) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Username not found");
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Không tìm thấy người dùng!");
 		} catch (RuntimeException e) {
 			// Ghi log chi tiết để debug
 			// System.err.println("Error during login: " + e.getMessage());
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Incorrect password");
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Tài khoản hoặc mật khẩu không đúng!");
 		}
 	}
 

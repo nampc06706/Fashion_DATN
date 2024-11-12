@@ -106,9 +106,8 @@ export default function CardPage({ cart = true }) {
 
 
   return (
-
     <LayoutHomeFive childrenClasses={cart ? "pt-0 pb-0" : ""}>
-
+      <ToastContainer autoClose={1000} />
       {cartItems.length === 0 ? (
         <div className="cart-page-wrapper w-full">
           <div className="container-x mx-auto">
@@ -170,7 +169,7 @@ export default function CardPage({ cart = true }) {
           </div>
         </div>
       )}
-      <ToastContainer autoClose={3000} />
+
     </LayoutHomeFive>
 
   );
