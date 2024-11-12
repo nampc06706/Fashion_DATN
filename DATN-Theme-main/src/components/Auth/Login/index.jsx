@@ -25,6 +25,7 @@ export default function Login() {
         try {
           const response = await axios.post("http://localhost:8080/api/guest/takeData", dataGoogle);
           console.log("Login successful", response.data);
+          window.location.reload();
         } catch (error) {
           // console.error("Error:", error.response ? error.response.data : error.message);
           // toast.error(`Error: ${error.response ? error.response.data : 'Unknown error'}`);
@@ -33,6 +34,7 @@ export default function Login() {
       }
     };
     takeData();
+    
   }, [dataGoogle]);
 
   const rememberMe = () => setChecked(!checked);

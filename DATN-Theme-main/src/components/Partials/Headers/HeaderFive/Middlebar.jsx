@@ -28,8 +28,9 @@ export default function Middlebar({ className }) {
     Cookies.remove('user'); // Xóa cookie của người dùng khi đăng xuất
     Cookies.remove('token');
     Cookies.remove('cart');
-    window.location.reload();
     navigate("/login");
+    window.location.reload();
+    
   };
 
   // Lấy số lượng sản phẩm trong giỏ hàng và danh sách yêu thích từ cookie

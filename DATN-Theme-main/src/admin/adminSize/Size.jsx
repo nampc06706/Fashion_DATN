@@ -20,7 +20,9 @@ const SizeManagementPage = () => {
   const [selectedColor, setSelectedColor] = useState('#FF0000'); // Mặc định là màu trắng
   const [displayColorPicker, setDisplayColorPicker] = useState(false);
 
-
+  // Phân trang
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5); // Số phần tử mỗi trang
   const token = Cookies.get('token');
   let userInfo = null;
 
@@ -37,6 +39,47 @@ const SizeManagementPage = () => {
     value: product.id,
     label: product.name,
   }));
+
+  // Hàm phân trang: Tính toán số phần tử hiển thị trên mỗi trang
+  const totalPages = Math.ceil(addedItems.length / itemsPerPage);
+  const currentItems = addedItems.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const handlePageChange = (pageNumber) => {
+    if (pageNumber > 0 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);
+    }
+  };
+
+  // Tạo các trang hiển thị
+  const generatePageNumbers = () => {
+    const pageNumbers = [];
+
+    // Chỉ hiển thị 3 trang gần với trang hiện tại
+    const start = Math.max(1, currentPage - 1);
+    const end = Math.min(totalPages, currentPage + 1);
+
+    // Thêm trang đầu
+    if (start > 1) pageNumbers.push(1);
+    // Nếu không phải trang đầu, thêm dấu ba chấm
+    if (start > 2) pageNumbers.push('...');
+
+    // Thêm các trang gần với trang hiện tại
+    for (let i = start; i <= end; i++) {
+      pageNumbers.push(i);
+    }
+
+    // Nếu không phải trang cuối, thêm dấu ba chấm
+    if (end < totalPages - 1) pageNumbers.push('...');
+    // Thêm trang cuối
+    if (end < totalPages) pageNumbers.push(totalPages);
+
+    return pageNumbers;
+  };
+
+  const pageNumbers = generatePageNumbers();
 
 
   useEffect(() => {
@@ -329,7 +372,8 @@ const SizeManagementPage = () => {
 
 
   return (
-    <div className="container mx-auto p-6 bg-gray-50 rounded-lg shadow-lg">
+    <div className="container mx-auto p-6 bg-gray-50 rounded-lg">
+      <ToastContainer position="top-right" autoClose={1000} />
       <div className="mb-6">
         <label className="block mb-4 text-lg font-semibold text-gray-800">
           Chọn sản phẩm:
@@ -443,63 +487,96 @@ const SizeManagementPage = () => {
 
       </div>
 
-      <h2 className="text-2xl font-bold mb-6">Danh sách đã thêm</h2>
-      <div className="bg-white shadow-lg rounded-xl overflow-hidden">
-        <table className="min-w-full table-auto">
-          <thead>
-            <tr className="bg-gradient-to-r from-blue-600 to-blue-500 text-white">
-              <th className="py-4 px-6 text-left font-semibold uppercase tracking-wider">Sản phẩm</th>
-              <th className="py-4 px-6 text-left font-semibold uppercase tracking-wider">Kích thước</th>
-              <th className="py-4 px-6 text-left font-semibold uppercase tracking-wider">Màu</th>
-              <th className="py-4 px-6 text-left font-semibold uppercase tracking-wider">Tồn kho</th>
-              <th className="py-4 px-6 text-left font-semibold uppercase tracking-wider">Hành động</th>
-            </tr>
-          </thead>
-          <tbody>
-            {addedItems.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="py-6 text-center text-gray-500">
-                  Không có dữ liệu để hiển thị
-                </td>
+      <div className="container mx-auto p-6 bg-gray-50 rounded-lg ">
+        <h2 className="text-2xl font-bold mb-6">Quản lý Kích thước Sản phẩm</h2>
+        <div className="bg-white rounded-xl overflow-hidden">
+          <table className="min-w-full table-auto">
+            <thead>
+              <tr className="bg-gradient-to-r from-blue-600 to-blue-500 text-white">
+                <th className="py-4 px-6 text-left font-semibold uppercase tracking-wider">Sản phẩm</th>
+                <th className="py-4 px-6 text-left font-semibold uppercase tracking-wider">Kích thước</th>
+                <th className="py-4 px-6 text-left font-semibold uppercase tracking-wider">Màu</th>
+                <th className="py-4 px-6 text-left font-semibold uppercase tracking-wider">Tồn kho</th>
+                <th className="py-4 px-6 text-left font-semibold uppercase tracking-wider">Hành động</th>
               </tr>
-            ) : (
-              addedItems.map((item, index) => (
-
-                <tr
-                  key={index}
-                  className="hover:bg-gray-50 transition-colors duration-300"
-                >
-                  <td className="py-4 px-6 border-b">{item.product.name}</td>
-                  <td className="py-4 px-6 border-b">{item.name}</td>
-                  <td className="py-4 px-6 border-b flex items-center gap-2">
-                    <span
-                      className="inline-block w-6 h-6 rounded-full border border-gray-200"
-                      style={{ backgroundColor: item.color.name }}
-                    ></span>
-                    {item.color.name}
-                  </td>
-                  <td className="py-4 px-6 border-b text-gray-600">{item.quantityInStock}</td>
-                  <td className="py-4 px-6 border-b flex gap-3">
-                    <button
-                      onClick={() => handleEditProduct(item)}
-                      className="flex items-center justify-center bg-yellow-400 text-white px-4 py-2 rounded-lg hover:bg-yellow-500 transition-colors duration-300 shadow-sm"
-                      aria-label="Chỉnh sửa"
-                    >
-                      <AiOutlineEdit size={20} />
-                    </button>
-                    <button
-                      onClick={() => deleteSize(item.id)}
-                      className="flex items-center justify-center bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors duration-300 shadow-sm"
-                      aria-label="Xóa"
-                    >
-                      <AiOutlineDelete size={20} />
-                    </button>
+            </thead>
+            <tbody>
+              {currentItems.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="py-6 text-center text-gray-500">
+                    Không có dữ liệu để hiển thị
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                currentItems.map((item, index) => (
+                  <tr key={index} className="hover:bg-gray-50 transition-colors duration-300">
+                    <td className="py-4 px-6 border-b">{item.product.name}</td>
+                    <td className="py-4 px-6 border-b">{item.name}</td>
+                    <td className="py-4 px-6 border-b flex items-center gap-2">
+                      <span
+                        className="inline-block w-6 h-6 rounded-full border border-gray-200"
+                        style={{ backgroundColor: item.color.name }}
+                      ></span>
+                      {item.color.name}
+                    </td>
+                    <td className="py-4 px-6 border-b text-gray-600">{item.quantityInStock}</td>
+                    <td className="py-4 px-6 border-b flex gap-3">
+                      <button
+                        onClick={() => handleEditProduct(item)}
+                        className="flex items-center justify-center bg-yellow-400 text-white px-4 py-2 rounded-lg hover:bg-yellow-500 transition-colors duration-300 shadow-sm"
+                        aria-label="Chỉnh sửa"
+                      >
+                        <AiOutlineEdit size={20} />
+                      </button>
+                      <button
+                        onClick={() => deleteSize(item.id)}
+                        className="flex items-center justify-center bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors duration-300 shadow-sm"
+                        aria-label="Xóa"
+                      >
+                        <AiOutlineDelete size={20} />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+
+          {/* Phân trang */}
+          <div className="flex justify-center mt-4">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              className="px-4 py-2 mx-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+              disabled={currentPage === 1}
+            >
+              Trước
+            </button>
+
+            {/* Hiển thị các trang */}
+            {pageNumbers.map((number, index) => (
+              <button
+                key={index}
+                onClick={() => {
+                  if (number !== '...') handlePageChange(number);
+                }}
+                className={`px-4 py-2 mx-2 text-lg rounded-lg ${number === currentPage
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-white text-blue-500 border border-blue-500'
+                  } hover:bg-blue-600 hover:text-white transition-colors duration-300`}
+              >
+                {number}
+              </button>
+            ))}
+
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              className="px-4 py-2 mx-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+              disabled={currentPage === totalPages}
+            >
+              Sau
+            </button>
+          </div>
+        </div>
       </div>
 
     </div>

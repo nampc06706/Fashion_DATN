@@ -105,12 +105,16 @@ export default function Routers() {
       <Route exact path="/all-products" element={<AllProductPage />} />
       <Route exact path="/products/:id" element={<SingleProductPage />} />
       <Route exact path="/cart" element={<CardPage />} />
-      <Route exact path="/profile" element={<Profile />} />
+
       <Route exact path="/become-saller" element={<BecomeSaller />} />
       <Route exact path="/terms-condition" element={<TermsCondition />} />
       <Route exact path="/forgot-password" element={<Forgotpassword />} />
 
       {/* Kiểm tra token trước khi cho phép vào các trang cần đăng nhập */}
+      <Route
+        exact
+        path="/profile"
+        element={userInfo ? <Profile /> : <Navigate to="/" />} />
       <Route
         exact
         path="/checkout"

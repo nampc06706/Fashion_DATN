@@ -48,5 +48,10 @@ public class FlashsaleService {
 				flashsale.getEnddate(), flashsale.isIsactive() // Sử dụng isIsactive() cho trường boolean
 		);
 	}
+	
+	// Phương thức thêm Flash Sale
+    public Flashsale addFlashsale(Flashsale flashsale) {
+        return flashRepository.save(flashsale);
+    }
 
 }

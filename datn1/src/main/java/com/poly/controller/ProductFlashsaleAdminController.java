@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.poly.dto.FlashsaleDTO;
 import com.poly.dto.ProductDTO;
 import com.poly.dto.ProductFlashsaleRequest;
+import com.poly.entity.Flashsale;
 import com.poly.entity.ProductFlashsale;
 import com.poly.service.FlashsaleService;
 import com.poly.service.ProductFlashsaleService;
@@ -86,4 +87,18 @@ public class ProductFlashsaleAdminController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Có lỗi xảy ra khi xóa ProductFlashsale.");
         }
     }	
+	
+	// API thêm Flash Sale
+    @PostMapping("/addFlashsale")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    public ResponseEntity<Flashsale> addFlashsale(@RequestBody Flashsale flashsale) {
+        try {
+            // Đặt giá trị mặc định cho isactive
+            flashsale.setIsactive(false);
+            Flashsale savedFlashsale = flashsaleService.addFlashsale(flashsale);
+            return ResponseEntity.ok(savedFlashsale);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }
