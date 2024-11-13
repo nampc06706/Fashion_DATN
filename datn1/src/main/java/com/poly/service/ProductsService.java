@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
@@ -314,6 +315,7 @@ public class ProductsService {
 				.orElseThrow(() -> new RuntimeException("Danh mục không tồn tại"));
 		product.setCategory(category);
 
+		
 		List<ProductImages> updatedImages = productDTO.getImages().stream().map(img -> {
 			ProductImages image = new ProductImages();
 			try {
@@ -570,16 +572,14 @@ public class ProductsService {
 		}
 	}
 
-	public void deleteImage(Integer imageId) {
-		try {
-			productImageRepository.deleteById(imageId);
-			System.out.println("Deleted image with ID: " + imageId);
-		} catch (EmptyResultDataAccessException e) {
-			System.out.println("Image with ID " + imageId + " does not exist.");
-		} catch (Exception e) {
-			System.out.println("An error occurred while deleting image with ID " + imageId + ": " + e.getMessage());
-			e.printStackTrace(); // In chi tiết lỗi ra console để kiểm tra
+	public void deleteImage(Integer imageId) { 
+		if (productImageRepository.existsById(imageId)) {
+		    productImageRepository.deleteImageById(imageId);
+		    System.out.println("Deleted image with ID: " + imageId);
+		} else {
+		    System.out.println("Image with ID " + imageId + " does not exist.");
 		}
+
 	}
 
 }

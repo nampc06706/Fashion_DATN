@@ -192,7 +192,6 @@ const ProductManagementPage = () => {
           toast.error("Thêm sản phẩm thất bại");
         }
       }
-
     }
   };
 
@@ -212,12 +211,6 @@ const ProductManagementPage = () => {
     }
   };
 
-  const handleImageChange = (index, value) => {
-    const updatedImages = [...newProduct.images];
-    updatedImages[index] = value;
-    setNewProduct({ ...newProduct, images: updatedImages });
-  };
-
   const handleSizeChange = (index, field, value) => {
     const updatedSizes = [...newProduct.sizes];
     updatedSizes[index] = { ...updatedSizes[index], [field]: value };
@@ -229,22 +222,23 @@ const ProductManagementPage = () => {
     setIsEditMode(false);
     setCurrentProduct(null);
     setNewProduct({ name: '', price: '', description: '', category: '', images: [], sizes: [] });
+    fetchProducts();
   };
 
   const handleFileChange = (e, index) => {
-    const file = e.target.files[0];
+    const file = e.target.files[0]; // Lấy file đầu tiên từ input
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
         const updatedImages = [...newProduct.images];
         updatedImages[index] = {
-          image: reader.result, // URL tạm thời để hiển thị hình ảnh
-          fileName: file.name,  // Lưu tên file để hiển thị trong input text
+          image: reader.result, // URL tạm thời của ảnh để hiển thị
+          fileName: file.name,  // Lưu tên file để hiển thị
         };
 
-        setNewProduct({ ...newProduct, images: updatedImages });
+        setNewProduct({ ...newProduct, images: updatedImages }); // Cập nhật trạng thái mới
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(file); // Chuyển đổi file thành URL
     }
   };
 
@@ -285,27 +279,29 @@ const ProductManagementPage = () => {
     });
   };
 
-  const handleRemoveImage = (imageId) => {
-    console.log("Removing image with ID:", imageId);
+  const handleRemoveImage = async (imageId) => {
 
-    // Gọi API DELETE để xóa hình ảnh
-    axios.delete(`http://localhost:8080/api/admin/products/delete/${imageId}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`, // Đảm bảo token đã được định nghĩa
-        'Content-Type': 'application/json',
-      },
-    })
-      .then(response => {
-        console.log(response);
-        console.log("Image removed successfully.");
-        // Gọi lại fetchProducts để làm mới danh sách
-      })
-      .catch(error => {
-        console.error("Error occurred while removing image:", error);
+    try {
+      // Gửi yêu cầu xóa với token trong headers
+      const response = await axios.delete(`http://localhost:8080/api/admin/products/delete/${imageId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
       });
-    // fetchProducts();
-  };
 
+      if (response.status === 200) {
+        // Xóa thành công, cập nhật lại danh sách hình ảnh
+        setNewProduct((prevState) => ({
+          ...prevState,
+          images: prevState.images.filter((image) => image.id !== imageId),
+        }));
+      } else {
+        console.log("Xóa thất bại, vui lòng thử lại.");
+      }
+    } catch (error) {
+      console.error("Lỗi khi xóa hình ảnh:", error);
+    }
+  };
 
   const validateProductData = (product) => {
     // Kiểm tra tên sản phẩm
@@ -469,13 +465,15 @@ const ProductManagementPage = () => {
                       style={{ display: "none" }}
                       onChange={(e) => handleFileChange(e, index)}
                     />
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveImage(imageObj.id)}
-                      className="bg-red-500 text-white px-2 py-1 rounded-lg hover:bg-red-600 transition duration-300"
-                    >
-                      Xóa
-                    </button>
+                    {isEditMode && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveImage(imageObj.id)}
+                        className="bg-red-500 text-white px-2 py-1 rounded-lg hover:bg-red-600 transition duration-300"
+                      >
+                        Xóa
+                      </button>
+                    )}
                   </div>
                 ))}
                 <button
