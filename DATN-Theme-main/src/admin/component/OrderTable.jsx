@@ -37,42 +37,42 @@ export default function OrderTab({ accountId: initialAccountId }) {
 
   useEffect(() => {
     const fetchOrders = async () => {
-        try {
-          const response = await axios.get(`http://localhost:8080/api/admin/orders`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
+      try {
+        const response = await axios.get(`http://localhost:8080/api/admin/orders`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-          const sortedOrders = response.data.sort((a, b) =>
-            formatDateArray(b.date) - formatDateArray(a.date)
-          );
+        const sortedOrders = response.data.sort((a, b) =>
+          formatDateArray(b.date) - formatDateArray(a.date)
+        );
 
-          // Lọc đơn hàng theo các tiêu chí tìm kiếm
-          const filteredOrders = sortedOrders.filter((order) => {
-            const matchesOrderId = orderId ? order.id.toString().includes(orderId) : true;
-            const matchesOrderDate = orderDate
-              ? new Date(order.date[0], order.date[1] - 1, order.date[2]).toLocaleDateString() === new Date(orderDate).toLocaleDateString()
-              : true;
-            const matchesStatus = status ? order.status.toString() === status : true;
+        // Lọc đơn hàng theo các tiêu chí tìm kiếm
+        const filteredOrders = sortedOrders.filter((order) => {
+          const matchesOrderId = orderId ? order.id.toString().includes(orderId) : true;
+          const matchesOrderDate = orderDate
+            ? new Date(order.date[0], order.date[1] - 1, order.date[2]).toLocaleDateString() === new Date(orderDate).toLocaleDateString()
+            : true;
+          const matchesStatus = status ? order.status.toString() === status : true;
 
-            return matchesOrderId && matchesOrderDate && matchesStatus;
-          });
+          return matchesOrderId && matchesOrderDate && matchesStatus;
+        });
 
-          // Cập nhật số trang
-          setTotalPages(Math.ceil(filteredOrders.length / ordersPerPage));
+        // Cập nhật số trang
+        setTotalPages(Math.ceil(filteredOrders.length / ordersPerPage));
 
-          // Lọc đơn hàng cho trang hiện tại
-          const currentOrders = filteredOrders.slice(
-            (currentPage - 1) * ordersPerPage,
-            currentPage * ordersPerPage
-          );
+        // Lọc đơn hàng cho trang hiện tại
+        const currentOrders = filteredOrders.slice(
+          (currentPage - 1) * ordersPerPage,
+          currentPage * ordersPerPage
+        );
 
-          setOrders(currentOrders);
+        setOrders(currentOrders);
 
-        } catch (error) {
-          console.error("Lỗi khi lấy đơn hàng:", error);
-        }
+      } catch (error) {
+        console.error("Lỗi khi lấy đơn hàng:", error);
+      }
     };
 
     fetchOrders();
@@ -159,11 +159,10 @@ export default function OrderTab({ accountId: initialAccountId }) {
 
       const order = orders.find(order => order.id === orderId);
 
-      if (order.status >= newStatus) {
+      if ( order.status == 4 || order.status >= newStatus) {
         toast.error("Không thể thay đổi trạng thái đơn hàng");
         return;
       }
-
       // Gọi API để cập nhật trạng thái đơn hàng
       const response = await axios.put('http://localhost:8080/api/admin/orders', null, {
         params: { orderId, status: newStatus },
