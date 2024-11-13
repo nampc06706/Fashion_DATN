@@ -159,7 +159,7 @@ export default function OrderTab({ accountId: initialAccountId }) {
 
       const order = orders.find(order => order.id === orderId);
 
-      if ( order.status == 4 || order.status >= newStatus) {
+      if (order.status == 4 || order.status >= newStatus) {
         toast.error("Không thể thay đổi trạng thái đơn hàng");
         return;
       }
@@ -199,6 +199,84 @@ export default function OrderTab({ accountId: initialAccountId }) {
       }
       console.error("Lỗi khi cập nhật trạng thái đơn hàng:", error);
     }
+  };
+
+  const handlePrintBill = () => {
+    const printWindow = window.open("", "_blank");
+    printWindow.document.write(`<html>
+  <head>
+    <title>Hóa Đơn Đặt Hàng</title>
+    <style>
+      body { font-family: Arial, sans-serif; padding: 20px; }
+      h2 { text-align: center; }
+      .order-details, .product-details { width: 100%; border-collapse: collapse; }
+      .order-details th, .order-details td, .product-details th, .product-details td {
+        border: 1px solid #ddd; padding: 8px; text-align: left;
+      }
+      .order-details th { background-color: #f2f2f2; }
+    </style>
+  </head>
+  <body>
+    <h2>Đơn Hàng #${selectedOrder.id}</h2>
+    <table class="order-details">
+      <tr><th>Tên Khách Hàng</th><td>${selectedOrder.address.fullname}</td></tr>
+      <tr><th>Số Điện Thoại</th><td>${selectedOrder.address.phone}</td></tr>
+      <tr><th>Địa Chỉ Giao Hàng</th><td>${selectedOrder.address.province}, ${selectedOrder.address.district}, ${selectedOrder.address.ward}</td></tr>
+      <tr><th>Ghi Chú</th><td>${selectedOrder.note}</td></tr>
+      <tr><th>Phương Thức Thanh Toán</th><td>${selectedOrder.payment.method}</td></tr>
+      <tr><th>Phương Thức Giao Hàng</th><td>${selectedOrder.shippingMethod.methodName}</td></tr>
+      <tr><th>Thời Gian Dự Kiến Giao Hàng</th><td>${selectedOrder.shippingMethod.estimatedDeliveryTime}</td></tr>
+    </table>
+
+    <h3>Sản Phẩm</h3>
+    <table class="product-details">
+      <thead>
+        <tr><th>Sản Phẩm</th><th>Kích Thước</th><th>Số Lượng</th><th>Giá</th></tr>
+      </thead>
+      <tbody>
+        ${selectedOrder.orderDetails.map(detail => `
+          <tr>
+            <td>${detail.size?.product?.name}</td>
+            <td>${detail.size?.name}</td>
+            <td>${detail.quantity}</td>
+            <td>
+              ${(detail.size?.product?.price ? Number(detail.size.product.price) : 0)
+                .toLocaleString("vi-VN", { style: "currency", currency: "VND" })}
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+
+    <h3>Chi Tiết Thanh Toán</h3>
+    <table class="order-details">
+      <tr>
+        <th>Tổng Tiền Sản Phẩm</th>
+        <td>
+          ${calculateTotalPrice(selectedOrder.orderDetails).toLocaleString("vi-VN", { style: "currency", currency: "VND" })}
+        </td>
+      </tr>
+      <tr>
+        <th>Phí Giao Hàng</th>
+        <td>
+          ${selectedOrder.shippingMethod && selectedOrder.shippingMethod.price !== undefined
+            ? Math.round(selectedOrder.shippingMethod.price)
+                .toLocaleString("vi-VN", { style: "currency", currency: "VND" })
+            : "Không có thông tin"}
+        </td>
+      </tr>
+      <tr>
+        <th>Tổng Cộng</th>
+        <td>
+          ${calculateTotalPrice(selectedOrder.orderDetails, selectedOrder.shippingMethod).toLocaleString("vi-VN", { style: "currency", currency: "VND" })}
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
+`);
+    printWindow.document.close();
+    printWindow.print();
   };
 
   return (
@@ -444,7 +522,6 @@ export default function OrderTab({ accountId: initialAccountId }) {
                 </div>
               )}
             </div>
-
             <div className="flex justify-end space-x-4 mt-4">
               {selectedOrder.status === "99" && (
                 <button
@@ -453,6 +530,11 @@ export default function OrderTab({ accountId: initialAccountId }) {
                   Thanh toán lại
                 </button>
               )}
+              <button
+                onClick={handlePrintBill}
+                className="bg-blue-500 text-white px-6 py-2 rounded-full shadow-md transition duration-300 ease-in-out hover:bg-blue-600 hover:shadow-lg">
+                Print Bill
+              </button>
               <button
                 onClick={handleCloseModal}
                 className="bg-red-500 text-white px-6 py-2 rounded-full shadow-md transition duration-300 ease-in-out hover:bg-red-600 hover:shadow-lg transform hover:scale-105 border border-red-500 hover:border-red-600"
