@@ -203,9 +203,45 @@ public class OrdersService {
 		return orders; // Trả về danh sách đơn hàng cùng với chi tiết của chúng
 	}
 
+	@Transactional
 	public List<Orders> getAllOrders() {
-		return ordersRepository.findAll();
+	    List<Orders> orders = ordersRepository.findAll();
+	    if (orders.isEmpty()) {
+	        throw new NoSuchElementException("Không có đơn hàng nào trong hệ thống.");
+	    }
+
+	    System.out.println("Tổng số đơn hàng: " + orders.size());
+	    for (Orders order : orders) {
+	        // Kiểm tra địa chỉ
+	        if (order.getAddress() == null) {
+	            System.out.println("Địa chỉ hóa đơn ID " + order.getId() + " là null");
+	        }
+
+	        // Lấy danh sách OrderDetails
+	        List<OrderDetails> orderDetails = orderDetailsRepository.findByOrderId(order.getId());
+
+	        // Gán hình ảnh cho từng chi tiết sản phẩm
+	        for (OrderDetails detail : orderDetails) {
+	            if (detail != null) {
+	                Size size = detail.getSize();
+	                if (size != null) {
+	                    Products product = size.getProduct();
+	                    if (product != null) {
+	                        // Lấy danh sách hình ảnh của sản phẩm
+	                        List<ProductImages> images = product.getImages();
+	                        detail.setImages(images);
+	                    }
+	                }
+	            }
+	        }
+
+	        // Gán danh sách OrderDetails vào đơn hàng
+	        order.setOrderDetails(orderDetails);
+	    }
+
+	    return orders; // Trả về danh sách đơn hàng với chi tiết và hình ảnh
 	}
+
 
 	public int updateOrderStatusById1(int orderId, String status) {
 		return ordersRepository.updateOrderStatusById(orderId, status);

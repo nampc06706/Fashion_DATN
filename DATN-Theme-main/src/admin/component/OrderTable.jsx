@@ -94,57 +94,6 @@ export default function OrderTab({ accountId: initialAccountId }) {
     setSelectedOrder(null);
   };
 
-  // Hàm chuyển đổi trạng thái đơn hàng thành chuỗi mô tả
-  const getOrderStatus = (status) => {
-    switch (status.toString()) { // Đảm bảo status là chuỗi để so sánh
-      case '1': return "Chờ xác nhận";
-      case '2': return "Đã xác nhận";
-      case '3': return "Đang giao hàng";
-      case '4': return "Hoàn thành";
-      case '5': return "Đã hủy";
-      case '99': return "Thanh toán VNPay thất bại";
-      case '0': return "Đã thanh toán";
-      default: return "Không xác định";
-    }
-  };
-
-  const handlePaymentAgain = async (orderId) => {
-    try {
-      // In ra token và orderId để kiểm tra giá trị
-      console.log('Token:', token);
-      console.log('Order ID:', orderId);
-
-      // Gửi yêu cầu POST đến API với token trong header
-      const response = await axios.post(
-        'http://localhost:8080/api/user/payments/payment-again',
-        { orderId: orderId },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // Đính kèm token vào header
-          },
-        }
-      );
-
-      // Kiểm tra phản hồi API
-      console.log('API Response:', response.data);
-
-      const vnpayUrl = response.data.vnpayUrl;
-      console.log('VNPAY URL:', vnpayUrl);
-
-      // Kiểm tra và chuyển hướng đến link thanh toán
-      if (vnpayUrl) {
-        setError(null); // Reset error state
-        window.location.href = vnpayUrl; // Chuyển hướng trực tiếp
-      } else {
-        setError('URL thanh toán không hợp lệ');
-      }
-    } catch (error) {
-      // Xử lý lỗi khi gọi API
-      console.error('API Error:', error);
-      setError(error.response?.data?.error || 'Có lỗi xảy ra khi gọi API');
-    }
-  };
-
   // Hàm tính tổng tiền từ orderDetails và giá của shippingMethod
   const calculateTotalPrice = (orderDetails, shippingMethod) => {
     const productTotal = orderDetails.reduce((total, detail) => {
@@ -242,7 +191,7 @@ export default function OrderTab({ accountId: initialAccountId }) {
             <td>${detail.quantity}</td>
             <td>
               ${(detail.size?.product?.price ? Number(detail.size.product.price) : 0)
-                .toLocaleString("vi-VN", { style: "currency", currency: "VND" })}
+        .toLocaleString("vi-VN", { style: "currency", currency: "VND" })}
             </td>
           </tr>
         `).join('')}
@@ -261,9 +210,9 @@ export default function OrderTab({ accountId: initialAccountId }) {
         <th>Phí Giao Hàng</th>
         <td>
           ${selectedOrder.shippingMethod && selectedOrder.shippingMethod.price !== undefined
-            ? Math.round(selectedOrder.shippingMethod.price)
-                .toLocaleString("vi-VN", { style: "currency", currency: "VND" })
-            : "Không có thông tin"}
+        ? Math.round(selectedOrder.shippingMethod.price)
+          .toLocaleString("vi-VN", { style: "currency", currency: "VND" })
+        : "Không có thông tin"}
         </td>
       </tr>
       <tr>
