@@ -22,7 +22,7 @@ import com.poly.entity.Orders;
 import com.poly.service.OrdersService;
 
 @RestController
-@RequestMapping("/api/admin/orders")
+@RequestMapping("/api/staff/orders")
 public class OrderAdminController {
 
 	private static final Logger logger = LoggerFactory.getLogger(OrdersController.class);
@@ -30,7 +30,7 @@ public class OrderAdminController {
 	@Autowired
 	private OrdersService ordersService;
 
-	@PreAuthorize("hasAnyAuthority('ADMIN')")
+	@PreAuthorize("hasAnyAuthority('ADMIN','STAFF')")
 	@GetMapping()
 	public ResponseEntity<List<Orders>> getAllOrders() {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -43,7 +43,7 @@ public class OrderAdminController {
 		return new ResponseEntity<>(orders, HttpStatus.OK);
 	}
 
-	@PreAuthorize("hasAnyAuthority('ADMIN')")
+	@PreAuthorize("hasAnyAuthority('ADMIN','STAFF')")
 	@PutMapping()
 	public ResponseEntity<Map<String, Object>> updateStatus(@RequestParam Integer orderId,
 			@RequestParam String status) {

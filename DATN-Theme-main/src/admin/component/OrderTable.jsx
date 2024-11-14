@@ -38,7 +38,7 @@ export default function OrderTab({ accountId: initialAccountId }) {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/api/admin/orders`, {
+        const response = await axios.get(`http://localhost:8080/api/staff/orders`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -164,7 +164,7 @@ export default function OrderTab({ accountId: initialAccountId }) {
         return;
       }
       // Gọi API để cập nhật trạng thái đơn hàng
-      const response = await axios.put('http://localhost:8080/api/admin/orders', null, {
+      const response = await axios.put('http://localhost:8080/api/staff/orders', null, {
         params: { orderId, status: newStatus },
         headers: {
           'Authorization': `Bearer ${token}`, // Thay 'token' bằng token xác thực của bạn

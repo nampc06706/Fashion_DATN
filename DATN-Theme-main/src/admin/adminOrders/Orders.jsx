@@ -14,7 +14,7 @@ const OrderDetailsPage = () => {
   // Tách hàm fetchOrderDetails ra để có thể gọi lại khi cần
   const fetchOrderDetails = async () => {
     try {
-      const response = await axios.get(`http://localhost:8080/api/admin/orders`, {
+      const response = await axios.get(`http://localhost:8080/api/staff/orders`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
