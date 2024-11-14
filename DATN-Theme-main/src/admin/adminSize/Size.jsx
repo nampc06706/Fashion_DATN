@@ -88,7 +88,7 @@ const SizeManagementPage = () => {
         return;
       }
       try {
-        const response = await axios.get(`http://localhost:8080/api/admin/products`, {
+        const response = await axios.get(`http://localhost:8080/api/staff/products`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -224,7 +224,7 @@ const SizeManagementPage = () => {
       const quantityInStock = selectedStock;
 
       const response = await axios.post(
-        `http://localhost:8080/api/admin/staff/update?colorName=${encodeURIComponent(colorName)}&productId=${productId}`,
+        `http://localhost:8080/api/staff/size/update?colorName=${encodeURIComponent(colorName)}&productId=${productId}`,
         {
           id: id, // Gửi id size
           name: name, // Gửi name size

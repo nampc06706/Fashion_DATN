@@ -33,7 +33,7 @@ const CategoryManagementPage = () => {
       }
 
       try {
-        const response = await axios.get('http://localhost:8080/api/admin/categoryadmin', {
+        const response = await axios.get('http://localhost:8080/api/staff/categoryadmin', {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -79,7 +79,7 @@ const CategoryManagementPage = () => {
     }
   
     try {
-      const response = await axios.post('http://localhost:8080/api/admin/categoryadmin', newCategory, {
+      const response = await axios.post('http://localhost:8080/api/staff/categoryadmin', newCategory, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',

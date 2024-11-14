@@ -24,7 +24,7 @@ import com.poly.entity.Products;
 import com.poly.service.ProductsService;
 
 @RestController
-@RequestMapping("/api/admin/products")
+@RequestMapping("/api/staff/products")
 public class ProductsAdminController {
 	private static final Logger logger = LoggerFactory.getLogger(AddressController.class);
 
@@ -32,7 +32,7 @@ public class ProductsAdminController {
 	private ProductsService productService;
 
 	// API thêm sản phẩm mới
-	@PreAuthorize("hasAnyAuthority('ADMIN')")
+	@PreAuthorize("hasAnyAuthority('ADMIN','STAFF')")
 	@PostMapping
 	public ResponseEntity<Products> addProduct(@RequestBody ProductDTO productDTO) {
 		try {
@@ -63,7 +63,7 @@ public class ProductsAdminController {
 
 	//
 	// hiện san
-	@PreAuthorize("hasAnyAuthority('ADMIN')")
+	@PreAuthorize("hasAnyAuthority('ADMIN','STAFF')")
 	@GetMapping
 	public ResponseEntity<List<ProductDTO>> getAllProducts() {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -102,7 +102,7 @@ public class ProductsAdminController {
 	}
 
 	// API xóa sản phẩm
-	@PreAuthorize("hasAnyAuthority('ADMIN')")
+	@PreAuthorize("hasAnyAuthority('ADMIN','STAFF')")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<?> deleteProduct(@PathVariable("id") Integer productId) {
 		try {

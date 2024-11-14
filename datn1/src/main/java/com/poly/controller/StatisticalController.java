@@ -13,35 +13,35 @@ import com.poly.dto.StatisticalDTO;
 import com.poly.service.StatisticalService;
 
 @RestController
-@RequestMapping("/api/admin/statistical")
+@RequestMapping("/api/staff/statistical")
 public class StatisticalController {
 
 	@Autowired
 	private StatisticalService statisticalService;
 
 	@GetMapping("/count-order")
-	@PreAuthorize("hasAnyAuthority('ADMIN')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public ResponseEntity<Integer> countOrdersWithStatusOne() {
         int sumOrder = statisticalService.getSumOrderWithStatusOne();
         return ResponseEntity.ok(sumOrder);
     }
 	
 	@GetMapping("/count-product")
-	@PreAuthorize("hasAnyAuthority('ADMIN')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public ResponseEntity<Integer> getTotalProduct() {
         int TotalProduct = statisticalService.getTotalProduct();
         return ResponseEntity.ok(TotalProduct);
     }
 	
 	@GetMapping("/sum-total-price")
-	@PreAuthorize("hasAnyAuthority('ADMIN')")
+	@PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<Double> getTotalPrice() {
         double TotalPrice = statisticalService.getTotalPrice();
         return ResponseEntity.ok(TotalPrice);
     }
 	
 	@GetMapping("/fetch-monthly-sales")
-	@PreAuthorize("hasAnyAuthority('ADMIN')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
 	public ResponseEntity<List<StatisticalDTO>> fetchMonthlySalesData() {
 	    List<StatisticalDTO> monthlySalesData = statisticalService.fetchMonthlySalesData();
 	    return ResponseEntity.ok(monthlySalesData);

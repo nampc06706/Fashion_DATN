@@ -38,10 +38,12 @@ const StatisticsPage = () => {
 
   const token = Cookies.get('token');
   let userInfo = null;
+  let role = null;
 
   if (token) {
     try {
       userInfo = jwtDecode(token);
+      role = userInfo.roles;
     } catch (error) {
       console.error("Token decoding error:", error);
     }
@@ -58,7 +60,7 @@ const StatisticsPage = () => {
       setLoading(true); // Bắt đầu loading
       try {
         // Gọi API để lấy số đơn hàng
-        const orderResponse = await axios.get(`http://localhost:8080/api/admin/statistical/count-order`, {
+        const orderResponse = await axios.get(`http://localhost:8080/api/staff/statistical/count-order`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -68,7 +70,7 @@ const StatisticsPage = () => {
         setSumOrder(orderResponse.data);
 
         // Gọi API để lấy số sản phẩm
-        const productResponse = await axios.get(`http://localhost:8080/api/admin/statistical/count-product`, {
+        const productResponse = await axios.get(`http://localhost:8080/api/staff/statistical/count-product`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -77,18 +79,8 @@ const StatisticsPage = () => {
         });
         setSumProduct(productResponse.data);
 
-        // Gọi API để lấy tổng doanh thu
-        const priceResponse = await axios.get(`http://localhost:8080/api/admin/statistical/sum-total-price`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          withCredentials: true,
-        });
-        setSumTotalPrice(priceResponse.data);
-
         // Gọi API để lấy doanh thu hàng tháng
-        const monthlySaleResponse = await axios.get(`http://localhost:8080/api/admin/statistical/fetch-monthly-sales`, {
+        const monthlySaleResponse = await axios.get(`http://localhost:8080/api/staff/statistical/fetch-monthly-sales`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -98,8 +90,17 @@ const StatisticsPage = () => {
         const months = Array.from(new Set(monthlySales.map(item => parseInt(item.month, 10))));
         setMonthlySales(monthlySaleResponse.data);
         setAvailableMonths(months);
-        console.log();
-        
+
+        // Gọi API để lấy tổng doanh thu
+        const priceResponse = await axios.get(`http://localhost:8080/api/staff/statistical/sum-total-price`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true,
+        });
+        setSumTotalPrice(priceResponse.data);
+
       } catch (error) {
         console.error("Lỗi khi lấy dữ liệu thống kê:", error);
         setError("Có lỗi xảy ra. Vui lòng thử lại sau.");
@@ -181,7 +182,7 @@ const StatisticsPage = () => {
     <div className="min-h-screen bg-gray-100 p-6">
       <h1 className="text-3xl font-bold mb-6 text-center">Thống kê</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className={`grid grid-cols-1 md:grid-cols-${role === 'STAFF' ? 2 : 3} gap-6`}>
         {/* Card 1: Tổng số sản phẩm */}
         <div className="bg-white shadow-lg rounded-lg p-6 flex flex-col items-center justify-center">
           <h2 className="text-xl font-semibold">Tổng số sản phẩm</h2>
@@ -189,12 +190,14 @@ const StatisticsPage = () => {
         </div>
 
         {/* Card 2: Tổng doanh thu */}
-        <div className="bg-white shadow-lg rounded-lg p-6 flex flex-col items-center justify-center">
-          <h2 className="text-xl font-semibold">Tổng doanh thu</h2>
-          <p className="text-3xl font-bold text-green-600">
-            {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(statistics.totalRevenue)}
-          </p>
-        </div>
+        {role !== 'STAFF' && (
+          <div className="bg-white shadow-lg rounded-lg p-6 flex flex-col items-center justify-center">
+            <h2 className="text-xl font-semibold">Tổng doanh thu</h2>
+            <p className="text-3xl font-bold text-green-600">
+              {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(statistics.totalRevenue)}
+            </p>
+          </div>
+        )}
 
         {/* Card 3: Tổng số đơn hàng */}
         <div className="bg-white shadow-lg rounded-lg p-6 flex flex-col items-center justify-center">
@@ -208,16 +211,18 @@ const StatisticsPage = () => {
         <h1 className="text-3xl font-bold mb-6 text-center">Thống kê</h1>
 
         {/* Biểu đồ tổng quan doanh thu theo tháng */}
-        <div className="mt-10 bg-white shadow-lg rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">Biểu đồ doanh thu theo tháng</h2>
-          <select value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))}>
-            {uniqueYears.map(year => (
-              <option key={year} value={year}>{year}</option>
-            ))}
-          </select>
-          <Bar data={chartData} options={{ responsive: true, scales: { y: { beginAtZero: true, ticks: { callback: (value) => value.toLocaleString() + ' VND' } } } }} />
-        </div>
-
+        {role !== 'STAFF' && (
+          <div div className="mt-10 bg-white shadow-lg rounded-lg p-6">
+            <h2 className="text-xl font-semibold mb-4">Biểu đồ doanh thu theo tháng</h2>
+            <select value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))}>
+              {uniqueYears.map(year => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
+            <Bar data={chartData} options={{ responsive: true, scales: { y: { beginAtZero: true, ticks: { callback: (value) => value.toLocaleString() + ' VND' } } } }} />
+          </div>
+        )}
+        
         {/* Biểu đồ doanh thu theo ngày */}
         <div className="mt-10 bg-white shadow-lg rounded-lg p-6">
           <h2 className="text-xl font-semibold mb-4">Biểu đồ doanh thu theo ngày</h2>
@@ -229,7 +234,7 @@ const StatisticsPage = () => {
           <Bar data={dailyChartData} options={{ responsive: true, scales: { y: { beginAtZero: true, ticks: { callback: (value) => value.toLocaleString() + ' VND' } } } }} />
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 

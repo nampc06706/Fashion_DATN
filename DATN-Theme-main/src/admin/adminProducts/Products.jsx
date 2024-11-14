@@ -53,10 +53,12 @@ const ProductManagementPage = () => {
 
   const token = Cookies.get('token');
   let userInfo = null;
+  let role = null;
 
   if (token) {
     try {
       userInfo = jwtDecode(token);
+      role = userInfo.roles;
     } catch (error) {
       console.error("Token decoding error:", error);
     }
@@ -70,7 +72,7 @@ const ProductManagementPage = () => {
     }
 
     try {
-      const response = await axios.get(`http://localhost:8080/api/admin/products`, {
+      const response = await axios.get(`http://localhost:8080/api/staff/products`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -78,7 +80,7 @@ const ProductManagementPage = () => {
         withCredentials: true,
       });
 
-      const responseCategory = await axios.get(`http://localhost:8080/api/admin/categoryadmin`, {
+      const responseCategory = await axios.get(`http://localhost:8080/api/staff/categoryadmin`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -125,7 +127,7 @@ const ProductManagementPage = () => {
     }
 
     try {
-      const response = await axios.put(`http://localhost:8080/api/admin/products/${id}`, {
+      const response = await axios.put(`http://localhost:8080/api/staff/products/${id}`, {
         ...productData,
         category: { id: productData.category.id } // Đảm bảo gửi đúng id của category
       }, {
@@ -173,7 +175,7 @@ const ProductManagementPage = () => {
         }
       } else {
         try {
-          const response = await axios.post("http://localhost:8080/api/admin/products", newProduct, {
+          const response = await axios.post("http://localhost:8080/api/staff/products", newProduct, {
             headers: {
               'Authorization': `Bearer ${token}`,
               "Content-Type": "application/json"
@@ -264,7 +266,7 @@ const ProductManagementPage = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const response = await axios.delete(`http://localhost:8080/api/admin/products/${productId}`, {
+          const response = await axios.delete(`http://localhost:8080/api/staff/products/${productId}`, {
             headers: { 'Authorization': `Bearer ${token}` },
           });
 
@@ -283,7 +285,7 @@ const ProductManagementPage = () => {
 
     try {
       // Gửi yêu cầu xóa với token trong headers
-      const response = await axios.delete(`http://localhost:8080/api/admin/products/delete/${imageId}`, {
+      const response = await axios.delete(`http://localhost:8080/api/staff/products/delete/${imageId}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -373,6 +375,7 @@ const ProductManagementPage = () => {
         <button
           onClick={handleAddProduct}
           className="flex items-center bg-green-500 text-white px-5 py-3 rounded-lg shadow-md hover:bg-green-600 transition duration-300 transform hover:scale-105"
+          aria-label="Add new product"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -590,12 +593,14 @@ const ProductManagementPage = () => {
                   >
                     <AiOutlineEdit />
                   </button>
-                  <button
-                    onClick={() => handleDelete(product.id)}
-                    className="bg-red-500 text-white px-3 py-1 rounded-lg mr-2 hover:bg-yellow-600 transition duration-300"
-                  >
-                    <AiOutlineDelete />
-                  </button>
+                  {role !== 'STAFF' && (
+                    <button
+                      onClick={() => handleDelete(product.id)}
+                      className="bg-red-500 text-white px-3 py-1 rounded-lg mr-2 hover:bg-yellow-600 transition duration-300"
+                    >
+                      <AiOutlineDelete />
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}
