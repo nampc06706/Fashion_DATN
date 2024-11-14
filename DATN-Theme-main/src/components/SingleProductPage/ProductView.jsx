@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import Star from "../Helpers/icons/Star";
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Cookies from 'js-cookie';
 import { jwtDecode } from "jwt-decode";
 
@@ -140,37 +141,31 @@ export default function ProductView() {
   const addToCart = async () => {
     const token = Cookies.get('token');
 
-    // Kiểm tra kích cỡ đã chọn
     if (!selectedSize) {
       toast.error('Vui lòng chọn kích cỡ.');
-      return; // Ngừng hàm nếu không có kích cỡ
+      return;
     }
 
-    // Kiểm tra số lượng hợp lệ
     if (quantity <= 0) {
       toast.error('Số lượng không hợp lệ.');
-      return; // Ngừng hàm nếu số lượng không hợp lệ
+      return;
     }
 
-    // Lấy thông tin kích cỡ đã chọn
     const selectedSizeInfo = availableSizes.find(size => size.name === selectedSize);
     if (!selectedSizeInfo) {
       toast.error('Kích cỡ không hợp lệ.');
-      return; // Ngừng hàm nếu không có kích cỡ
+      return;
     }
 
-    // Kiểm tra tồn kho trước khi thêm vào giỏ hàng
     const cartItems = JSON.parse(Cookies.get('cart') || '[]');
     const existingItem = cartItems.find(item => item.size.id === selectedSizeInfo.id);
     const totalQuantity = existingItem ? existingItem.quantity + quantity : quantity;
 
-    // Nếu số lượng vượt quá tồn kho, thông báo lỗi và ngừng xử lý
     if (totalQuantity > selectedSizeInfo.quantityInStock) {
       toast.error(`Số lượng vượt quá tồn kho. Chỉ còn ${selectedSizeInfo.quantityInStock} sản phẩm.`);
-      return; // Ngừng hàm nếu số lượng vượt quá tồn kho
+      return;
     }
 
-    // Tạo đối tượng cartItem
     const cartItem = {
       id: null,
       accountId: null,
@@ -204,7 +199,6 @@ export default function ProductView() {
     try {
       let response;
 
-      // Nếu không có token, thêm vào giỏ hàng như khách
       if (!token) {
         response = await axios.post('http://localhost:8080/api/guest/carts', cartItem);
       } else {
@@ -213,12 +207,15 @@ export default function ProductView() {
         response = await axios.post('http://localhost:8080/api/guest/carts', cartItem);
       }
 
-      // Chỉ cập nhật giỏ hàng và thông báo thành công nếu không có lỗi
+      console.log('API Response:', response.data);
+
       if (response.data && response.data.id) {
         cartItem.id = response.data.id;
         updateCartCookie(cartItem);
         toast.success('Sản phẩm đã được thêm vào giỏ hàng.');
-        setQuantity(1); // Đặt lại số lượng về 1
+        setQuantity(1);
+      } else {
+        toast.success('Sản phẩm đã được thêm vào giỏ hàng.');
       }
     } catch (error) {
       toast.error('Có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng.');
@@ -296,6 +293,7 @@ export default function ProductView() {
   const isSamePrice = price === originalPrice;
   return (
     <div className="product-view w-full lg:flex justify-between">
+      <ToastContainer position="top-right" autoClose={1000} hideProgressBar={false} />
       <div className="lg:w-1/2 xl:mr-[70px] lg:mr-[50px]">
         <div className="w-full">
           <div className="w-full h-[600px] border border-qgray-border flex justify-center items-center overflow-hidden relative mb-3">

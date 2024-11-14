@@ -24,7 +24,7 @@ import com.poly.repository.SizeRepository;
 import com.poly.service.SizeService;
 
 @RestController
-@RequestMapping("/api/admin/size")
+@RequestMapping("/api/staff/size")
 public class SizeAdminController {
 	private static final Logger logger = LoggerFactory.getLogger(SizeAdminController.class);
 
@@ -37,7 +37,7 @@ public class SizeAdminController {
 	/**
 	 * API thêm mới Size và tạo mới Color nếu cần.
 	 */
-	@PreAuthorize("hasAnyAuthority('ADMIN')")
+	@PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF')")
 	@PostMapping("/add")
 	public ResponseEntity<?> addSize(@RequestBody Size size, @RequestParam String colorName,
 			@RequestParam Integer productId) {
@@ -57,7 +57,7 @@ public class SizeAdminController {
 		}
 	}
 
-	@PreAuthorize("hasAnyAuthority('ADMIN')")
+	@PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF')")
 	@PostMapping("/update")
 	public ResponseEntity<?> updateSize(@RequestBody Size size, @RequestParam String colorName,
 			@RequestParam Integer productId) {
@@ -77,7 +77,7 @@ public class SizeAdminController {
 		}
 	}
 
-	@PreAuthorize("hasAnyAuthority('ADMIN')")
+	@PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF')")
 	@GetMapping
 	public ResponseEntity<List<Size>> getAllSizes() {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -94,7 +94,7 @@ public class SizeAdminController {
 	}
 
 	@DeleteMapping("/delete/{sizeId}")
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
+	@PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF')")
     public ResponseEntity<String> deleteSize(@PathVariable Integer sizeId) {
         try {
             sizeService.deleteSizeById(sizeId);

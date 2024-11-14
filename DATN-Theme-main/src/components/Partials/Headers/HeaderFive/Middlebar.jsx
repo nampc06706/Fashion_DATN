@@ -30,7 +30,7 @@ export default function Middlebar({ className }) {
     Cookies.remove('cart');
     navigate("/login");
     window.location.reload();
-    
+
   };
 
   // Lấy số lượng sản phẩm trong giỏ hàng và danh sách yêu thích từ cookie
@@ -84,29 +84,28 @@ export default function Middlebar({ className }) {
               {username ? (
                 <>
                   <div className="flex items-center space-x-2">
-                    <Link to="/profile">
-                      <span>
-                        <ThinPeople />
-                      </span>
+                    <Link to="/profile" className="flex items-center hover:text-blue-500 transition duration-200">
+                      <ThinPeople className="w-6 h-6 text-gray-700" />
+                      <span className="ml-2 text-sm font-semibold text-gray-800">Xin chào, {username}</span>
                     </Link>
-                    <span>Xin chào, {username}</span>
                   </div>
-                  <div>
-                    <Link to="#" onClick={handleLogout}>
-                      <span>Đăng xuất</span>
+                  <div className="mt-1">
+                    <Link to="#" onClick={handleLogout} className="text-sm text-red-600 hover:text-red-800 transition duration-200">
+                      Đăng xuất
                     </Link>
                   </div>
                 </>
               ) : (
-                <div>
-                  <Link to="/login">
-                    <span>Đăng nhập </span>
+                <div className="flex space-x-4">
+                  <Link to="/login" className="text-sm text-gray-700 hover:text-blue-500 transition duration-200">
+                    Đăng nhập
                   </Link>
-                  <Link to="/signup">
-                    <span> Đăng ký</span>
+                  <Link to="/signup" className="text-sm text-gray-700 hover:text-blue-500 transition duration-200">
+                    Đăng ký
                   </Link>
                 </div>
               )}
+
             </div>
           </div>
         </div>

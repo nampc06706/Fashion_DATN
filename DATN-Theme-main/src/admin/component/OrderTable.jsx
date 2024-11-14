@@ -21,6 +21,7 @@ export default function OrderTab({ accountId: initialAccountId }) {
   const [ordersPerPage, setOrdersPerPage] = useState(10); // Số lượng đơn hàng mỗi trang
   const [totalPages, setTotalPages] = useState(0); // Tổng số trang
 
+  console.log(selectedOrder)
 
   useEffect(() => {
     if (token) {
@@ -467,8 +468,6 @@ export default function OrderTab({ accountId: initialAccountId }) {
                 ))}
               </div>
 
-
-
               {/* Tổng tiền và phí giao hàng */}
               <div className="flex justify-between items-center border-t-2 pt-2 font-semibold text-gray-800">
                 <span>Tổng tiền:</span>
@@ -512,24 +511,8 @@ export default function OrderTab({ accountId: initialAccountId }) {
                   <span>Đã thanh toán</span>
                 </div>
               )}
-
-              {selectedOrder.payment && selectedOrder.payment.id === "2" && (
-                <div className="flex justify-between items-center border-t-2 pt-2 text-yellow-600 font-semibold">
-                  <span>Thông báo:</span>
-                  <span>
-                    Bạn cần thanh toán {calculateTotalPrice(selectedOrder.orderDetails).toLocaleString("vi-VN", { style: "currency", currency: "VND" })} khi nhận hàng.
-                  </span>
-                </div>
-              )}
             </div>
             <div className="flex justify-end space-x-4 mt-4">
-              {selectedOrder.status === "99" && (
-                <button
-                  onClick={() => handlePaymentAgain(selectedOrder.id)}
-                  className="bg-yellow-500 text-white px-6 py-2 rounded-full shadow-md transition duration-300 ease-in-out hover:bg-yellow-600 hover:shadow-lg transform hover:scale-105 border border-yellow-500 hover:border-yellow-600">
-                  Thanh toán lại
-                </button>
-              )}
               <button
                 onClick={handlePrintBill}
                 className="bg-blue-500 text-white px-6 py-2 rounded-full shadow-md transition duration-300 ease-in-out hover:bg-blue-600 hover:shadow-lg">

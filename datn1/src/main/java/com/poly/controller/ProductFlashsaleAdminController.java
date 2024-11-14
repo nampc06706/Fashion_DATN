@@ -25,7 +25,7 @@ import com.poly.service.FlashsaleService;
 import com.poly.service.ProductFlashsaleService;
 
 @RestController
-@RequestMapping("/api/admin/product-flashsale")
+@RequestMapping("/api/staff/product-flashsale")
 public class ProductFlashsaleAdminController {
 
 	@Autowired
@@ -33,8 +33,16 @@ public class ProductFlashsaleAdminController {
 	@Autowired
 	private FlashsaleService flashsaleService;
 
+	// Lấy tất cả Flash Sale (kể cả hoạt động và không hoạt động)
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF')")
+	@GetMapping("/flashsales")
+	public ResponseEntity<List<FlashsaleDTO>> getAllFlashsales() {
+		List<FlashsaleDTO> flashsales = flashsaleService.findAllFlashsales();
+		return ResponseEntity.ok(flashsales);
+	}
+
 	// Lấy tất cả sản phẩm flash sale
-	@PreAuthorize("hasAnyAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF')")
 	@GetMapping
 	public ResponseEntity<List<ProductDTO>> getAllProductFlashsales() {
 		List<ProductDTO> productDTOs = productFlashsaleService.findAllIncludingInactive();
@@ -42,21 +50,15 @@ public class ProductFlashsaleAdminController {
 	}
 	 // API đổi trạng thái isactive
     @PutMapping("/{id}/toggle-active")
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF')")
     public ResponseEntity<FlashsaleDTO> toggleIsActive(@PathVariable Integer id) {
         FlashsaleDTO updatedFlashsale = flashsaleService.toggleIsActive(id);
         return ResponseEntity.ok(updatedFlashsale);
     }
 
-	// Lấy tất cả Flash Sale (kể cả hoạt động và không hoạt động)
-	@GetMapping("/flashsales")
-	public ResponseEntity<List<FlashsaleDTO>> getAllFlashsales() {
-		List<FlashsaleDTO> flashsales = flashsaleService.findAllFlashsales();
-		return ResponseEntity.ok(flashsales);
-	}
-
+	
 	@PostMapping("/add")
-	@PreAuthorize("hasAnyAuthority('ADMIN')")
+	@PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF')")
 	public ResponseEntity<ProductDTO> addProductFlashsale(@RequestBody ProductFlashsaleRequest request) {
 	    System.out.println("Request Data: " + request);
 	    Integer productId = request.getProductId();
@@ -73,7 +75,7 @@ public class ProductFlashsaleAdminController {
 	}
 
 	@DeleteMapping("/delete/{productId}/{flashsaleId}")
-	@PreAuthorize("hasAnyAuthority('ADMIN')")
+	@PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF')")
     public ResponseEntity<String> deleteProductFlashsale(@PathVariable Integer productId, @PathVariable Integer flashsaleId) {
         try {
             // Gọi service để xóa
@@ -90,7 +92,7 @@ public class ProductFlashsaleAdminController {
 	
 	// API thêm Flash Sale
     @PostMapping("/addFlashsale")
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF')")
     public ResponseEntity<Flashsale> addFlashsale(@RequestBody Flashsale flashsale) {
         try {
             // Đặt giá trị mặc định cho isactive

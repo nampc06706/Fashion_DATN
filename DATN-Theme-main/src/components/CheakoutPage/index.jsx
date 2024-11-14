@@ -251,6 +251,16 @@ export default function CheckoutPage() {
       toast.error("Vui lòng chọn địa chỉ, phương thức vận chuyển và phương thức thanh toán."); // Thông báo lỗi
       return;
     }
+    // Kiểm tra nếu giỏ hàng trống
+    if (!cartItems || cartItems.length === 0) {
+      toast.error("Giỏ hàng của bạn không có sản phẩm.");
+      // Chuyển hướng sang trang /order sau 2 giây
+      setTimeout(() => {
+        navigate('/cart');
+      }, 2000);
+      return;
+    }
+
 
     const orderData = {
       accountId: userInfo.accountId,
@@ -320,6 +330,11 @@ export default function CheckoutPage() {
       setSelectedPaymentMethod(null);
       setShippingFee(0);
       setTotalAmount(0);
+
+      // Chuyển hướng sang trang /order sau 2 giây
+      setTimeout(() => {
+        navigate('/profile#order');
+      }, 2000);
 
       // navigate('/profile#order');
     } catch (error) {
@@ -417,6 +432,7 @@ export default function CheckoutPage() {
   if (loading) {
     return <p>Đang tải thông tin...</p>;
   }
+
   return (
 
     <LayoutHomeFive childrenClasses="pt-0 pb-0">
@@ -602,8 +618,8 @@ export default function CheckoutPage() {
                                       className="w-[20px] h-[20px] block rounded-full border border-gray-400"
                                       style={{ backgroundColor: item.size.color.name }}
                                     ></span>
-                                     {item.size.name}, 
-                                     {formatCurrency(product.price)}
+                                    {item.size.name},
+                                    {formatCurrency(product.price)}
                                   </p>
                                 </div>
                                 <div>

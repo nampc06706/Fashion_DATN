@@ -47,7 +47,7 @@ const FlashSaleManagementPage = () => {
     try {
       // Gửi yêu cầu POST đến API với token trong header
       const response = await axios.post(
-        'http://localhost:8080/api/admin/product-flashsale/addFlashsale',
+        'http://localhost:8080/api/staff/product-flashsale/addFlashsale',
         flashSaleData,
         {
           headers: {
@@ -89,7 +89,7 @@ const FlashSaleManagementPage = () => {
         return;
       }
       try {
-        const response = await axios.get(`http://localhost:8080/api/admin/products`, {
+        const response = await axios.get(`http://localhost:8080/api/guest/products`, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -110,7 +110,7 @@ const FlashSaleManagementPage = () => {
     setLoading(true);
     try {
       // Gọi API toggle cho Flashsale
-      await axios.put(`http://localhost:8080/api/admin/product-flashsale/${id}/toggle-active`, null, {
+      await axios.put(`http://localhost:8080/api/staff/product-flashsale/${id}/toggle-active`, null, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -135,7 +135,7 @@ const FlashSaleManagementPage = () => {
       return;
     }
     try {
-      const response = await axios.get(`http://localhost:8080/api/admin/product-flashsale/flashsales`, {
+      const response = await axios.get(`http://localhost:8080/api/staff/product-flashsale/flashsales`, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -153,7 +153,7 @@ const FlashSaleManagementPage = () => {
       return;
     }
     try {
-      const response = await axios.get(`http://localhost:8080/api/admin/product-flashsale`, {
+      const response = await axios.get(`http://localhost:8080/api/staff/product-flashsale`, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -176,7 +176,7 @@ const FlashSaleManagementPage = () => {
         return;
       }
       try {
-        const response = await axios.get(`http://localhost:8080/api/admin/product-flashsale/flashsales`, {
+        const response = await axios.get(`http://localhost:8080/api/staff/product-flashsale/flashsales`, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -198,7 +198,7 @@ const FlashSaleManagementPage = () => {
         return;
       }
       try {
-        const response = await axios.get(`http://localhost:8080/api/admin/product-flashsale`, {
+        const response = await axios.get(`http://localhost:8080/api/staff/product-flashsale`, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -283,7 +283,7 @@ const FlashSaleManagementPage = () => {
         discount: discountValue,
       };
 
-      const response = await axios.post('http://localhost:8080/api/admin/product-flashsale/add', requestData, {
+      const response = await axios.post('http://localhost:8080/api/staff/product-flashsale/add', requestData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -323,7 +323,7 @@ const FlashSaleManagementPage = () => {
         // Người dùng đã chọn "Có"
         try {
           const response = await axios.delete(
-            `http://localhost:8080/api/admin/product-flashsale/delete/${productId}/${flashsaleId}`,
+            `http://localhost:8080/api/staff/product-flashsale/delete/${productId}/${flashsaleId}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,

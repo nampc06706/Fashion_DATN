@@ -96,7 +96,7 @@ const SizeManagementPage = () => {
           withCredentials: true,
         });
 
-        const responseSize = await axios.get(`http://localhost:8080/api/admin/size`, {
+        const responseSize = await axios.get(`http://localhost:8080/api/staff/size`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -150,7 +150,7 @@ const SizeManagementPage = () => {
 
       // Gửi yêu cầu thêm Size
       const response = await axios.post(
-        `http://localhost:8080/api/admin/size/add?colorName=${colorName}&productId=${productId}`,
+        `http://localhost:8080/api/staff/size/add?colorName=${colorName}&productId=${productId}`,
         {
           name: sizeName,
           quantityInStock: quantityInStock,
@@ -224,7 +224,7 @@ const SizeManagementPage = () => {
       const quantityInStock = selectedStock;
 
       const response = await axios.post(
-        `http://localhost:8080/api/admin/size/update?colorName=${encodeURIComponent(colorName)}&productId=${productId}`,
+        `http://localhost:8080/api/admin/staff/update?colorName=${encodeURIComponent(colorName)}&productId=${productId}`,
         {
           id: id, // Gửi id size
           name: name, // Gửi name size
@@ -280,7 +280,7 @@ const SizeManagementPage = () => {
 
   const deleteSize = async (sizeId) => {
     try {
-      const response = await axios.delete(`http://localhost:8080/api/admin/size/delete/${sizeId}`, {
+      const response = await axios.delete(`http://localhost:8080/api/staff/size/delete/${sizeId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',

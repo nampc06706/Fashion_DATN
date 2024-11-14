@@ -60,7 +60,9 @@ const AdminRoutes = () => (
 );
 
 export default function Routers() {
-  const [isAdmin, setIsAdmin] = useState(false);  // State để lưu thông tin isAdmin
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isStaff, setIsStaff] = useState(false);
+
   const [userInfo, setUserInfo] = useState(null);  // State để lưu thông tin user
   const [isTokenChecked, setIsTokenChecked] = useState(false);  // Cờ để kiểm tra token đã được kiểm tra
 
@@ -68,19 +70,23 @@ export default function Routers() {
     const token = Cookies.get("token");
     if (token) {
       try {
-        const decodedToken = jwtDecode(token);  // Giải mã token
-        setUserInfo(decodedToken);  // Lưu thông tin người dùng vào state
-        if (decodedToken.roles && decodedToken.roles.includes("ADMIN")) {
-          setIsAdmin(true);  // Kiểm tra quyền admin
-        } else {
-          setIsAdmin(false);  // Nếu không phải admin
-        }
+        const decodedToken = jwtDecode(token);
+        setUserInfo(decodedToken);
+
+        // Kiểm tra quyền
+        const roles = Array.isArray(decodedToken.roles) ? decodedToken.roles : [decodedToken.roles];
+        setIsAdmin(roles.includes("ADMIN"));
+        setIsStaff(roles.includes("STAFF"));
+
+        console.log("Decoded Token:", decodedToken);
+        console.log("Roles:", roles);
       } catch (error) {
         console.error("Token decoding error:", error);
       }
     }
-    setIsTokenChecked(true);  // Đánh dấu là đã kiểm tra token
-  }, []);  // Chạy useEffect một lần khi component được mount
+    setIsTokenChecked(true);
+  }, []);
+
 
   // Kiểm tra xem token đã được kiểm tra chưa
   if (!isTokenChecked) {
@@ -159,7 +165,8 @@ export default function Routers() {
       <Route exact path="*" element={<FourZeroFour />} />
 
       {/* Kiểm tra quyền admin trước khi cho phép vào trang admin */}
-      <Route path="/admin/*" element={isAdmin ? <AdminRoutes /> : <Navigate to="/" />} />
+      <Route path="/admin/*" element={(isAdmin || isStaff) ? <AdminRoutes /> : <Navigate to="/" />} />
+
     </Routes>
   );
 }
