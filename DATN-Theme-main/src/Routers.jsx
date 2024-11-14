@@ -70,10 +70,10 @@ export default function Routers() {
       try {
         const decodedToken = jwtDecode(token);  // Giải mã token
         setUserInfo(decodedToken);  // Lưu thông tin người dùng vào state
-        if (decodedToken.roles && decodedToken.roles.includes("ADMIN")) {
-          setIsAdmin(true);  // Kiểm tra quyền admin
+        if (decodedToken.roles && (decodedToken.roles.includes("ADMIN") || decodedToken.roles.includes("STAFF"))) {
+          setIsAdmin(true);  // Đặt quyền truy cập nếu người dùng là ADMIN hoặc STAFF
         } else {
-          setIsAdmin(false);  // Nếu không phải admin
+          setIsAdmin(false);  // Không có quyền truy cập nếu không phải ADMIN hoặc STAFF
         }
       } catch (error) {
         console.error("Token decoding error:", error);
