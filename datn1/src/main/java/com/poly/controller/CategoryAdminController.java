@@ -22,7 +22,7 @@ import com.poly.dto.CategoryDTO;
 import com.poly.service.CategoryService;
 
 @RestController
-@RequestMapping("/api/admin/categoryadmin")
+@RequestMapping("/api/staff/categoryadmin")
 public class CategoryAdminController {
 	 private static final Logger logger = LoggerFactory.getLogger(AddressController.class);
 	 
@@ -30,7 +30,7 @@ public class CategoryAdminController {
 	    private CategoryService categoryService;
 // hien thi loai hang 
 	    @GetMapping
-	    @PreAuthorize("hasAnyAuthority('ADMIN')")
+	    @PreAuthorize("hasAnyAuthority('ADMIN','STAFF')")
 	    public ResponseEntity<List<CategoryDTO>> getAllCategories() {
 	    	 Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 	    	  if (authentication == null || !authentication.isAuthenticated()) {
