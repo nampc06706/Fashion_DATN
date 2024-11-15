@@ -1,0 +1,102 @@
+/* Pagination.css */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.page-item {
+    margin: 0 5px;
+}
+
+.page-link {
+    display: inline-block;
+    padding: 10px 15px;
+    font-size: 14px;
+    cursor: pointer;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    color: #007bff;
+    text-decoration: none;
+}
+
+.page-link:hover {
+    background-color: #f0f0f0;
+}
+
+.active .page-link {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+/* Nút "Trang trước" và "Trang sau" */
+.previous-link, .next-link {
+    display: inline-block;
+    padding: 10px 15px;
+    font-size: 14px;
+    cursor: pointer;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    color: #007bff;
+    text-decoration: none;
+    margin-right: 5px;
+}
+
+.previous-link:hover, .next-link:hover {
+    background-color: #cc3333;  /* Thay đổi màu nền khi hover */
+    cursor: pointer;  /* Đổi con trỏ thành hình tay khi hover */
+    transition: background-color 0.3s ease; /* Thêm hiệu ứng chuyển màu nền mượt mà */
+}
+
+
+.previous-link {
+    background-color: #007bff; /* Màu nền cho nút "Trang trước" */
+    color: white;   /* Màu chữ */
+}
+
+.next-link {
+    background-color: #007bff; /* Màu nền cho nút "Trang sau" */
+    color: white;   /* Màu chữ */
+}
+
+.previous-link:disabled, .next-link:disabled {
+    background-color: #e9ecef;
+    color: #6c757d;
+    cursor: not-allowed;
+    border-color: #e9ecef;
+}
+
+.disabled .page-link {
+    background-color: #e9ecef;
+    color: #6c757d;
+    cursor: not-allowed;
+    border-color: #e9ecef;
+}
+
+.pagination-container {
+    text-align: center;
+  }
+  
+  .pagination .previous-link {
+    display: inline-flex;  /* Đặt display là inline-flex để chúng hiển thị trên cùng một dòng */
+    align-items: center;   /* Căn giữa biểu tượng và văn bản theo chiều dọc */
+  }
+  
+  .pagination .next-link {
+    display: inline-flex;  /* Tương tự cho nút "Trang sau" */
+    align-items: center;   /* Căn giữa */
+  }
+  
+  .pagination .previous-link span, .pagination .next-link span {
+    margin-right: 5px; /* Khoảng cách giữa văn bản và biểu tượng */
+  }
+  

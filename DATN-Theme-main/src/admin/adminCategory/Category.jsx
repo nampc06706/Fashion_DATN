@@ -5,6 +5,7 @@ import { jwtDecode } from "jwt-decode";
 import { AiOutlineSearch, AiOutlineEdit, AiOutlineDelete, AiOutlinePlus } from 'react-icons/ai';
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
+import Pagination from "../component/Pagination";
 
 const CategoryManagementPage = () => {
   const [categories, setCategories] = useState([]);
@@ -14,6 +15,9 @@ const CategoryManagementPage = () => {
   const [showForm, setShowForm] = useState(false);
   const [newCategory, setNewCategory] = useState({ id: '', name: '' });
   const [isEditing, setIsEditing] = useState(false);
+
+  const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
+  const itemsPerPage = 10; // Số mục hiển thị trên mỗi trang
 
   const token = Cookies.get('token');
   let userInfo = null;
@@ -171,6 +175,12 @@ const CategoryManagementPage = () => {
     category.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredCategories.slice(indexOfFirstItem, indexOfLastItem);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="bg-white shadow-md p-5 flex justify-between items-center mb-6">
@@ -202,7 +212,7 @@ const CategoryManagementPage = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredCategories.map((category) => (
+            {currentItems.map((category) => (
               <tr key={category.id} className="hover:bg-gray-100">
                 <td className="py-4 px-6 border-b border-gray-200">{category.id}</td>
                 <td className="py-4 px-6 border-b border-gray-200">{category.name}</td>
@@ -226,6 +236,13 @@ const CategoryManagementPage = () => {
           </tbody>
         </table>
       </div>
+
+      <Pagination
+        totalItems={filteredCategories.length}
+        itemsPerPage={itemsPerPage}
+        paginate={paginate}
+        currentPage={currentPage}
+      />
 
       {showForm && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
