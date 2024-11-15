@@ -17,4 +17,10 @@ public interface FlashsaleRepository extends JpaRepository<ProductFlashsale, Pro
          + "CURRENT_TIMESTAMP BETWEEN pf.flashsale.startdate AND pf.flashsale.enddate")
     List<ProductFlashsale> findCurrentFlashSales();
     
+    
+    @Query("SELECT pf FROM ProductFlashsale pf WHERE pf.product.id = :productId AND "
+    	     + "pf.flashsale.isactive = true AND "
+    	     + "CURRENT_TIMESTAMP BETWEEN pf.flashsale.startdate AND pf.flashsale.enddate")
+    	ProductFlashsale findFlashSaleByProductId(Integer productId);
+
 }

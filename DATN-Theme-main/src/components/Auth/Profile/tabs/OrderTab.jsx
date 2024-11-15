@@ -142,6 +142,7 @@ export default function OrderTab({ accountId: initialAccountId }) {
     }
   };
 
+  console.log(selectedOrder)
 
   // Định nghĩa hàm fetchOrders bên ngoài useEffect
   const fetchOrders = async () => {

@@ -19,6 +19,7 @@ import com.poly.entity.Carts;
 import com.poly.entity.OrderDetails;
 import com.poly.entity.Orders;
 import com.poly.entity.Payment;
+import com.poly.entity.ProductFlashsale;
 import com.poly.entity.ProductImages;
 import com.poly.entity.Products;
 import com.poly.entity.ShippingMethods;
@@ -26,6 +27,7 @@ import com.poly.entity.Size;
 import com.poly.repository.AccountRepository;
 import com.poly.repository.AddressRepository;
 import com.poly.repository.CartsRepository;
+import com.poly.repository.FlashsaleRepository;
 import com.poly.repository.OrderDetailsRepository;
 import com.poly.repository.OrdersRepository;
 import com.poly.repository.PaymentRepository;
@@ -61,6 +63,10 @@ public class OrdersService {
 
 	@Autowired
 	private CartsRepository cartRepository;
+	
+	@Autowired
+	private FlashsaleRepository flashsaleRepository;
+	
 
 	@Transactional
 	public Orders createOrder(OrderRequestDTO orderRequest) {
@@ -186,17 +192,37 @@ public class OrdersService {
 
 			// Gán danh sách chi tiết vào đơn hàng
 			for (OrderDetails detail : orderDetails) {
-				if (detail != null) {
-					Size size = detail.getSize();
-					if (size != null) {
-						Products product = size.getProduct();
-						if (product != null) {
-							List<ProductImages> images = product.getImages();
-							detail.setImages(images);
-						}
-					}
-				}
+			    if (detail != null) {
+			        Size size = detail.getSize();
+			        if (size != null) {
+			            Products product = size.getProduct();
+			            if (product != null) {
+			                // Kiểm tra sản phẩm có nằm trong flash sale
+			                ProductFlashsale flashSale = flashsaleRepository.findFlashSaleByProductId(product.getId());
+			                if (flashSale != null) {
+			                    // Nếu có, tính giá mới sau khi giảm giá (giảm theo phần trăm)
+			                    BigDecimal originalPrice = product.getPrice();  // Giá gốc của sản phẩm
+			                    BigDecimal discountPercentage = flashSale.getDiscount();  // Phần trăm giảm giá
+
+			                    // Tính giá sau khi giảm
+			                    BigDecimal discountAmount = originalPrice.multiply(discountPercentage).divide(BigDecimal.valueOf(100));  // Số tiền giảm
+			                    BigDecimal discountedPrice = originalPrice.subtract(discountAmount);  // Giá sau khi giảm
+
+			                    detail.setPrice(discountedPrice);  // Cập nhật giá vào chi tiết đơn hàng
+			                } else {
+			                    // Nếu không có flash sale, giữ giá gốc
+			                    detail.setPrice(product.getPrice());
+			                }
+
+			                // Lấy hình ảnh của sản phẩm
+			                List<ProductImages> images = product.getImages();
+			                detail.setImages(images);
+			            }
+			        }
+			    }
 			}
+
+
 			order.setOrderDetails(orderDetails); // Gán danh sách chi tiết vào đơn hàng
 		}
 
