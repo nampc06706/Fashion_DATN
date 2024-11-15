@@ -6,7 +6,7 @@ import { AiOutlineEdit, AiOutlineDelete } from 'react-icons/ai';
 import { toast } from 'react-toastify';
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-
+import Pagination from "../component/Pagination";
 
 const ProductManagementPage = () => {
 
@@ -34,22 +34,13 @@ const ProductManagementPage = () => {
   );
 
   const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
-  const pageSize = 6; // Số sản phẩm mỗi trang
-  const totalPages = Math.ceil(filteredProducts.length / pageSize); // Tổng số trang dựa trên tổng sản phẩm đã lọc
-  const currentProducts = filteredProducts.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const itemsPerPage = 5; // Số mục hiển thị trên mỗi trang
 
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredProducts.slice(indexOfFirstItem, indexOfLastItem);
 
-  const handlePreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const token = Cookies.get('token');
   let userInfo = null;
@@ -570,7 +561,7 @@ const ProductManagementPage = () => {
             </tr>
           </thead>
           <tbody>
-            {currentProducts.map((product) => (
+            {currentItems.map((product) => (
               <tr key={product.id} className="border-b border-gray-300">
                 <td className="py-3 px-6">
                   <img
@@ -608,25 +599,12 @@ const ProductManagementPage = () => {
         </table>
       </div>
       {/* Điều khiển phân trang */}
-      <div className="flex justify-center mt-4">
-        <button
-          onClick={handlePreviousPage}
-          disabled={currentPage === 1}
-          className={`px-4 py-2 mr-2 ${currentPage === 1 ? 'bg-gray-300' : 'bg-blue-500 hover:bg-blue-600'} text-white rounded-lg`}
-        >
-          ←
-        </button>
-
-        <span className="px-4 py-2">Trang {currentPage} / {totalPages}</span>
-
-        <button
-          onClick={handleNextPage}
-          disabled={currentPage === totalPages}
-          className={`px-4 py-2 ml-2 ${currentPage === totalPages ? 'bg-gray-300' : 'bg-blue-500 hover:bg-blue-600'} text-white rounded-lg`}
-        >
-          →
-        </button>
-      </div>
+      <Pagination
+        totalItems={filteredProducts.length}
+        itemsPerPage={itemsPerPage}
+        paginate={paginate}
+        currentPage={currentPage}
+      />
     </div>
 
   );
