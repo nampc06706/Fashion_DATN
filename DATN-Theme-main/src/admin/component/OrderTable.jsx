@@ -3,7 +3,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { toast } from 'react-toastify';
 import { jwtDecode } from "jwt-decode"; // Sửa import cho jwtDecode
-
+import Pagination from "./Pagination";
 export default function OrderTab({ accountId: initialAccountId }) {
   const [isModalOpen, setModalOpen] = useState(false);
   const [orders, setOrders] = useState([]);
@@ -17,11 +17,27 @@ export default function OrderTab({ accountId: initialAccountId }) {
   const [orderDate, setOrderDate] = useState('');
   const [status, setStatus] = useState('');
 
-  const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
-  const [ordersPerPage, setOrdersPerPage] = useState(10); // Số lượng đơn hàng mỗi trang
-  const [totalPages, setTotalPages] = useState(0); // Tổng số trang
 
-  console.log(selectedOrder)
+  // Lọc đơn hàng theo các tiêu chí tìm kiếm
+  const filteredOrders = orders.filter((order) => {
+    const matchesOrderId = orderId ? order.id.toString().includes(orderId) : true;
+    const matchesOrderDate = orderDate
+      ? new Date(order.date[0], order.date[1] - 1, order.date[2]).toLocaleDateString() === new Date(orderDate).toLocaleDateString()
+      : true;
+    const matchesStatus = status ? order.status.toString() === status : true;
+
+    return matchesOrderId && matchesOrderDate && matchesStatus;
+  });
+
+  const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
+  const itemsPerPage = 6; // Số mục hiển thị trên mỗi trang
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredOrders.slice(indexOfFirstItem, indexOfLastItem);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
 
   useEffect(() => {
     if (token) {
@@ -45,31 +61,9 @@ export default function OrderTab({ accountId: initialAccountId }) {
           },
         });
 
-        const sortedOrders = response.data.sort((a, b) =>
-          formatDateArray(b.date) - formatDateArray(a.date)
-        );
 
-        // Lọc đơn hàng theo các tiêu chí tìm kiếm
-        const filteredOrders = sortedOrders.filter((order) => {
-          const matchesOrderId = orderId ? order.id.toString().includes(orderId) : true;
-          const matchesOrderDate = orderDate
-            ? new Date(order.date[0], order.date[1] - 1, order.date[2]).toLocaleDateString() === new Date(orderDate).toLocaleDateString()
-            : true;
-          const matchesStatus = status ? order.status.toString() === status : true;
 
-          return matchesOrderId && matchesOrderDate && matchesStatus;
-        });
-
-        // Cập nhật số trang
-        setTotalPages(Math.ceil(filteredOrders.length / ordersPerPage));
-
-        // Lọc đơn hàng cho trang hiện tại
-        const currentOrders = filteredOrders.slice(
-          (currentPage - 1) * ordersPerPage,
-          currentPage * ordersPerPage
-        );
-
-        setOrders(currentOrders);
+        setOrders(response.data);
 
       } catch (error) {
         console.error("Lỗi khi lấy đơn hàng:", error);
@@ -77,7 +71,7 @@ export default function OrderTab({ accountId: initialAccountId }) {
     };
 
     fetchOrders();
-  }, [accountId, token, orderId, orderDate, status, currentPage, ordersPerPage]); // Thêm các state vào dependency array
+  }, [accountId, token, orderId, orderDate, status, currentPage]); // Thêm các state vào dependency array
 
   const formatDateArray = (dateArray) => {
     const [year, month, day, hour, minute, second] = dateArray;
@@ -273,8 +267,8 @@ export default function OrderTab({ accountId: initialAccountId }) {
             </tr>
           </thead>
           <tbody>
-            {orders.length > 0 ? (
-              orders.map((order) => (
+            {currentItems.length > 0 ? (
+              currentItems.map((order) => (
                 <tr key={order.id} className="bg-white border-b hover:bg-gray-50">
                   <td className="text-center py-4">
                     <span className="text-lg text-qgray font-medium">#{order.id}</span>
@@ -323,30 +317,13 @@ export default function OrderTab({ accountId: initialAccountId }) {
             )}
           </tbody>
         </table>
-        <div className="flex justify-center items-center space-x-2 mt-4">
-          {/* Nút Previous */}
-          <button
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-            className="px-4 py-2 bg-gray-300 text-gray-600 rounded-md hover:bg-gray-400"
-          >
-            <span>&larr;</span>
-          </button>
-
-          {/* Hiển thị trang hiện tại và tổng số trang */}
-          <span className="text-xl text-gray-700">
-            Trang {currentPage} / {totalPages}
-          </span>
-
-          {/* Nút Next */}
-          <button
-            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-            disabled={currentPage === totalPages}
-            className="px-4 py-2 bg-gray-300 text-gray-600 rounded-md hover:bg-gray-400"
-          >
-            <span>&rarr;</span>
-          </button>
-        </div>
+        {/* Điều khiển phân trang */}
+        <Pagination
+          totalItems={filteredOrders.length}
+          itemsPerPage={itemsPerPage}
+          paginate={paginate}
+          currentPage={currentPage}
+        />
       </div>
 
       {isModalOpen && selectedOrder && (
