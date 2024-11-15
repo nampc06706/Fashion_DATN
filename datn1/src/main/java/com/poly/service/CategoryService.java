@@ -44,4 +44,8 @@ public class CategoryService {
         category = categoryRepository.save(category);
         return new CategoryDTO(category.getId(), category.getName());
     }
+    
+    public void deleteCategory(Integer id) {
+    	 categoryRepository.deleteById(id);
+	}
 }

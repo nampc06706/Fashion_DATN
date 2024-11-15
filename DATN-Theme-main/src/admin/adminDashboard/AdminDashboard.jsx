@@ -182,7 +182,7 @@ const StatisticsPage = () => {
     <div className="min-h-screen bg-gray-100 p-6">
       <h1 className="text-3xl font-bold mb-6 text-center">Thống kê</h1>
 
-      <div className={`grid grid-cols-1 md:grid-cols-${role === 'STAFF' ? 2 : 3} gap-6`}>
+      <div className={`grid grid-cols-3 md:grid-cols-${role === 'STAFF' ? 2 : 3} gap-6`}>
         {/* Card 1: Tổng số sản phẩm */}
         <div className="bg-white shadow-lg rounded-lg p-6 flex flex-col items-center justify-center">
           <h2 className="text-xl font-semibold">Tổng số sản phẩm</h2>
@@ -208,7 +208,7 @@ const StatisticsPage = () => {
 
       {/* Biểu đồ doanh thu */}
       <div className="min-h-screen bg-gray-100 p-6">
-        <h1 className="text-3xl font-bold mb-6 text-center">Thống kê</h1>
+        <h1 className="text-3xl font-bold mb-6 text-center">Biểu đồ thống kê</h1>
 
         {/* Biểu đồ tổng quan doanh thu theo tháng */}
         {role !== 'STAFF' && (
