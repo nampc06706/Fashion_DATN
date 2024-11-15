@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import Cookies from 'js-cookie';
 import axios from 'axios';
 import { jwtDecode } from "jwt-decode";
+import Pagination from '../component/Pagination';
 
 const UserManagementPage = () => {
   const [users, setUsers] = useState([]); // Danh sách người dùng
@@ -35,48 +36,6 @@ const UserManagementPage = () => {
   const [previewImage, setPreviewImage] = useState(null);
 
   const [sortConfig, setSortConfig] = useState({ key: 'fullname', direction: 'ascending' });
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
-
-  // Hàm để thêm dữ liệu tĩnh vào danh sách người dùng
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await axios.get(`http://localhost:8080/api/admin/useradmin`, {
-          headers: {
-            'Authorization': `Bearer ${token}`, // Thêm token xác thực
-            'Content-Type': 'application/json',
-          },
-          withCredentials: true, // Để gửi kèm cookie nếu cần
-        });
-        setUsers(response.data); // Cập nhật state `users` từ phản hồi của API
-      } catch (error) {
-        console.error("Lỗi khi gọi API:", error);
-      }
-    };
-    fetchUsers();
-  }, []);
-
-
-  const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value.toLowerCase());
-  };
-
-
-
-  const handleSortChange = (key) => {
-    let direction = 'ascending';
-    if (sortConfig.key === key && sortConfig.direction === 'ascending') {
-      direction = 'descending';
-    }
-    setSortConfig({ key, direction });
-  };
-
-
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
-
 
   const filteredUsers = users.filter((user) =>
     user.fullname.toLowerCase().includes(searchTerm) ||
@@ -95,13 +54,49 @@ const UserManagementPage = () => {
     return 0;
   });
 
-  // Paginate the sorted users
-  const paginatedUsers = sortedUsers.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
 
-  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+  const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
+  const itemsPerPage = 10; // Số mục hiển thị trên mỗi trang
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredUsers.slice(indexOfFirstItem, indexOfLastItem) || sortedUsers.slice(indexOfFirstItem, indexOfLastItem);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  // Hàm để thêm dữ liệu tĩnh vào danh sách người dùng
+
+  const fetchUsers = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8080/api/admin/useradmin`, {
+        headers: {
+          'Authorization': `Bearer ${token}`, // Thêm token xác thực
+          'Content-Type': 'application/json',
+        },
+        withCredentials: true, // Để gửi kèm cookie nếu cần
+      });
+      setUsers(response.data); // Cập nhật state `users` từ phản hồi của API
+    } catch (error) {
+      console.error("Lỗi khi gọi API:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value.toLowerCase());
+  };
+
+  const handleSortChange = (key) => {
+    let direction = 'ascending';
+    if (sortConfig.key === key && sortConfig.direction === 'ascending') {
+      direction = 'descending';
+    }
+    setSortConfig({ key, direction });
+  };
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
@@ -186,6 +181,7 @@ const UserManagementPage = () => {
         );
         setUsers(users.map((u) => (u.id === newUser.id ? response.data.data : u)));
         setShowForm(false); // Ẩn form sau khi gửi thành công
+        fetchUsers();
         toast.success("Cập nhật người dùng thành công!");
       } else {
         // Add a new user
@@ -202,6 +198,7 @@ const UserManagementPage = () => {
         const user = newUser.id ? response.data : [...users, response.data.data];
         setUsers(user);
         setShowForm(false); // Ẩn form sau khi gửi thành công
+        fetchUsers();
         toast.success("Tạo người mới dùng thành công!");
       }
     } catch (error) {
@@ -275,7 +272,7 @@ const UserManagementPage = () => {
               </tr>
             </thead>
             <tbody>
-              {paginatedUsers.map((user) => (
+              {currentItems.map((user) => (
                 <tr key={user.id} className="hover:bg-gray-100">
                   <td className="py-4 px-6 border-b border-gray-200">{user.fullname}</td>
                   <td className="py-4 px-6 border-b border-gray-200">{user.username}</td>
@@ -302,17 +299,12 @@ const UserManagementPage = () => {
         </div>
 
         {/* Pagination Controls */}
-        <div className="flex justify-center mt-4">
-          {[...Array(totalPages)].map((_, i) => (
-            <button
-              key={i}
-              onClick={() => handlePageChange(i + 1)}
-              className={`px-3 py-1 mx-1 rounded ${currentPage === i + 1 ? 'bg-blue-500 text-white' : 'bg-gray-300'}`}
-            >
-              {i + 1}
-            </button>
-          ))}
-        </div>
+        <Pagination
+          totalItems={filteredUsers.length}
+          itemsPerPage={itemsPerPage}
+          paginate={paginate}
+          currentPage={currentPage}
+        />
 
         {showForm && (
           <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
