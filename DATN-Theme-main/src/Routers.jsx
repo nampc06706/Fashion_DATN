@@ -128,7 +128,7 @@ export default function Routers() {
       />
       <Route
         exact
-        path="/checkout/success"
+        path="/checkout/succes"
         element={userInfo ? <Succes /> : <Navigate to="/" />}
       />
       <Route

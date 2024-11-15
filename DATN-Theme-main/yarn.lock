@@ -2597,7 +2597,7 @@ prelude-ls@^1.2.1:
   resolved "https://registry.npmjs.org/prelude-ls/-/prelude-ls-1.2.1.tgz"
   integrity sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==
 
-prop-types@15.8.1, prop-types@^15.5.10, prop-types@^15.6.0, prop-types@^15.6.2, prop-types@^15.7.2, prop-types@^15.8.1:
+prop-types@15.8.1, prop-types@^15, prop-types@^15.5.10, prop-types@^15.6.0, prop-types@^15.6.2, prop-types@^15.7.2, prop-types@^15.8.1:
   version "15.8.1"
   resolved "https://registry.npmjs.org/prop-types/-/prop-types-15.8.1.tgz"
   integrity sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg==
@@ -2678,6 +2678,13 @@ react-modal@^3.16.1:
     prop-types "^15.7.2"
     react-lifecycles-compat "^3.0.0"
     warning "^4.0.3"
+
+react-paginate@^8.2.0:
+  version "8.2.0"
+  resolved "https://registry.yarnpkg.com/react-paginate/-/react-paginate-8.2.0.tgz#947c3dcb444a6c16c1bcf8361871aa135baa3dcd"
+  integrity sha512-sJCz1PW+9PNIjUSn919nlcRVuleN2YPoFBOvL+6TPgrH/3lwphqiSOgdrLafLdyLDxsgK+oSgviqacF4hxsDIw==
+  dependencies:
+    prop-types "^15"
 
 react-range@^1.8.14:
   version "1.8.14"
@@ -2959,13 +2966,14 @@ shebang-regex@^3.0.0:
     react-dom "^18.2.0"
     react-icons "^5.3.0"
     react-modal "^3.16.1"
+    react-paginate "^8.2.0"
     react-range "^1.8.14"
     react-router-dom "^6.20.0"
     react-select "^5.8.3"
     react-slick "^0.29.0"
     react-table "^7.8.0"
     react-toastify "^10.0.5"
-    shopo "file:C:/Users/ADMIN/AppData/Local/Yarn/Cache/v6/npm-shopo-0.0.0-f974a76f-826b-48a4-9967-d996821ae708-1731398139828/node_modules/shopo"
+    shopo "file:C:/Users/ADMIN/AppData/Local/Yarn/Cache/v6/npm-shopo-0.0.0-223bd259-03c8-4ec2-83e5-378eab996263-1731673813958/node_modules/shopo"
     slick-carousel "^1.8.1"
     sweetalert2 "^11.14.5"
     sweetalert2-react-content "^5.0.7"

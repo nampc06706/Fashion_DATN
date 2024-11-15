@@ -454,9 +454,8 @@ export default function OrderTab({ accountId: initialAccountId }) {
 
               {selectedOrder.payment && selectedOrder.payment.id === "2" && (
                 <div className="flex justify-between items-center border-t-2 pt-2 text-yellow-600 font-semibold">
-                  <span>Thông báo:</span>
                   <span>
-                    Bạn cần thanh toán {calculateTotalPrice(selectedOrder.orderDetails).toLocaleString("vi-VN", { style: "currency", currency: "VND" })} khi nhận hàng.
+                    Bạn cần thanh toán {calculateTotalPrice(selectedOrder.orderDetails, selectedOrder.shippingMethod).toLocaleString("vi-VN", { style: "currency", currency: "VND" })} khi nhận hàng.
                   </span>
                 </div>
               )}
