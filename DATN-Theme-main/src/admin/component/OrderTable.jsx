@@ -153,81 +153,127 @@ export default function OrderTab({ accountId: initialAccountId }) {
 
   const handlePrintBill = () => {
     const printWindow = window.open("", "_blank");
-    printWindow.document.write(`<html>
-  <head>
-    <title>Hóa Đơn Đặt Hàng</title>
-    <style>
-      body { font-family: Arial, sans-serif; padding: 20px; }
-      h2 { text-align: center; }
-      .order-details, .product-details { width: 100%; border-collapse: collapse; }
-      .order-details th, .order-details td, .product-details th, .product-details td {
-        border: 1px solid #ddd; padding: 8px; text-align: left;
-      }
-      .order-details th { background-color: #f2f2f2; }
-    </style>
-  </head>
-  <body>
-    <h2>Đơn Hàng #${selectedOrder.id}</h2>
-    <table class="order-details">
-      <tr><th>Tên Khách Hàng</th><td>${selectedOrder.address.fullname}</td></tr>
-      <tr><th>Số Điện Thoại</th><td>${selectedOrder.address.phone}</td></tr>
-      <tr><th>Địa Chỉ Giao Hàng</th><td>${selectedOrder.address.province}, ${selectedOrder.address.district}, ${selectedOrder.address.ward}</td></tr>
-      <tr><th>Ghi Chú</th><td>${selectedOrder.note}</td></tr>
-      <tr><th>Phương Thức Thanh Toán</th><td>${selectedOrder.payment.method}</td></tr>
-      <tr><th>Phương Thức Giao Hàng</th><td>${selectedOrder.shippingMethod.methodName}</td></tr>
-      <tr><th>Thời Gian Dự Kiến Giao Hàng</th><td>${selectedOrder.shippingMethod.estimatedDeliveryTime}</td></tr>
-    </table>
-
-    <h3>Sản Phẩm</h3>
-    <table class="product-details">
-      <thead>
-        <tr><th>Sản Phẩm</th><th>Kích Thước</th><th>Số Lượng</th><th>Giá</th></tr>
-      </thead>
-      <tbody>
-        ${selectedOrder.orderDetails.map(detail => `
-          <tr>
-            <td>${detail.size?.product?.name}</td>
-            <td>${detail.size?.name}</td>
-            <td>${detail.quantity}</td>
-            <td>
-              ${(detail.size?.product?.price ? Number(detail.size.product.price) : 0)
-        .toLocaleString("vi-VN", { style: "currency", currency: "VND" })}
-            </td>
-          </tr>
-        `).join('')}
-      </tbody>
-    </table>
-
-    <h3>Chi Tiết Thanh Toán</h3>
-    <table class="order-details">
-      <tr>
-        <th>Tổng Tiền Sản Phẩm</th>
-        <td>
-          ${calculateTotalPrice(selectedOrder.orderDetails).toLocaleString("vi-VN", { style: "currency", currency: "VND" })}
-        </td>
-      </tr>
-      <tr>
-        <th>Phí Giao Hàng</th>
-        <td>
-          ${selectedOrder.shippingMethod && selectedOrder.shippingMethod.price !== undefined
-        ? Math.round(selectedOrder.shippingMethod.price)
-          .toLocaleString("vi-VN", { style: "currency", currency: "VND" })
-        : "Không có thông tin"}
-        </td>
-      </tr>
-      <tr>
-        <th>Tổng Cộng</th>
-        <td>
-          ${calculateTotalPrice(selectedOrder.orderDetails, selectedOrder.shippingMethod).toLocaleString("vi-VN", { style: "currency", currency: "VND" })}
-        </td>
-      </tr>
-    </table>
-  </body>
-</html>
-`);
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Hóa Đơn Đặt Hàng</title>
+          <style>
+            body {
+              font-family: 'Arial', sans-serif;
+              padding: 20px;
+              background-color: #f9f9f9;
+              color: #333;
+              line-height: 1.6;
+            }
+            h2, h3 {
+              text-align: center;
+              color: #2c3e50;
+            }
+            .order-details, .product-details {
+              width: 100%;
+              border-collapse: collapse;
+              margin-bottom: 20px;
+            }
+            .order-details th, .order-details td, .product-details th, .product-details td {
+              border: 1px solid #ddd;
+              padding: 12px;
+              text-align: left;
+            }
+            .order-details th, .product-details th {
+              background-color: #3498db;
+              color: white;
+              font-weight: bold;
+            }
+            .order-details td, .product-details td {
+              background-color: #fff;
+            }
+            .product-details tbody tr:nth-child(even) {
+              background-color: #f2f2f2;
+            }
+            .order-details td, .product-details td {
+              text-align: right;
+            }
+            .order-details th, .product-details th {
+              text-align: left;
+            }
+            .total-row {
+              font-weight: bold;
+              font-size: 16px;
+            }
+            .footer {
+              text-align: center;
+              margin-top: 20px;
+              font-size: 14px;
+              color: #7f8c8d;
+            }
+            .footer a {
+              color: #3498db;
+              text-decoration: none;
+            }
+            .footer a:hover {
+              text-decoration: underline;
+            }
+          </style>
+        </head>
+        <body>
+          <h2>Đơn Hàng #${selectedOrder.id}</h2>
+  
+          <table class="order-details">
+            <tr><th>Tên Khách Hàng</th><td>${selectedOrder.address.fullname}</td></tr>
+            <tr><th>Số Điện Thoại</th><td>0${selectedOrder.address.phone}</td></tr>
+            <tr><th>Địa Chỉ Giao Hàng</th><td>${selectedOrder.address.province}, ${selectedOrder.address.district}, ${selectedOrder.address.ward}</td></tr>
+            <tr><th>Ghi Chú</th><td>${selectedOrder.note}</td></tr>
+            <tr><th>Phương Thức Thanh Toán</th><td>${selectedOrder.payment.method}</td></tr>
+            <tr><th>Phương Thức Giao Hàng</th><td>${selectedOrder.shippingMethod.methodName}</td></tr>
+            <tr><th>Thời Gian Dự Kiến Giao Hàng</th><td>${selectedOrder.shippingMethod.estimatedDeliveryTime}</td></tr>
+          </table>
+  
+          <h3>Sản Phẩm</h3>
+          <table class="product-details">
+            <thead>
+              <tr><th>Sản Phẩm</th><th>Kích Thước</th><th>Số Lượng</th><th>Giá</th></tr>
+            </thead>
+            <tbody>
+              ${selectedOrder.orderDetails.map(detail => `
+                <tr>
+                  <td>${detail.size?.product?.name}</td>
+                  <td>${detail.size?.name}</td>
+                  <td>${detail.quantity}</td>
+                  <td>${(detail.size?.product?.price ? Number(detail.size.product.price) : 0).toLocaleString("vi-VN", { style: "currency", currency: "VND" })}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+  
+          <h3>Chi Tiết Thanh Toán</h3>
+          <table class="order-details">
+            <tr>
+              <th>Tổng Tiền Sản Phẩm</th>
+              <td>${calculateTotalPrice(selectedOrder.orderDetails).toLocaleString("vi-VN", { style: "currency", currency: "VND" })}</td>
+            </tr>
+            <tr>
+              <th>Phí Giao Hàng</th>
+              <td>${selectedOrder.shippingMethod && selectedOrder.shippingMethod.price !== undefined
+                ? Math.round(selectedOrder.shippingMethod.price).toLocaleString("vi-VN", { style: "currency", currency: "VND" })
+                : "Không có thông tin"}</td>
+            </tr>
+            <tr class="total-row">
+              <th>Tổng Cộng</th>
+              <td>${calculateTotalPrice(selectedOrder.orderDetails, selectedOrder.shippingMethod).toLocaleString("vi-VN", { style: "currency", currency: "VND" })}</td>
+            </tr>
+          </table>
+  
+          <div class="footer">
+            <p>Cảm ơn bạn đã mua hàng tại cửa hàng chúng tôi!</p>
+            <p><a href="mailto:support@store.com">Liên hệ hỗ trợ</a> | <a href="https://www.store.com" target="_blank">Truy cập website</a></p>
+          </div>
+        </body>
+      </html>
+    `);
     printWindow.document.close();
     printWindow.print();
   };
+  
 
   return (
     <>
