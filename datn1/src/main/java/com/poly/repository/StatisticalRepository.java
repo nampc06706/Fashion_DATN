@@ -19,10 +19,11 @@ public interface StatisticalRepository extends JpaRepository<StatisticalDTO, Int
 	@Query(value = "SELECT count(p) FROM Products p")
 	int getTotalProduct();
 	
-	@Query(value = "SELECT sum(price) as SumPrice\r\n"
-			+ "FROM db1.orderdetails\r\n"
-			+ "inner join orders on OrderID = orders.id\r\n"
-			+ "where Status = 4;", nativeQuery = true)
+	@Query(value = "SELECT \n" + //
+				"    SUM(od.Price * od.Quantity) AS SumPrice\n" + //
+				"FROM Orders o\n" + //
+				"JOIN orderdetails od ON o.ID = od.orderid\n" + //
+				"WHERE o.STATUS = 4;", nativeQuery = true)
 	double sumTotalPrice();
 	
 	@Query(value = "SELECT \r\n"
