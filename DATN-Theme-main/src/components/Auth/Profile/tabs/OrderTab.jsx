@@ -262,15 +262,21 @@ export default function OrderTab({ accountId: initialAccountId }) {
   };
 
 
-  // Hàm tính tổng tiền từ orderDetails và giá của shippingMethod
   const calculateTotalPrice = (orderDetails, shippingMethod) => {
+    // Tính tổng tiền sản phẩm (giá * số lượng)
     const productTotal = orderDetails.reduce((total, detail) => {
-      return total + parseFloat(detail.price);
+      const price = parseFloat(detail.price) || 0; // Đảm bảo giá là số và không bị NaN
+      const quantity = parseInt(detail.quantity, 10) || 0; // Đảm bảo số lượng là số và không bị NaN
+      return total + price * quantity; // Nhân giá với số lượng và cộng dồn
     }, 0);
-
+  
+    // Tính chi phí vận chuyển
     const shippingCost = parseFloat(shippingMethod?.price) || 0; // Tránh lỗi khi không có shippingMethod
+  
+    // Trả về tổng tiền (tiền sản phẩm + chi phí vận chuyển)
     return productTotal + shippingCost;
   };
+  
 
   return (
     <>

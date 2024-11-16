@@ -28,8 +28,9 @@ export default function Wishlist({ wishlist = true }) {
       await axios.delete(`http://localhost:8080/api/user/favourites/removeAll/${accountId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-
+      
       toast.success("Đã xóa tất cả sản phẩm yêu thích!");
+      window.location.reload();
     } catch (error) {
       console.error("Lỗi khi xóa tất cả sản phẩm yêu thích:", error);
       toast.error("Không thể xóa tất cả sản phẩm yêu thích.");
@@ -44,6 +45,7 @@ export default function Wishlist({ wishlist = true }) {
       });
 
       toast.success("Đã thêm tất cả sản phẩm yêu thích vào giỏ hàng!");
+      window.location.reload();
     } catch (error) {
       console.error("Lỗi khi thêm tất cả sản phẩm yêu thích vào giỏ hàng:", error.response.data); // Ghi log thông tin lỗi
       toast.error("Không thể thêm sản phẩm yêu thích vào giỏ hàng.");
