@@ -54,4 +54,20 @@ public class FlashsaleService {
         return flashRepository.save(flashsale);
     }
 
+    
+    public FlashsaleDTO updateFlashsaleInfo(Integer id, FlashsaleDTO flashsaleDTO) {
+        Flashsale flashsale = flashRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy Flashsale với id: " + id));
+
+        // Cập nhật thông tin mà không thay đổi isactive
+        flashsale.setName(flashsaleDTO.getName());
+        flashsale.setStartdate(flashsaleDTO.getStartdate());
+        flashsale.setEnddate(flashsaleDTO.getEnddate());
+
+        // Lưu thay đổi
+        Flashsale updatedFlashsale = flashRepository.save(flashsale);
+        return convertToDto(updatedFlashsale);
+    }
+
+    
 }

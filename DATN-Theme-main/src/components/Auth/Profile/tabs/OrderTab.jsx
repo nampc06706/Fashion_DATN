@@ -381,8 +381,8 @@ export default function OrderTab({ accountId: initialAccountId }) {
                           />
                         </div>
                         <p>
-                          {`Giá: ${detail.size?.product?.price !== undefined
-                            ? Math.round(detail.size?.product?.price).toLocaleString("vi-VN", { style: "currency", currency: "VND" })
+                          {`Giá: ${detail.price !== undefined
+                            ? Math.round(detail.price).toLocaleString("vi-VN", { style: "currency", currency: "VND" })
                             : "Không có thông tin"}`}
                         </p>
 

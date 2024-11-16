@@ -6,6 +6,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import { AiOutlineEdit } from 'react-icons/ai';
 import Select from 'react-select';
 const FlashSaleManagementPage = () => {
 
@@ -33,52 +34,170 @@ const FlashSaleManagementPage = () => {
     }
   }
 
-  // Hàm xử lý gửi yêu cầu POST để thêm Flash Sale
-  const handleAddFlashSale = async (event) => {
-    event.preventDefault();
-    setLoading(true);
 
+  // Hàm kiểm tra ngày tháng năm hợp lệ
+  const isValidDate = (dateString) => {
+    // Regex cho phép cả ngày giờ có giây hoặc không có giây
+    const regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/;
+
+    // Nếu không đúng định dạng, trả về false
+    if (!regex.test(dateString)) return false;
+
+    // Kiểm tra ngày tháng năm hợp lệ
+    const date = new Date(dateString);
+
+    // Kiểm tra ngày có hợp lệ không (NaN là không hợp lệ)
+    if (isNaN(date.getTime())) return false;
+
+    return true;
+  };
+
+  // Chuyển mảng thành đối tượng Date
+  const convertArrayToDate = (dateArray) => {
+    return new Date(
+      dateArray[0], // year
+      dateArray[1] - 1, // month
+      dateArray[2], // day
+      dateArray[3] || 0, // hour
+      dateArray[4] || 0, // minute
+      dateArray[5] || 0 // second
+    );
+  };
+  const handleEditFlashSale = (flashSale) => {
+    setName(flashSale.name);
+
+    // Chuyển mảng thành chuỗi hợp lệ cho Date
+    const startDateValue = new Date(formatDateString(flashSale.startdate));
+    const endDateValue = new Date(formatDateString(flashSale.enddate));
+
+    // Kiểm tra nếu ngày bắt đầu và ngày kết thúc hợp lệ
+    if (!isNaN(startDateValue.getTime()) && !isNaN(endDateValue.getTime())) {
+      setStartDate(formatDateTimeLocal(startDateValue));
+      setEndDate(formatDateTimeLocal(endDateValue));
+    } else {
+      console.error('Ngày không hợp lệ:', flashSale.startdate, flashSale.enddate);
+    }
+
+    setSelectedFlashSale(flashSale);
+  };
+
+  // Hàm chuyển mảng thành chuỗi định dạng yyyy-MM-ddTHH:mm:ss
+  const formatDateString = (dateArray) => {
+    const [year, month, day, hour = 0, minute = 0, second = 0] = dateArray;
+    const formattedDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:${String(second).padStart(2, '0')}`;
+    return formattedDate;
+  };
+
+  // Hàm định dạng lại đối tượng Date thành định dạng datetime-local
+  const formatDateTimeLocal = (date) => {
+    if (!date || isNaN(date.getTime())) return '';  // Nếu không phải là ngày hợp lệ, trả về chuỗi rỗng
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+
+    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+  };
+
+
+  const handleSaveFlashSale = async (event) => {
+    event.preventDefault();
+
+    // Kiểm tra ngày bắt đầu và ngày kết thúc
+    if (!isValidDate(startDate)) {
+      toast.error("Ngày bắt đầu không hợp lệ.");
+      return;
+    }
+
+    if (!isValidDate(endDate)) {
+      toast.error("Ngày kết thúc không hợp lệ.");
+      return;
+    }
+
+    // Kiểm tra nếu ngày bắt đầu > ngày kết thúc
+    if (new Date(startDate) > new Date(endDate)) {
+      toast.error("Ngày bắt đầu không thể lớn hơn ngày kết thúc!");
+      return;
+    }
+
+    // Kiểm tra nếu startDate và endDate không hợp lệ
+    if (!startDate || !endDate) {
+      toast.error("Vui lòng chọn ngày bắt đầu và ngày kết thúc hợp lệ.");
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
     const flashSaleData = {
       name,
       startdate: startDate,
       enddate: endDate,
     };
 
-    try {
-      // Gửi yêu cầu POST đến API với token trong header
-      const response = await axios.post(
-        'http://localhost:8080/api/staff/product-flashsale/addFlashsale',
-        flashSaleData,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`, // Truyền token vào header
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+    const token = Cookies.get('token'); // Lấy token từ cookie
 
-      // Hiển thị thông báo thành công
-      Swal.fire({
-        icon: 'success',
-        title: 'Thêm Flash Sale thành công!',
-        text: `Flash Sale ${response.data.name} đã được tạo.`,
-      });
-      await fetchFlashSales();
-      // Reset form
+    try {
+      if (selectedFlashSale) {
+        // Nếu đang chỉnh sửa thì gọi PUT để cập nhật
+        await axios.put(
+          `http://localhost:8080/api/staff/product-flashsale/${selectedFlashSale.id}`,
+          flashSaleData,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+        toast.success("Cập nhật Flash Sale thành công!");
+      } else {
+        // Nếu không có selectedFlashSale thì gọi POST để thêm mới
+        const response = await axios.post(
+          'http://localhost:8080/api/staff/product-flashsale/addFlashsale',
+          flashSaleData,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+        Swal.fire({
+          icon: 'success',
+          title: 'Thêm Flash Sale thành công!',
+          text: `Flash Sale ${response.data.name} đã được tạo.`,
+        });
+      }
+
+      // Reset form và tải lại danh sách flash sales
       setName('');
       setStartDate('');
       setEndDate('');
+      setSelectedFlashSale(null);
+      fetchFlashSales(); // Tải lại flash sales mới
     } catch (error) {
-      // Hiển thị thông báo lỗi
       Swal.fire({
         icon: 'error',
         title: 'Lỗi!',
-        text: 'Không thể thêm Flash Sale. Vui lòng kiểm tra lại dữ liệu.',
+        text: 'Không thể lưu Flash Sale. Vui lòng kiểm tra lại dữ liệu.',
       });
       console.error('API Error:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Hàm hủy, đặt lại giá trị form về mặc định
+  const handleCancel = () => {
+    // Reset lại các giá trị state về mặc định
+    setName(''); // reset tên chương trình
+    setStartDate(''); // reset ngày bắt đầu
+    setEndDate(''); // reset ngày kết thúc
+
+    // Nếu cần reset cả selectedFlashSale
+    setSelectedFlashSale(null);
   };
 
 
@@ -215,17 +334,7 @@ const FlashSaleManagementPage = () => {
     fetchProductFlashSales();
   }, [token]);
 
-  // Chuyển mảng thành đối tượng Date
-  const convertArrayToDate = (dateArray) => {
-    return new Date(
-      dateArray[0], // year
-      dateArray[1] - 1, // month
-      dateArray[2], // day
-      dateArray[3] || 0, // hour
-      dateArray[4] || 0, // minute
-      dateArray[5] || 0 // second
-    );
-  };
+
 
   const handleShowDetails = (id) => {
     //console.log("Product ID clicked:", id);  // Debug log id
@@ -348,6 +457,8 @@ const FlashSaleManagementPage = () => {
   };
 
 
+
+
   return (
     <div className="container mx-auto p-6 bg-white rounded-lg shadow-lg">
       <ToastContainer position="top-right" autoClose={1000} />
@@ -359,7 +470,7 @@ const FlashSaleManagementPage = () => {
           Quản lý Chương Trình Giảm Giá
         </h2>
 
-        <form className="space-y-6" onSubmit={handleAddFlashSale}>
+        <form className="space-y-6" onSubmit={handleSaveFlashSale}>
           {/* Tên Chương Trình */}
           <div className="mb-4">
             <label htmlFor="name" className="block text-lg font-semibold text-gray-700">
@@ -383,9 +494,9 @@ const FlashSaleManagementPage = () => {
             </label>
             <input
               type="datetime-local"
+              id="startdate"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              id="startdate"
               required
               className="w-full p-3 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
@@ -405,21 +516,30 @@ const FlashSaleManagementPage = () => {
               className="w-full p-3 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          {/* Nút Thêm */}
+
+          {/* Nút Thêm hoặc Cập Nhật */}
           <button
             type="submit"
             disabled={loading}
             className="w-40 p-4 bg-transparent text-blue-600 font-semibold border-4 border-blue-600 rounded-full shadow-xl relative overflow-hidden group focus:outline-none"
           >
-            <span
-              className="absolute inset-0 bg-blue-600 transform scale-x-0 group-hover:scale-x-100 transition-all duration-500 ease-in-out z-0"
-            ></span>
+            <span className="absolute inset-0 bg-blue-600 transform scale-x-0 group-hover:scale-x-100 transition-all duration-500 ease-in-out z-0"></span>
             <span className="relative z-10 text-blue group-hover:text-white">
-              {loading ? 'Đang xử lý...' : 'Thêm mới'}
+              {loading ? 'Đang xử lý...' : selectedFlashSale ? 'Cập nhật' : 'Thêm mới'}
             </span>
           </button>
 
+          {/* Nút Hủy */}
+          <button
+            type="button"
+            onClick={handleCancel}
+            className="w-40 p-4 bg-gray-200 text-gray-800 font-semibold rounded-full shadow-xl hover:bg-gray-300"
+          >
+            Hủy
+          </button>
         </form>
+
+
       </div>
 
       <div className="mt-6">
@@ -504,6 +624,7 @@ const FlashSaleManagementPage = () => {
               <th className="px-4 py-3 text-left">Trạng Thái</th>
               <th className="px-4 py-3 text-left"></th>
               <th className="px-4 py-3 text-left"></th>
+              <th className="px-4 py-3 text-left"></th>
             </tr>
           </thead>
           <tbody>
@@ -535,6 +656,14 @@ const FlashSaleManagementPage = () => {
                       ) : (
                         <span className="text-red-600">Bật</span>
                       )}
+                    </button>
+                  </td>
+                  <td className="px-4 py-3">
+                    <button
+                      onClick={() => handleEditFlashSale(item)} // Gọi hàm handleEditFlashSale khi nhấn vào nút
+                      className="bg-yellow-500 text-white px-3 py-1 rounded-lg hover:bg-yellow-600 transition duration-300 mr-2"
+                    >
+                      <AiOutlineEdit />
                     </button>
                   </td>
 
