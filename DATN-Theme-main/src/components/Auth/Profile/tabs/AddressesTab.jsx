@@ -8,7 +8,7 @@ import 'react-toastify/dist/ReactToastify.css';
 export default function AddressesTab() {
   const [addressData, setAddressData] = useState([]);
   const [newAddress, setNewAddress] = useState({
-    id: null, 
+    id: null,
     fullname: '',
     phone: '',
     province: '',
@@ -20,6 +20,7 @@ export default function AddressesTab() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showNewAddressForm, setShowNewAddressForm] = useState(false);
+
 
   const token = Cookies.get('token');
   let userInfo = null;
@@ -39,7 +40,7 @@ export default function AddressesTab() {
         setLoading(false);
         return;
       }
-  
+
       try {
         const response = await axios.get(`http://localhost:8080/api/user/addresses/account/${userInfo.accountId}`, {
           headers: {
@@ -48,7 +49,7 @@ export default function AddressesTab() {
           },
           withCredentials: true,
         });
-  
+
         // Kiểm tra nếu không có địa chỉ
         if (!response.data || response.data.length === 0) {
           setError("Bạn chưa thêm địa chỉ nào.");
@@ -71,11 +72,26 @@ export default function AddressesTab() {
         setLoading(false);
       }
     };
-  
+
     fetchAddresses();
   }, [userInfo?.accountId, token]);
-  
+
   const handleAddAddress = async () => {
+    const { fullname, phone, province, district, ward, note } = newAddress;
+
+    // Kiểm tra bỏ trống
+    if (!fullname || !phone || !province || !district || !ward || !note) {
+      toast.error("Vui lòng điền đầy đủ thông tin!");
+      return;
+    }
+
+    // Kiểm tra số điện thoại
+    const phoneRegex = /^(0[3|5|7|8|9])+([0-9]{8})$/; // Định dạng phổ biến tại Việt Nam
+    if (!phoneRegex.test(phone)) {
+      toast.error("Số điện thoại không hợp lệ!");
+      return;
+    }
+
     try {
       const response = await axios.post(
         `http://localhost:8080/api/user/addresses/add?accountId=${userInfo.accountId}`,
@@ -118,6 +134,10 @@ export default function AddressesTab() {
     }
 
     try {
+      // Kiểm tra xem địa chỉ có đang là mặc định hay không
+      const isCurrentlyDefault = addressData.find(address => address.id === addressId).isdefault;
+
+      // Nếu địa chỉ đã là mặc định, thì bỏ mặc định
       const response = await axios.put(
         `http://localhost:8080/api/user/addresses/${userInfo.accountId}/set-default/${addressId}`,
         {},
@@ -130,20 +150,24 @@ export default function AddressesTab() {
         }
       );
 
-      toast.success("Đặt địa chỉ mặc định thành công!");
+      // Chỉ thay đổi trạng thái nếu yêu cầu API thành công
+      if (response.status === 200) {
+        toast.success(isCurrentlyDefault ? "Đã bỏ địa chỉ mặc định." : "Đặt địa chỉ mặc định thành công!");
 
-      // Cập nhật địa chỉ mặc định trong state
-      setAddressData((prevData) =>
-        prevData.map((address) => ({
-          ...address,
-          isdefault: address.id === addressId,
-        }))
-      );
+        // Cập nhật lại địa chỉ trong state sau khi thay đổi
+        setAddressData((prevData) =>
+          prevData.map((address) => ({
+            ...address,
+            isdefault: address.id === addressId ? !isCurrentlyDefault : address.isdefault,
+          }))
+        );
+      }
     } catch (error) {
-      console.error("Lỗi khi đặt địa chỉ mặc định:", error.message);
-      toast.error("Có lỗi xảy ra khi đặt địa chỉ mặc định.");
+      console.error("Lỗi khi thay đổi địa chỉ mặc định:", error.message);
+      toast.error("Có lỗi xảy ra khi thay đổi địa chỉ mặc định.");
     }
   };
+
   const handleEditAddress = (addressId) => {
     const addressToEdit = addressData.find((address) => address.id === addressId);
     if (addressToEdit) {
@@ -202,13 +226,13 @@ export default function AddressesTab() {
       toast.error("Bạn cần đăng nhập để thực hiện thao tác này.");
       return;
     }
-  
+
     const accountId = userInfo.accountId;
     if (!accountId) {
       toast.error("Không tìm thấy thông tin tài khoản.");
       return;
     }
-  
+
     try {
       const response = await axios.delete(
         `http://localhost:8080/api/user/addresses/delete/${accountId}/${addressId}`,
@@ -219,21 +243,21 @@ export default function AddressesTab() {
           },
         }
       );
-  
+
       if (response.status === 204) {
         toast.success("Xóa địa chỉ thành công!");
         setAddressData((prevData) => prevData.filter((address) => address.id !== addressId));
       } else {
         toast.error("Có lỗi xảy ra khi xóa địa chỉ.");
       }
-  
+
     } catch (error) {
       // Log toàn bộ đối tượng lỗi để kiểm tra chi tiết
-      toast.error("Địa chỉ này đang liên kết với đơn hàng và không thể xóa ngay lúc này!!!"); 
-      
+      toast.error("Địa chỉ này đang liên kết với đơn hàng và không thể xóa ngay lúc này!!!");
+
     }
   };
-  
+
   return (
     <>
       <ToastContainer autoClose={1000} />
@@ -289,7 +313,6 @@ export default function AddressesTab() {
                         <p className="text-gray-700">{address.province}, {address.district}, {address.ward}</p>
                         <p className="text-gray-500">{address.note}</p>
                       </div>
-
                       <div className="flex items-center mt-2">
                         <input
                           type="checkbox"
@@ -311,6 +334,7 @@ export default function AddressesTab() {
                         </label>
                       </div>
 
+
                       {/* Nút Xóa */}
                       <div className="mt-4 flex justify-end">
                         <button
@@ -331,90 +355,90 @@ export default function AddressesTab() {
 
         </div>
         {showNewAddressForm && (
-            <div className="w-full mb-3">
-              <h3 className="text-lg font-semibold">Thêm/Chỉnh sửa địa chỉ</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <input
-                  type="text"
-                  name="fullname"
-                  value={newAddress.fullname}
-                  onChange={handleInputChange}
-                  placeholder="Họ và tên"
-                  className="p-2 border border-gray-300 rounded"
-                  required
-                />
-                <input
-                  type="text"
-                  name="phone"
-                  value={newAddress.phone}
-                  onChange={handleInputChange}
-                  placeholder="Số điện thoại"
-                  className="p-2 border border-gray-300 rounded"
-                  required
-                />
-                <input
-                  type="text"
-                  name="province"
-                  value={newAddress.province}
-                  onChange={handleInputChange}
-                  placeholder="Tỉnh/Thành phố"
-                  className="p-2 border border-gray-300 rounded"
-                  required
-                />
-                <input
-                  type="text"
-                  name="district"
-                  value={newAddress.district}
-                  onChange={handleInputChange}
-                  placeholder="Quận/Huyện"
-                  className="p-2 border border-gray-300 rounded"
-                  required
-                />
-                <input
-                  type="text"
-                  name="ward"
-                  value={newAddress.ward}
-                  onChange={handleInputChange}
-                  placeholder="Phường/Xã"
-                  className="p-2 border border-gray-300 rounded"
-                  required
-                />
-                <textarea
-                  name="note"
-                  value={newAddress.note}
-                  onChange={handleInputChange}
-                  placeholder="Ghi chú"
-                  className="p-2 border border-gray-300 rounded col-span-2"
-                />
-                <div className="col-span-2">
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      name="isdefault"
-                      checked={newAddress.isdefault}
-                      onChange={handleInputChange}
-                      className="mr-2"
-                    />
-                    Đặt làm địa chỉ mặc định
-                  </label>
-                </div>
-              </div>
-              <div className="flex justify-end mt-4">
-                <button
-                  onClick={newAddress.id ? handleUpdateAddress : handleAddAddress}
-                  className="bg-blue-500 text-white py-2 px-4 rounded"
-                >
-                  {newAddress.id ? "Cập nhật" : "Thêm"}
-                </button>
-                <button
-                  onClick={resetNewAddress}
-                  className="bg-red-500 text-white py-2 px-4 rounded ml-2"
-                >
-                  Hủy
-                </button>
+          <div className="w-full mb-3">
+            <h3 className="text-lg font-semibold">Thêm/Chỉnh sửa địa chỉ</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <input
+                type="text"
+                name="fullname"
+                value={newAddress.fullname}
+                onChange={handleInputChange}
+                placeholder="Họ và tên"
+                className="p-2 border border-gray-300 rounded"
+                required
+              />
+              <input
+                type="text"
+                name="phone"
+                value={newAddress.phone}
+                onChange={handleInputChange}
+                placeholder="Số điện thoại"
+                className="p-2 border border-gray-300 rounded"
+                required
+              />
+              <input
+                type="text"
+                name="province"
+                value={newAddress.province}
+                onChange={handleInputChange}
+                placeholder="Tỉnh/Thành phố"
+                className="p-2 border border-gray-300 rounded"
+                required
+              />
+              <input
+                type="text"
+                name="district"
+                value={newAddress.district}
+                onChange={handleInputChange}
+                placeholder="Quận/Huyện"
+                className="p-2 border border-gray-300 rounded"
+                required
+              />
+              <input
+                type="text"
+                name="ward"
+                value={newAddress.ward}
+                onChange={handleInputChange}
+                placeholder="Phường/Xã"
+                className="p-2 border border-gray-300 rounded"
+                required
+              />
+              <textarea
+                name="note"
+                value={newAddress.note}
+                onChange={handleInputChange}
+                placeholder="Ghi chú"
+                className="p-2 border border-gray-300 rounded col-span-2"
+              />
+              <div className="col-span-2">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    name="isdefault"
+                    checked={newAddress.isdefault}
+                    onChange={handleInputChange}
+                    className="mr-2"
+                  />
+                  Đặt làm địa chỉ mặc định
+                </label>
               </div>
             </div>
-          )}
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={newAddress.id ? handleUpdateAddress : handleAddAddress}
+                className="bg-blue-500 text-white py-2 px-4 rounded"
+              >
+                {newAddress.id ? "Cập nhật" : "Thêm"}
+              </button>
+              <button
+                onClick={resetNewAddress} // Reset form khi nhấn nút Hủy
+                className="bg-red-500 text-white py-2 px-4 rounded ml-2"
+              >
+                Hủy
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
