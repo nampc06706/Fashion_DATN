@@ -239,7 +239,7 @@ export default function OrderTab({ accountId: initialAccountId }) {
                   <td>${detail.size?.product?.name}</td>
                   <td>${detail.size?.name}</td>
                   <td>${detail.quantity}</td>
-                  <td>${(detail.size?.product?.price ? Number(detail.size.product.price) : 0).toLocaleString("vi-VN", { style: "currency", currency: "VND" })}</td>
+                  <td>${(detail.price ? Number(detail.price) : 0).toLocaleString("vi-VN", { style: "currency", currency: "VND" })}</td>
                 </tr>
               `).join('')}
             </tbody>
