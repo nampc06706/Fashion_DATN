@@ -343,8 +343,8 @@ export default function OrderTab({ accountId: initialAccountId }) {
                       <option value="3" className="text-orange-500">Đang giao hàng</option>
                       <option value="4" className="text-green-500">Hoàn thành</option> 
                       <option value="5" className="text-red-500">Đã hủy</option> 
-                      <option value="0" className="text-gray-500">Thất bại</option> 
-                      <option value="99" className="text-green-500">Thành công</option> 
+                      <option value="99" className="text-gray-500">Thất bại</option> 
+                      <option value="0" className="text-green-500">Thành công</option> 
                     </select>
                   </td>
 
