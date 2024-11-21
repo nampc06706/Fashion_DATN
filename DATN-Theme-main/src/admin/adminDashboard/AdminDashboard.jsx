@@ -13,6 +13,11 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
+import 'react-tabs/style/react-tabs.css';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+import Pagination from "../component/Pagination";
 
 // Đăng ký các thành phần
 ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, Title, Tooltip, Legend);
@@ -27,6 +32,59 @@ const StatisticsPage = () => {
   const [dailySales, setDailySales] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+
+  const [tableData, setTableData] = useState([]);
+
+  const [filteredDataProduct, setFilteredDataProduct] = useState(tableData);
+
+  const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
+  const itemsPerPage = 10; // Số mục hiển thị trên mỗi trang
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredDataProduct.slice(indexOfFirstItem, indexOfLastItem);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  const exportToExcel = () => {
+    // Chuyển đổi timestamp thành đối tượng Date và định dạng lại theo nhu cầu
+    const formattedItems = currentItems.map(item => {
+      // Giả sử 'ngay' là trường chứa timestamp, bạn có thể thay đổi theo tên trường của bạn
+      return {
+        ...item,
+        orderDate: new Date(parseInt(item.orderDate)).toLocaleDateString("vi-VN") // Định dạng ngày theo kiểu Việt Nam
+      };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(formattedItems);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Thống kê sản phẩm");
+
+    // Tạo file Excel
+    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+    const data = new Blob([excelBuffer], { type: "application/octet-stream" });
+
+    // Tải file xuống
+    saveAs(data, "ThongKeSanPham.xlsx");
+  };
+
+
+  const filterDataByDate = () => {
+    if (startDate && endDate) {
+      const filtered = tableData.filter((item) => {
+        const itemDate = new Date(item.date); // item.date là ngày của sản phẩm (định dạng ISO).
+        return itemDate >= new Date(startDate) && itemDate <= new Date(endDate);
+      });
+      setFilteredDataProduct(filtered);
+    } else {
+      setFilteredDataProduct(currentItems); // Nếu không chọn ngày, hiển thị toàn bộ.
+    }
+
+    setFilteredDataProduct(currentItems); // Nếu không chọn ngày, hiển thị toàn bộ.
+  };
 
   const uniqueYears = Array.from(new Set(monthlySales.map(item => parseInt(item.year, 10))));
 
@@ -101,6 +159,15 @@ const StatisticsPage = () => {
         });
         setSumTotalPrice(priceResponse.data);
 
+        const orderDetailsResponse = await axios.get(`http://localhost:8080/api/staff/statistical/order-statistics`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true,
+        });
+        setTableData(orderDetailsResponse.data);
+        setFilteredDataProduct(orderDetailsResponse.data);
       } catch (error) {
         console.error("Lỗi khi lấy dữ liệu thống kê:", error);
         setError("Có lỗi xảy ra. Vui lòng thử lại sau.");
@@ -206,34 +273,127 @@ const StatisticsPage = () => {
         </div>
       </div>
 
-      {/* Biểu đồ doanh thu */}
-      <div className="min-h-screen bg-gray-100 p-6">
-        <h1 className="text-3xl font-bold mb-6 text-center">Biểu đồ thống kê</h1>
+      <Tabs>
+        <TabList className="mt-10 grid grid-cols-3 md:grid-cols-3 gap-6">
+          <Tab className="bg-white p-6 flex flex-col items-center justify-center font-semibold">Thống kê sản phẩm đã bán</Tab>
+          <Tab className="bg-white p-6 flex flex-col items-center justify-center font-semibold">Biểu đồ doanh thu theo năm</Tab>
+          <Tab className="bg-white p-6 flex flex-col items-center justify-center font-semibold">Biểu đồ doanh thu theo tháng</Tab>
+        </TabList>
+        {/* Tab 1: Thống kê chi tiết sản phẩm */}
+        <TabPanel>
+          <div className="mt-10 bg-white shadow-lg rounded-lg p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h1 className="font-semibold flex-grow text-center">
+                Thống kê sản phẩm bán ra
+              </h1>
+            </div>
 
-        {/* Biểu đồ tổng quan doanh thu theo tháng */}
-        {role !== 'STAFF' && (
-          <div div className="mt-10 bg-white shadow-lg rounded-lg p-6">
+            {/* Bộ lọc thời gian */}
+            <div className="flex justify-between items-center mb-4">
+              <div className="flex space-x-4">
+                <div className="flex space-x-2">
+                  <label className="flex items-center text-gray-700">
+                    <span className="mr-2">Từ ngày:</span>
+                    <input
+                      type="date"
+                      className="border border-gray-300 rounded px-3 py-2"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                    />
+                  </label>
+                  <label className="flex items-center text-gray-700">
+                    <span className="mr-2">Đến ngày:</span>
+                    <input
+                      type="date"
+                      className="border border-gray-300 rounded px-3 py-2"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                    />
+                  </label>
+                </div>
+                <button
+                  className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition"
+                  onClick={filterDataByDate}
+                >
+                  Tìm kiếm
+                </button>
+              </div>
+              <button
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                onClick={exportToExcel}
+              >
+                Xuất Excel
+              </button>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="table-auto w-full border-collapse border border-gray-300">
+                <thead>
+                  <tr className="bg-gray-200">
+                    <th className="border border-gray-300 px-4 py-2 text-left">#ID</th>
+                    <th className="border border-gray-300 px-4 py-2 text-left">Tên sản phẩm</th>
+                    <th className="border border-gray-300 px-4 py-2 text-left">Giá sản phẩm</th>
+                    <th className="border border-gray-300 px-4 py-2 text-center">Số lượng bán</th>
+                    <th className="border border-gray-300 px-4 py-2 text-center">Ngày</th>
+                    <th className="border border-gray-300 px-4 py-2 text-right">Tổng tiền (VND)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentItems.map((item, index) => (
+                    <tr key={index} className="hover:bg-gray-100">
+                      <td className="border border-gray-300 px-4 py-2 text-center">{item.orderDetailsId}</td>
+                      <td className="border border-gray-300 px-4 py-2">{item.productName}</td>
+                      <td className="border border-gray-300 px-4 py-2">
+                        {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.productPrice)}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2 text-center">{item.quantity}</td>
+                      <td className="border border-gray-300 px-4 py-2 text-center">
+                        {new Date(parseInt(item.orderDate)).toLocaleDateString('en-US')}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2 text-right">
+                        {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.total)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <Pagination
+                totalItems={filteredDataProduct.length}
+                itemsPerPage={itemsPerPage}
+                paginate={paginate}
+                currentPage={currentPage}
+              />
+
+            </div>
+          </div>
+        </TabPanel>
+
+        {/* Tab 2: Biểu đồ doanh thu năm*/}
+        <TabPanel>
+          <div className="mt-10 bg-white shadow-lg rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-4">Biểu đồ doanh thu theo tháng</h2>
             <select value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))}>
-              {uniqueYears.map(year => (
+              {[2023, 2024, 2025].map((year) => (
                 <option key={year} value={year}>{year}</option>
               ))}
             </select>
-            <Bar data={chartData} options={{ responsive: true, scales: { y: { beginAtZero: true, ticks: { callback: (value) => value.toLocaleString() + ' VND' } } } }} />
+            <Bar data={chartData} options={{ responsive: true, scales: { y: { beginAtZero: true } } }} />
           </div>
-        )}
-        
-        {/* Biểu đồ doanh thu theo ngày */}
-        <div className="mt-10 bg-white shadow-lg rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">Biểu đồ doanh thu theo ngày</h2>
-          <select value={selectedMonth} onChange={(e) => setSelectedMonth(parseInt(e.target.value))}>
-            {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
-              <option key={month} value={month}>Tháng {month}</option>
-            ))}
-          </select>
-          <Bar data={dailyChartData} options={{ responsive: true, scales: { y: { beginAtZero: true, ticks: { callback: (value) => value.toLocaleString() + ' VND' } } } }} />
-        </div>
-      </div>
+        </TabPanel>
+        {/* Tab 2: Biểu đồ doanh thu tháng*/}
+        <TabPanel>
+          <div className="mt-10 bg-white shadow-lg rounded-lg p-6">
+            <h2 className="text-xl font-semibold mb-4">Biểu đồ doanh thu theo ngày</h2>
+            <select value={selectedMonth} onChange={(e) => setSelectedMonth(parseInt(e.target.value))}>
+              {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
+                <option key={month} value={month}>Tháng {month}</option>
+              ))}
+            </select>
+            <Bar data={dailyChartData} options={{ responsive: true, scales: { y: { beginAtZero: true } } }} />
+          </div>
+        </TabPanel>
+      </Tabs>
     </div >
   );
 };
