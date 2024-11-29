@@ -333,20 +333,27 @@ export default function OrderTab({ accountId: initialAccountId }) {
                   </td>
                   <td className="text-center py-4 px-2">
                     <select
-                      className={`text-sm rounded p-2 ${order.status === '4' || order.status === '0' ? 'text-green-500 bg-green-100' : 'text-red-500 bg-red-100'
+                      className={`text-sm rounded p-2 ${order.status === '4' || order.status === '0'
+                          ? 'text-green-500 bg-green-100'
+                          : 'text-red-500 bg-red-100'
                         }`}
                       value={order.status}
                       onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                      disabled={order.status === '99'} // Disable khi thanh toán thất bại
                     >
                       <option value="1" className="text-yellow-500">Chờ xác nhận</option>
                       <option value="2" className="text-blue-500">Đã xác nhận</option>
                       <option value="3" className="text-orange-500">Đang giao hàng</option>
-                      <option value="4" className="text-green-500">Hoàn thành</option> 
-                      <option value="5" className="text-red-500">Đã hủy</option> 
-                      <option value="99" className="text-gray-500">Thất bại</option> 
-                      <option value="0" className="text-green-500">Thành công</option> 
+                      <option value="4" className="text-green-500">Hoàn thành</option>
+                      <option value="5" className="text-red-500">Đã hủy</option>
+                      {order.status === '99' && (
+                        <option value="99" className="text-gray-500">Thanh toán thất bại ví VNPay</option>
+                      )}
+                      <option value="0" className="text-green-500">Thành công</option>
                     </select>
                   </td>
+
+
 
                   <td className="text-center py-4 px-2">
                     <span className="text-base text-qblack whitespace-nowrap px-2">
