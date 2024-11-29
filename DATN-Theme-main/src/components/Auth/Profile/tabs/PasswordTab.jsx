@@ -32,7 +32,11 @@ export default function PasswordTab() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  // Kiểm tra nếu bất kỳ trường nào trống
+  if (!oldPassword || !newPassword || !confirmPassword) {
+    toast.error("Vui lòng nhập đầy đủ các trường mật khẩu!");
+    return;
+  }
     // Kiểm tra xem mật khẩu mới và xác nhận mật khẩu có khớp không
     if (newPassword !== confirmPassword) {
       toast.error("Mật khẩu mới và xác nhận mật khẩu không khớp!");
@@ -97,6 +101,16 @@ export default function PasswordTab() {
         setConfirmPass("hide-password");
       }
     }
+  };
+  const handleCancel = () => {
+    // Xóa dữ liệu các trường và thiết lập lại trạng thái ban đầu
+    setOldPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+    setOldPass("hide-password");
+    setNewPass("hide-password");
+    setConfirmPass("hide-password");
+    toast.info("Đã hủy thay đổi mật khẩu."); // Thông báo khi nhấn "Hủy"
   };
   return (
     <div className="changePasswordTab w-full">
@@ -331,11 +345,11 @@ export default function PasswordTab() {
                     </div>
                   </button>
                 </div>
-                <button type="button">
-                  <div className="w-full text-sm font-semibold text-qblack mb-5 sm:mb-0">
-                    Hủy bỏ
-                  </div>
-                </button>
+                <button type="button" onClick={handleCancel}>
+        <div className="w-full text-sm font-semibold text-qblack mb-5 sm:mb-0">
+          Hủy bỏ
+        </div>
+      </button>
               </div>
             </div>
           </div>

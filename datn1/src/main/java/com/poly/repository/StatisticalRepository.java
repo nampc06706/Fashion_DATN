@@ -12,7 +12,7 @@ import com.poly.dto.StatisticalDTO;
 public interface StatisticalRepository extends JpaRepository<StatisticalDTO, Integer> {
 	@Query(value = "SELECT COUNT(o.id) AS SumOrder " 
 			+ "FROM db1.orders o "
-			+ "INNER JOIN db1.orderdetails d ON o.id = d.OrderID " 
+//			+ "INNER JOIN db1.orderdetails d ON o.id = d.OrderID " 
 			+ "WHERE o.Status = 4", nativeQuery = true)
 	int countOrdersWithStatusOne();
 	

@@ -27,6 +27,19 @@ export default function Contact() {
   // Hàm gửi dữ liệu đến API
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Kiểm tra các trường có bị bỏ trống hay không
+    const { fullName, email, subject, message } = formData;
+    if (!fullName || !email || !subject || !message) {
+      toast.error("Vui lòng điền đầy đủ thông tin trước khi gửi!");
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error("Email không hợp lệ. Vui lòng kiểm tra lại!");
+      return;
+    }
+
     setIsSubmitting(true);
 
 
@@ -225,7 +238,7 @@ export default function Contact() {
               <div className="inputs mt-5">
                 <form onSubmit={handleSubmit} >
                   <div className="mb-4 form-group">
-                  <h6 className="input-label text-qgray capitalize text-[13px] font-normal block mb-2 ">
+                    <h6 className="input-label text-qgray capitalize text-[13px] font-normal block mb-2 ">
                       Họ và tên*
                     </h6>
                     <input
@@ -251,7 +264,7 @@ export default function Contact() {
                   </div>
                   <div className="mb-4">
                     <input
-                      
+
                       placeholder="Nhập chủ đề của bạn ở đây..."
                       name="subject"
                       type="text"
@@ -274,10 +287,10 @@ export default function Contact() {
                     ></textarea>
                   </div>
                   <div>
-                    <button  type="submit" disabled={isSubmitting} style={{width:'100%',backgroundColor:'black',color:'white',padding: '10px 15px'}} >
-                      
-                        {isSubmitting ? "Đang gửi..." : "Gửi ngay"}
-                      
+                    <button type="submit" disabled={isSubmitting} style={{ width: '100%', backgroundColor: 'black', color: 'white', padding: '10px 15px' }} >
+
+                      {isSubmitting ? "Đang gửi..." : "Gửi ngay"}
+
                     </button>
                   </div>
                 </form>

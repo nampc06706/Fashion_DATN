@@ -95,14 +95,14 @@ export default function OrderTab({ accountId: initialAccountId }) {
       const quantity = parseInt(detail.quantity, 10) || 0; // Đảm bảo số lượng là số và không bị NaN
       return total + price * quantity; // Nhân giá với số lượng và cộng dồn
     }, 0);
-  
+
     // Tính chi phí vận chuyển
     const shippingCost = parseFloat(shippingMethod?.price) || 0; // Tránh lỗi khi không có shippingMethod
-  
+
     // Trả về tổng tiền (tiền sản phẩm + chi phí vận chuyển)
     return productTotal + shippingCost;
   };
-  
+
 
   const handleStatusChange = async (orderId, newStatus) => {
     try {
@@ -254,8 +254,8 @@ export default function OrderTab({ accountId: initialAccountId }) {
             <tr>
               <th>Phí Giao Hàng</th>
               <td>${selectedOrder.shippingMethod && selectedOrder.shippingMethod.price !== undefined
-                ? Math.round(selectedOrder.shippingMethod.price).toLocaleString("vi-VN", { style: "currency", currency: "VND" })
-                : "Không có thông tin"}</td>
+        ? Math.round(selectedOrder.shippingMethod.price).toLocaleString("vi-VN", { style: "currency", currency: "VND" })
+        : "Không có thông tin"}</td>
             </tr>
             <tr class="total-row">
               <th>Tổng Cộng</th>
@@ -273,7 +273,7 @@ export default function OrderTab({ accountId: initialAccountId }) {
     printWindow.document.close();
     printWindow.print();
   };
-  
+
 
   return (
     <>
@@ -333,16 +333,18 @@ export default function OrderTab({ accountId: initialAccountId }) {
                   </td>
                   <td className="text-center py-4 px-2">
                     <select
-                      className={`text-sm rounded p-2 ${order.status === '4' ? 'text-green-500 bg-green-100' : 'text-red-500 bg-red-100'
+                      className={`text-sm rounded p-2 ${order.status === '4' || order.status === '0' ? 'text-green-500 bg-green-100' : 'text-red-500 bg-red-100'
                         }`}
                       value={order.status}
                       onChange={(e) => handleStatusChange(order.id, e.target.value)}
                     >
-                      <option value="1" className="text-red-500">Chờ xác nhận</option>
-                      <option value="2" className="text-red-500">Đã xác nhận</option>
-                      <option value="3" className="text-yellow-500">Đang giao hàng</option>
-                      <option value="4" className="text-green-500">Hoàn thành</option>
-                      <option value="5" className="text-gray-500">Đã hủy</option>
+                      <option value="1" className="text-yellow-500">Chờ xác nhận</option>
+                      <option value="2" className="text-blue-500">Đã xác nhận</option>
+                      <option value="3" className="text-orange-500">Đang giao hàng</option>
+                      <option value="4" className="text-green-500">Hoàn thành</option> 
+                      <option value="5" className="text-red-500">Đã hủy</option> 
+                      <option value="99" className="text-gray-500">Thất bại</option> 
+                      <option value="0" className="text-green-500">Thành công</option> 
                     </select>
                   </td>
 
