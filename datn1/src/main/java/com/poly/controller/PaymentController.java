@@ -149,45 +149,44 @@ public class PaymentController {
 	@PostMapping("/payment-again")
 	@PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF', 'USER')")
 	public ResponseEntity<Map<String, String>> createPaymentAgain(Orders order,
-			@RequestBody Map<String, String> payload) {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		// Kiểm tra xác thực
-		if (authentication == null || !authentication.isAuthenticated()) {
-			logger.error("Authentication is null or not authenticated.");
-			Map<String, String> response = new HashMap<>();
-			response.put("message", "You are not authorized to perform this action.");
-			return ResponseEntity.ok(response);
-		}
-		try {
-			// Lấy orderId từ payload
-			String orderIdStr = payload.get("orderId");
-			Orders orders = ordersService.findById(Integer.valueOf(orderIdStr));
+	        @RequestBody Map<String, String> payload) {
+	    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+	    if (authentication == null || !authentication.isAuthenticated()) {
+	        logger.error("Authentication is null or not authenticated.");
+	        Map<String, String> response = new HashMap<>();
+	        response.put("message", "You are not authorized to perform this action.");
+	        return ResponseEntity.ok(response);
+	    }
+	    try {
+	        String orderIdStr = payload.get("orderId");
+	        Orders orders = ordersService.findById(Integer.valueOf(orderIdStr));
 
-			BigDecimal totalAmount = orders.getOrderDetails().stream()
-				    .map(od -> od.getPrice()) // Chỉ lấy giá sản phẩm, không nhân với số lượng nữa
-				    .reduce(BigDecimal.ZERO, BigDecimal::add)
-				    .multiply(BigDecimal.valueOf(100)); // Thêm hai số 0 vào tổng tiền (nếu cần)
+	        BigDecimal totalAmount = orders.getOrderDetails().stream()
+	                .map(od -> od.getPrice().multiply(BigDecimal.valueOf(od.getQuantity())))
+	                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-			// Lấy phí vận chuyển từ đơn hàng và nhân thêm 100
-			BigDecimal shipmentFee = orders.getShipmentFee().multiply(BigDecimal.valueOf(100));
+	        BigDecimal shipmentFee = orders.getShipmentFee();
+	        BigDecimal totalAmountWithShipping = totalAmount.add(shipmentFee);
 
-			// Tính tổng số tiền bao gồm phí vận chuyển
-			BigDecimal totalAmountWithShipping = totalAmount.add(shipmentFee);
-			String paymentUrl = vnPayService.createOrder(orders.getId(), totalAmountWithShipping.intValue(),
-					"Thanh toán đơn hàng");
+	        int amountInVND = totalAmountWithShipping.multiply(BigDecimal.valueOf(100)).intValue();
 
-			// Trả về link thanh toán dưới dạng JSON
-			Map<String, String> response = new HashMap<>();
-			response.put("vnpayUrl", paymentUrl);
-			return ResponseEntity.ok(response);
 
-		} catch (Exception e) {
-			// Xử lý khi có lỗi và trả về thông báo lỗi
-			Map<String, String> errorResponse = new HashMap<>();
-			errorResponse.put("error", e.getMessage());
-			return ResponseEntity.status(500).body(errorResponse);
-		}
+	        logger.info("Total Amount: {}", totalAmount);
+	        logger.info("Shipment Fee: {}", shipmentFee);
+	        logger.info("Total Amount with Shipping: {}", totalAmountWithShipping);
+	        logger.info("Amount in VND: {}", amountInVND);
+
+	        String paymentUrl = vnPayService.createOrder(orders.getId(), amountInVND, "Thanh toán đơn hàng");
+	        Map<String, String> response = new HashMap<>();
+	        response.put("vnpayUrl", paymentUrl);
+	        return ResponseEntity.ok(response);
+	    } catch (Exception e) {
+	        Map<String, String> errorResponse = new HashMap<>();
+	        errorResponse.put("error", e.getMessage());
+	        return ResponseEntity.status(500).body(errorResponse);
+	    }
 	}
+
 
 	@GetMapping("/{id}")
 	public ResponseEntity<Payment> getPaymentById(@PathVariable Integer id) {

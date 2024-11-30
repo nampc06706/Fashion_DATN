@@ -152,13 +152,13 @@ export default function AddressesTab() {
 
       // Chỉ thay đổi trạng thái nếu yêu cầu API thành công
       if (response.status === 200) {
-        toast.success(isCurrentlyDefault ? "Đã bỏ địa chỉ mặc định." : "Đặt địa chỉ mặc định thành công!");
+        toast.success("Đặt địa chỉ mặc định thành công!");
 
         // Cập nhật lại địa chỉ trong state sau khi thay đổi
         setAddressData((prevData) =>
           prevData.map((address) => ({
             ...address,
-            isdefault: address.id === addressId ? !isCurrentlyDefault : address.isdefault,
+            isdefault: address.id === addressId,
           }))
         );
       }

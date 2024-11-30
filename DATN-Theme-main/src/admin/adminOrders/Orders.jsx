@@ -20,8 +20,15 @@ const OrderDetailsPage = () => {
           'Content-Type': 'application/json'
         }
       });
-      //console.log(response.data)
-      setOrder(response.data);
+
+      // Sắp xếp các đơn hàng theo ngày tạo mới nhất với kiểu date dạng [year, month, day]
+      const sortedOrders = response.data.sort((a, b) => {
+        const dateA = new Date(a.date[0], a.date[1] - 1, a.date[2]); // Chuyển đổi thành ngày
+        const dateB = new Date(b.date[0], b.date[1] - 1, b.date[2]); // Chuyển đổi thành ngày
+        return dateB - dateA; // Sắp xếp theo thứ tự giảm dần
+      });
+
+      setOrder(sortedOrders);
     } catch (error) {
       setError("Lỗi khi tải chi tiết đơn hàng.");
     }
@@ -41,7 +48,6 @@ const OrderDetailsPage = () => {
 
   return (
     <div className="container-fluid mx-auto p-4">
-      <h2 className="text-xl font-semibold mt-4">Đơn hàng</h2>
       <OrderTable orders={order} token={token} fetchOrderDetails={fetchOrderDetails} />
     </div>
   );

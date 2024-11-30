@@ -18,7 +18,8 @@ export default function FlashSale() {
       try {
         const response = await fetch("http://localhost:8080/api/guest/product-flashsale");
         const data = await response.json();
-        console.log(data);
+        console.log(data); // Log toàn bộ dữ liệu từ API để kiểm tra
+
         if (Array.isArray(data)) {
           setProducts(data);
 
@@ -26,9 +27,19 @@ export default function FlashSale() {
           if (data.length > 0 && data[0].flashsale) {
             const { name, startdate, enddate } = data[0].flashsale;
 
-            // Chuyển đổi startdate và enddate thành đối tượng Date
-            const startDate = new Date(startdate[0], startdate[1] - 1, startdate[2], startdate[3], startdate[4]);
-            const endDate = new Date(enddate[0], enddate[1] - 1, enddate[2], enddate[3], enddate[4], enddate[5]);
+            // console.log("startdate:", startdate); // Log startdate
+            // console.log("enddate:", enddate); // Log enddate
+
+            // Chuyển đổi startdate và enddate từ chuỗi 'YYYY-MM-DD HH:mm:ss' thành Date
+            const startDateStr = `${startdate[0]}-${(startdate[1] < 10 ? '0' : '') + startdate[1]}-${(startdate[2] < 10 ? '0' : '') + startdate[2]}T${(startdate[3] < 10 ? '0' : '') + startdate[3]}:${(startdate[4] < 10 ? '0' : '') + startdate[4]}:00`;
+            const endDateStr = `${enddate[0]}-${(enddate[1] < 10 ? '0' : '') + enddate[1]}-${(enddate[2] < 10 ? '0' : '') + enddate[2]}T${(enddate[3] < 10 ? '0' : '') + enddate[3]}:${(enddate[4] < 10 ? '0' : '') + enddate[4]}:00`;
+
+            // Tạo đối tượng Date từ chuỗi đã chuyển đổi
+            const startDate = new Date(startDateStr);
+            const endDate = new Date(endDateStr);
+
+            // console.log("Ngày bắt đầu flash sale:", startDate);
+            // console.log("Ngày kết thúc flash sale:", endDate);
 
             setFlashSaleInfo({
               name,
@@ -38,7 +49,7 @@ export default function FlashSale() {
 
             // Kiểm tra xem flash sale đã hết hạn chưa
             const currentDate = new Date();
-            if (currentDate > endDate) {
+            if (endDate && currentDate > endDate) {
               setIsExpired(true); // Đánh dấu hết hạn
             }
           }

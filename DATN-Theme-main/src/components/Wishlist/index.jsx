@@ -22,36 +22,36 @@ export default function Wishlist({ wishlist = true }) {
     }
   }
 
-  // Hàm xóa tất cả sản phẩm yêu thích
-  const handleRemoveAllFavourites = async () => {
-    try {
-      await axios.delete(`http://localhost:8080/api/user/favourites/removeAll/${accountId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+  // // Hàm xóa tất cả sản phẩm yêu thích
+  // const handleRemoveAllFavourites = async () => {
+  //   try {
+  //     await axios.delete(`http://localhost:8080/api/user/favourites/removeAll/${accountId}`, {
+  //       headers: { Authorization: `Bearer ${token}` }
+  //     });
       
-      toast.success("Đã xóa tất cả sản phẩm yêu thích!");
-      window.location.reload();
-    } catch (error) {
-      console.error("Lỗi khi xóa tất cả sản phẩm yêu thích:", error);
-      toast.error("Không thể xóa tất cả sản phẩm yêu thích.");
-    }
-  };
+  //     toast.success("Đã xóa tất cả sản phẩm yêu thích!");
+  //     window.location.reload();
+  //   } catch (error) {
+  //     console.error("Lỗi khi xóa tất cả sản phẩm yêu thích:", error);
+  //     toast.error("Không thể xóa tất cả sản phẩm yêu thích.");
+  //   }
+  // };
 
-  // Hàm thêm tất cả sản phẩm yêu thích vào giỏ hàng
-  const handleAddAllFavouritesToCart = async () => {
-    try {
-      await axios.post(`http://localhost:8080/api/user/favourites/addToCart/${accountId}`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+  // // Hàm thêm tất cả sản phẩm yêu thích vào giỏ hàng
+  // const handleAddAllFavouritesToCart = async () => {
+  //   try {
+  //     await axios.post(`http://localhost:8080/api/user/favourites/addToCart/${accountId}`, {}, {
+  //       headers: { Authorization: `Bearer ${token}` }
+  //     });
 
-      toast.success("Đã thêm tất cả sản phẩm yêu thích vào giỏ hàng!");
-      window.location.reload();
-    } catch (error) {
-      console.error("Lỗi khi thêm tất cả sản phẩm yêu thích vào giỏ hàng:", error.response.data); // Ghi log thông tin lỗi
-      toast.error("Không thể thêm sản phẩm yêu thích vào giỏ hàng.");
-    }
+  //     toast.success("Đã thêm tất cả sản phẩm yêu thích vào giỏ hàng!");
+  //     window.location.reload();
+  //   } catch (error) {
+  //     console.error("Lỗi khi thêm tất cả sản phẩm yêu thích vào giỏ hàng:", error.response.data); // Ghi log thông tin lỗi
+  //     toast.error("Không thể thêm sản phẩm yêu thích vào giỏ hàng.");
+  //   }
     
-  };
+  // };
 
   return (
     <LayoutHomeFive childrenClasses={wishlist ? "pt-0 pb-0" : ""}>
@@ -81,29 +81,6 @@ export default function Wishlist({ wishlist = true }) {
           <div className="w-full mt-[23px]">
             <div className="container-x mx-auto">
               <ProductsTable className="mb-[30px]" accountId={accountId} />
-              <div className="w-full mt-[30px] flex sm:justify-end justify-start">
-                <div className="sm:flex sm:space-x-[30px] items-center">
-                  <button 
-                    type="button" 
-                    onClick={handleRemoveAllFavourites} // Thêm sự kiện click cho nút xóa
-                  >
-                    <div className="w-full text-sm font-semibold text-qred mb-5 sm:mb-0">
-                      Xóa tất cả
-                    </div>
-                  </button>
-                  <div className="w-[180px] h-[50px]">
-                    <button 
-                      type="button" 
-                      className="yellow-btn" 
-                      onClick={handleAddAllFavouritesToCart} // Thêm sự kiện click cho nút thêm vào giỏ hàng
-                    >
-                      <div className="w-full text-sm font-semibold">
-                        Thêm vào giỏ hàng Tất cả
-                      </div>
-                    </button>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>

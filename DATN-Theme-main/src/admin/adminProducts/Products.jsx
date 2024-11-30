@@ -479,55 +479,6 @@ const ProductManagementPage = () => {
                 </button>
               </div>
 
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">Kích thước và số lượng</label>
-                {newProduct.sizes.map((size, index) => (
-                  <div key={index} className="mb-6">
-                    <div className="mb-4">
-                      <label htmlFor={`size-name-${index}`} className="block text-gray-600 text-sm font-medium mb-1">
-                        Kích thước
-                      </label>
-                      <input
-                        type="text"
-                        id={`size-name-${index}`}
-                        placeholder="Kích thước"
-                        value={size.name}
-                        onChange={(e) => handleSizeChange(index, "name", e.target.value)}
-                        className="w-full border border-gray-300 p-2 rounded-lg"
-                      />
-                    </div>
-
-                    <div className="mb-4">
-                      <label htmlFor={`size-color-${index}`} className="block text-gray-600 text-sm font-medium mb-1">
-                        Màu sắc
-                      </label>
-                      <input
-                        type="text"
-                        id={`size-color-${index}`}
-                        placeholder="Màu sắc"
-                        value={size.color?.name || ""}
-                        onChange={(e) => handleSizeChange(index, "color", { name: e.target.value })}
-                        className="w-full border border-gray-300 p-2 rounded-lg"
-                      />
-                    </div>
-
-                    <div className="mb-4">
-                      <label htmlFor={`quantity-${index}`} className="block text-gray-600 text-sm font-medium mb-1">
-                        Số lượng
-                      </label>
-                      <input
-                        type="number"
-                        id={`quantity-${index}`}
-                        placeholder="Số lượng"
-                        value={size.quantityInStock}
-                        onChange={(e) => handleSizeChange(index, "quantityInStock", e.target.value)}
-                        className="w-full border border-gray-300 p-2 rounded-lg"
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-
               <div className="flex justify-end">
                 <button
                   type="button"

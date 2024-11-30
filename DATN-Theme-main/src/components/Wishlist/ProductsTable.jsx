@@ -151,8 +151,6 @@ export default function ProductsTable({ className, accountId }) {
               <td className="py-4 whitespace-nowrap text-center">Màu sắc</td>
               <td className="py-4 whitespace-nowrap text-center">Kích cỡ</td>
               <td className="py-4 whitespace-nowrap text-center">Giá</td>
-              <td className="py-4 whitespace-nowrap text-center">Số lượng</td>
-              <td className="py-4 whitespace-nowrap text-center">Tổng cộng</td>
               <td className="py-4 whitespace-nowrap text-right w-[114px] block"></td>
             </tr>
             {favourites.length > 0 ? (
@@ -194,21 +192,6 @@ export default function ProductsTable({ className, accountId }) {
                         <span className="text-[15px] font-normal">{formatPrice(productPrice)}</span>
                       </div>
                     </td>
-                    <td className="py-4">
-                      <div className="flex justify-center items-center">
-                        <InputQuantityCom
-                          initialQuantity={item.quantity}
-                          id={item.id} // Truyền ID của mục yêu thích
-                          onQuantityChange={handleQuantityChange} // Thêm callback để cập nhật số lượng
-                        />
-                      </div>
-                    </td>
-
-                    <td className="text-right py-4">
-                      <div className="flex space-x-1 items-center justify-center">
-                        <span className="text-[15px] font-normal">{formatPrice(total)}</span>
-                      </div>
-                    </td>
                     <td className="text-right py-4">
                       <div className="flex space-x-1 items-center justify-center">
                         <span onClick={() => handleRemoveFavourite(item.id)} className="cursor-pointer">
@@ -239,11 +222,6 @@ export default function ProductsTable({ className, accountId }) {
             )}
           </tbody>
         </table>
-        <div className="w-full py-4 flex justify-end">
-          <span className="text-[16px] font-medium">
-            Tổng cộng: {formatPrice(totalAmount)}
-          </span>
-        </div>
       </div>
     </div>
   );

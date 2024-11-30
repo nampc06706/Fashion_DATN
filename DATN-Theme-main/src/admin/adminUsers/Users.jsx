@@ -125,8 +125,8 @@ const UserManagementPage = () => {
 
   const handleFormSubmit = async () => {
 
-    if (!newUser.username || newUser.username.length < 8) {
-      toast.error("Tên tài khoản là bắt buộc và phải có ít nhất 8 ký tự.");
+    if (!newUser.username || newUser.username.length < 1) {
+      toast.error("Tên tài khoản là bắt buộc và phải có ít nhất 1 ký tự.");
       return;
     }
 
@@ -241,12 +241,12 @@ const UserManagementPage = () => {
           />
 
           {/* Add User Button */}
-          <button
+          {/* <button
             onClick={handleAddUser}
             className="bg-green-600 text-white px-4 py-2 rounded flex items-center"
           >
             <AiOutlinePlus className="mr-2" /> Thêm người dùng
-          </button>
+          </button> */}
         </div>
 
         <div className="bg-white shadow-md rounded-lg p-5">

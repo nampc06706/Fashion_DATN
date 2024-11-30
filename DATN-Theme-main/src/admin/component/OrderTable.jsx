@@ -4,6 +4,8 @@ import Cookies from "js-cookie";
 import { toast } from 'react-toastify';
 import { jwtDecode } from "jwt-decode"; // Sửa import cho jwtDecode
 import Pagination from "./Pagination";
+
+
 export default function OrderTab({ accountId: initialAccountId }) {
   const [isModalOpen, setModalOpen] = useState(false);
   const [orders, setOrders] = useState([]);
@@ -12,12 +14,10 @@ export default function OrderTab({ accountId: initialAccountId }) {
   const [error, setError] = useState(null);
   const [paymentUrl, setPaymentUrl] = useState(null);
   const token = Cookies.get("token");
-
   const [orderId, setOrderId] = useState('');
   const [orderDate, setOrderDate] = useState('');
   const [status, setStatus] = useState('');
-
-
+  // Lọc đơn hàng theo các tiêu chí tìm kiếm
   // Lọc đơn hàng theo các tiêu chí tìm kiếm
   const filteredOrders = orders.filter((order) => {
     const matchesOrderId = orderId ? order.id.toString().includes(orderId) : true;
@@ -28,16 +28,12 @@ export default function OrderTab({ accountId: initialAccountId }) {
 
     return matchesOrderId && matchesOrderDate && matchesStatus;
   });
-
   const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
   const itemsPerPage = 6; // Số mục hiển thị trên mỗi trang
-
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredOrders.slice(indexOfFirstItem, indexOfLastItem);
-
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
 
   useEffect(() => {
     if (token) {
@@ -61,17 +57,41 @@ export default function OrderTab({ accountId: initialAccountId }) {
           },
         });
 
+        // Sắp xếp đơn hàng theo ngày và giờ tạo mới nhất
+        const sortedOrders = response.data.sort((a, b) => {
+          // // Log ngày trước khi xử lý
+          // console.log("Ngày đơn hàng A:", a.date);
+          // console.log("Ngày đơn hàng B:", b.date);
 
+          // Lấy năm, tháng, ngày, giờ, phút, giây từ mảng ngày (bỏ qua các phần tử không cần thiết)
+          const dateA = Array.isArray(a.date)
+            ? new Date(a.date[0], a.date[1] - 1, a.date[2], a.date[3], a.date[4], a.date[5])  // Năm, Tháng, Ngày, Giờ, Phút, Giây
+            : new Date(a.date); // Nếu ngày không phải mảng, chuyển trực tiếp
 
-        setOrders(response.data);
+          const dateB = Array.isArray(b.date)
+            ? new Date(b.date[0], b.date[1] - 1, b.date[2], b.date[3], b.date[4], b.date[5])  // Năm, Tháng, Ngày, Giờ, Phút, Giây
+            : new Date(b.date); // Nếu ngày không phải mảng, chuyển trực tiếp
 
+          // // Log giá trị sau khi chuyển đổi
+          // console.log("Ngày A sau khi chuyển đổi:", dateA);
+          // console.log("Ngày B sau khi chuyển đổi:", dateB);
+
+          // Sắp xếp theo thứ tự giảm dần (mới nhất ở trên)
+          return dateB - dateA;
+        });
+
+        setOrders(sortedOrders); // Cập nhật danh sách đơn hàng đã sắp xếp
       } catch (error) {
+        setError("Lỗi khi tải đơn hàng.");
         console.error("Lỗi khi lấy đơn hàng:", error);
       }
     };
 
     fetchOrders();
-  }, [accountId, token, orderId, orderDate, status, currentPage]); // Thêm các state vào dependency array
+  }, [accountId, token]);
+
+
+
 
   const formatDateArray = (dateArray) => {
     const [year, month, day, hour, minute, second] = dateArray;
@@ -279,34 +299,59 @@ export default function OrderTab({ accountId: initialAccountId }) {
     <>
       <div className="relative w-full overflow-x-auto sm:rounded-lg">
 
-        <div className="mb-4">
-          <input
-            type="text"
-            className="w-full p-2 border rounded mb-2"
-            placeholder="Tìm kiếm theo mã đơn hàng"
-            value={orderId}
-            onChange={(e) => setOrderId(e.target.value)}
-          />
-          <input
-            type="date"
-            className="w-full p-2 border rounded mb-2"
-            placeholder="Tìm kiếm theo ngày"
-            value={orderDate}
-            onChange={(e) => setOrderDate(e.target.value)}
-          />
-          <select
-            className="w-full p-2 border rounded mb-2"
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-          >
-            <option value="">Tìm kiếm theo trạng thái</option>
-            <option value="1">Chờ xác nhận</option>
-            <option value="2">Đã xác nhận</option>
-            <option value="3">Đang giao hàng</option>
-            <option value="4">Hoàn thành</option>
-            <option value="5">Đã hủy</option>
-          </select>
+        <div className="mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Tìm kiếm theo mã đơn hàng */}
+            <div className="flex flex-col">
+              <label htmlFor="orderId" className="text-sm font-medium text-gray-700 mb-2">
+                Mã đơn hàng
+              </label>
+              <input
+                id="orderId"
+                type="text"
+                className="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Tìm kiếm theo mã đơn hàng"
+                value={orderId}
+                onChange={(e) => setOrderId(e.target.value)}
+              />
+            </div>
+
+            {/* Tìm kiếm theo ngày */}
+            <div className="flex flex-col">
+              <label htmlFor="orderDate" className="text-sm font-medium text-gray-700 mb-2">
+                Ngày đơn hàng
+              </label>
+              <input
+                id="orderDate"
+                type="date"
+                className="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={orderDate}
+                onChange={(e) => setOrderDate(e.target.value)}
+              />
+            </div>
+
+            {/* Tìm kiếm theo trạng thái */}
+            <div className="flex flex-col">
+              <label htmlFor="status" className="text-sm font-medium text-gray-700 mb-2">
+                Trạng thái
+              </label>
+              <select
+                id="status"
+                className="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+              >
+                <option value="">Tìm kiếm theo trạng thái</option>
+                <option value="1">Chờ xác nhận</option>
+                <option value="2">Đã xác nhận</option>
+                <option value="3">Đang giao hàng</option>
+                <option value="4">Hoàn thành</option>
+                <option value="5">Đã hủy</option>
+              </select>
+            </div>
+          </div>
         </div>
+
 
         <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
           <thead>
@@ -333,26 +378,36 @@ export default function OrderTab({ accountId: initialAccountId }) {
                   </td>
                   <td className="text-center py-4 px-2">
                     <select
-                      className={`text-sm rounded p-2 ${order.status === '4' || order.status === '0'
-                          ? 'text-green-500 bg-green-100'
-                          : 'text-red-500 bg-red-100'
+                      className={`text-sm rounded p-2 ${order.status === '4'
+                        ? 'text-green-700 bg-green-200' // Hoàn thành
+                        : order.status === '0'
+                          ? 'text-emerald-700 bg-emerald-200' // Đã thanh toán, chờ xác nhận
+                          : order.status === '1'
+                            ? 'text-yellow-700 bg-yellow-200' // Chờ xác nhận
+                            : order.status === '5'
+                              ? 'text-red-700 bg-red-200' // Đã hủy
+                              : order.status === '99'
+                                ? 'text-gray-600 bg-gray-300' // Thanh toán thất bại
+                                : 'text-blue-700 bg-blue-200' // Các trạng thái khác
                         }`}
                       value={order.status}
                       onChange={(e) => handleStatusChange(order.id, e.target.value)}
-                      disabled={order.status === '99'} // Disable khi thanh toán thất bại
+                      disabled={order.status === '99' || order.status === '4' || order.status === '5'} // Disable khi thanh toán thất bại, đã hoàn thành, hoặc đã hủy
                     >
-                      <option value="1" className="text-yellow-500">Chờ xác nhận</option>
-                      <option value="2" className="text-blue-500">Đã xác nhận</option>
-                      <option value="3" className="text-orange-500">Đang giao hàng</option>
-                      <option value="4" className="text-green-500">Hoàn thành</option>
-                      <option value="5" className="text-red-500">Đã hủy</option>
-                      {order.status === '99' && (
-                        <option value="99" className="text-gray-500">Thanh toán thất bại ví VNPay</option>
+                      <option value="0" className="text-yellow-600 bg-white">Đã thanh toán, chờ xác nhận</option>
+                      <option value="1" className="text-yellow-600 bg-white">Chờ xác nhận</option>
+                      <option value="2" className="text-blue-600 bg-white">Đã xác nhận</option>
+                      <option value="3" className="text-orange-600 bg-white">Đang giao hàng</option>
+                      <option value="4" className="text-green-600 bg-white">Hoàn thành</option>
+                      {/* Ẩn "Đã hủy" nếu trạng thái là "Đã xác nhận" hoặc "Đang giao hàng" */}
+                      {order.status !== '2' && order.status !== '3' && (
+                        <option value="5" className="text-red-600 bg-white">Đã hủy</option>
                       )}
-                      <option value="0" className="text-green-500">Thành công</option>
+                      {order.status === '99' && (
+                        <option value="99" className="text-gray-600 bg-white">Thanh toán thất bại ví VNPay</option>
+                      )}
                     </select>
                   </td>
-
 
 
                   <td className="text-center py-4 px-2">

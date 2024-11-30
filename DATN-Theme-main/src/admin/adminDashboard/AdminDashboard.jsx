@@ -37,7 +37,7 @@ const StatisticsPage = () => {
   const [endDate, setEndDate] = useState('');
 
   const [tableData, setTableData] = useState([]);
-
+  const [sortedData, setSortedData] = useState([]);
   const [filteredDataProduct, setFilteredDataProduct] = useState(tableData);
 
   const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
@@ -72,19 +72,37 @@ const StatisticsPage = () => {
   };
 
 
+  const parseDateToTimestamp = (dateString) => {
+    const [day, month, year] = dateString.split('/'); // Tách chuỗi theo định dạng dd/MM/yyyy
+    return new Date(`${year}-${month}-${day}`).getTime(); // Chuyển sang timestamp
+  };
+
   const filterDataByDate = () => {
     if (startDate && endDate) {
-      const filtered = tableData.filter((item) => {
-        const itemDate = new Date(item.date); // item.date là ngày của sản phẩm (định dạng ISO).
-        return itemDate >= new Date(startDate) && itemDate <= new Date(endDate);
-      });
+      const startTimestamp = parseDateToTimestamp(startDate);
+      const endTimestamp = parseDateToTimestamp(endDate);
+  
+      const filtered = tableData
+        .filter((item) => {
+          const itemTimestamp = item.orderDate; // Giả sử orderDate là timestamp
+          return itemTimestamp >= startTimestamp && itemTimestamp <= endTimestamp;
+        })
+        .sort((a, b) => b.quantitySold - a.quantitySold); // Sắp xếp theo số lượng bán giảm dần
+  
       setFilteredDataProduct(filtered);
     } else {
-      setFilteredDataProduct(currentItems); // Nếu không chọn ngày, hiển thị toàn bộ.
+      // Nếu không chọn ngày, hiển thị toàn bộ và sắp xếp theo số lượng bán
+      const sortedData = [...tableData].sort((a, b) => b.quantitySold - a.quantitySold);
+      setFilteredDataProduct(sortedData);
     }
-
-    setFilteredDataProduct(currentItems); // Nếu không chọn ngày, hiển thị toàn bộ.
   };
+  
+
+  
+  // Gọi filterDataByDate khi startDate hoặc endDate thay đổi
+  useEffect(() => {
+    filterDataByDate();
+  }, [startDate, endDate, tableData]);
 
   const uniqueYears = Array.from(new Set(monthlySales.map(item => parseInt(item.year, 10))));
 
@@ -313,10 +331,14 @@ const StatisticsPage = () => {
                 </div>
                 <button
                   className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition"
-                  onClick={filterDataByDate}
+                  onClick={() => {
+                    setStartDate('');
+                    setEndDate('');
+                  }}
                 >
-                  Tìm kiếm
+                  Đặt lại
                 </button>
+
               </div>
               <button
                 className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"

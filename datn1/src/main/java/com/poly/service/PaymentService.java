@@ -41,33 +41,49 @@ public class PaymentService {
 
 	@Transactional
 	public String createPaymentUrl(Orders order, List<CartDTO> cartDTOs) {
-	    // Tính tổng số tiền cho các sản phẩm trong giỏ hàng
-	    BigDecimal amount = calculateTotalAmount(cartDTOs).multiply(BigDecimal.valueOf(100)); // Chuyển sang đơn vị tiền tệ (đồng)
+		// Tính tổng số tiền cho các sản phẩm trong giỏ hàng
+		BigDecimal amount = calculateTotalAmount(cartDTOs).multiply(BigDecimal.valueOf(100)); // Chuyển sang đơn vị tiền
+																								// tệ (đồng)
 
-	    // Lấy phí vận chuyển từ đơn hàng
-	    BigDecimal shipmentFee = order.getShipmentFee().multiply(BigDecimal.valueOf(100)); // Chuyển sang đơn vị tiền tệ (đồng)
+		// Lấy phí vận chuyển từ đơn hàng
+		BigDecimal shipmentFee = order.getShipmentFee().multiply(BigDecimal.valueOf(100)); // Chuyển sang đơn vị tiền tệ
+																							// (đồng)
 
-	    // Tính tổng số tiền bao gồm phí vận chuyển
-	    BigDecimal totalAmount = amount.add(shipmentFee);
+		// Tính tổng số tiền bao gồm phí vận chuyển
+		BigDecimal totalAmount = amount.add(shipmentFee);
 
-	    // Tạo URL thanh toán thông qua VNPayService
-	    String paymentUrl = vnPayService.createOrder(order.getId(), totalAmount.intValue(), "Thanh toán đơn hàng");
+		// Tạo URL thanh toán thông qua VNPayService
+		String paymentUrl = vnPayService.createOrder(order.getId(), totalAmount.intValue(), "Thanh toán đơn hàng");
 
-	    logger.info("Payment URL: {}", paymentUrl);
-	    return paymentUrl;
+		logger.info("Payment URL: {}", paymentUrl);
+		return paymentUrl;
 	}
 
 	// Phương thức tính tổng số tiền cho các sản phẩm trong giỏ hàng
 	private BigDecimal calculateTotalAmount(List<CartDTO> cartItems) {
-	    return cartItems.stream().map(cartItem -> {
-	        Size size = sizeRepository.findById(cartItem.getSize().getId())
-	                .orElseThrow(() -> new RuntimeException("Size not found"));
-	        BigDecimal productPrice = size.getProduct().getPrice();
-	        BigDecimal quantity = new BigDecimal(cartItem.getQuantity());
-	        return productPrice.multiply(quantity);
-	    }).reduce(BigDecimal.ZERO, BigDecimal::add);
-	}
+		return cartItems.stream().map(cartItem -> {
+			// Kiểm tra và lấy đúng kích thước (size) và sản phẩm (product)
+			Size size = sizeRepository.findById(cartItem.getSize().getId())
+					.orElseThrow(() -> new RuntimeException("Size not found"));
 
+			// Lấy giá sản phẩm từ size (đảm bảo giá tồn tại)
+			BigDecimal productPrice = size.getProduct().getPrice();
+			if (productPrice == null) {
+				throw new RuntimeException("Product price not found");
+			}
+
+			// Lấy số lượng sản phẩm và đảm bảo là giá trị hợp lệ
+			BigDecimal quantity = new BigDecimal(cartItem.getQuantity());
+			if (quantity.compareTo(BigDecimal.ZERO) <= 0) {
+				throw new RuntimeException("Quantity must be greater than zero");
+			}
+
+			// Tính toán giá trị cho sản phẩm này
+			return productPrice.multiply(quantity);
+		})
+				// Tổng hợp giá trị từ tất cả các sản phẩm
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+	}
 
 	public List<Payment> findAll() {
 		return paymentRepository.findAll();

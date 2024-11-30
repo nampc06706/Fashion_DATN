@@ -28,13 +28,7 @@ export default function TopBar({ className }) {
                     </span>
                   </Link>
                 </li>
-                <li>
-                  <Link to="/faq">
-                    <span className="text-xs leading-6 text-qblack font-500">
-                      Hỗ trợ
-                    </span>
-                  </Link>
-                </li>
+          
               </ul>
             </div>
             <div className="topbar-dropdowns sm:block hidden">
