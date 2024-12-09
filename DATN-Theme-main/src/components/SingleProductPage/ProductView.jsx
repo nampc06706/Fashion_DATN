@@ -218,7 +218,7 @@ export default function ProductView() {
         toast.success('Sản phẩm đã được thêm vào giỏ hàng.');
       }
     } catch (error) {
-      toast.error('Có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng.');
+      toast.error('Số lượng vượt quá số lượng tồn kho.');
       console.error('Error adding product to cart:', error);
     }
   };

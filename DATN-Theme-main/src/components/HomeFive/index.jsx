@@ -82,12 +82,6 @@ function Index() {
           className="mb-[60px]"
         />
       )}
-
-      <ProductsAds
-        sectionHeight="164"
-        ads={[`/assets/images/banner-cs1.jpg`]}
-        className="products-ads-section mb-[60px]"
-      />
     </LayoutHomeFive>
   );
 }
