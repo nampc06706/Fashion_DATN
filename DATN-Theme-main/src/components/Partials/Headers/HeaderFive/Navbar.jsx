@@ -90,179 +90,133 @@ export default function Navbar({ className }) {
 
 
   return (
-    <div
-      className={`nav-widget-wrapper w-full bg-qh5-bwhite h-[60px] relative z-30  ${className || ""
-        }`}
-    >
+    <div className={`w-full bg-white h-[70px] relative z-30 ${className || ""}`}>
       <div className="container-x mx-auto h-full">
-        <div className="w-full h-full relative">
-          <div className="w-full h-full flex justify-between items-center">
-            <div className="category-and-nav flex xl:space-x-7 space-x-3 items-center">
-              <div className="category w-[270px] h-[53px] bg-white px-5 rounded-t-md mt-[6px] relative">
-                <button
-                  onClick={handler}
-                  type="button"
-                  className="w-full h-full flex justify-between items-center"
-                >
-                  <div className="flex space-x-3 items-center">
-                    <span className="text-qblack">
+        <div className="w-full h-full flex justify-between items-center px-6">
+          {/* Danh mục */}
+          <div className="relative">
+            <button
+              onClick={handler}
+              type="button"
+              className="flex items-center space-x-3 bg-gray-100 hover:bg-gray-200 rounded-lg p-3 transition-all duration-300"
+            >
+              <span className="text-black text-sm font-semibold">Tất cả danh mục</span>
+              <svg
+                className="w-4 h-4 text-gray-600"
+                viewBox="0 0 14 9"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <rect width="14" height="1" />
+                <rect y="8" width="14" height="1" />
+                <rect y="4" width="10" height="1" />
+              </svg>
+            </button>
+
+            {categoryToggle && (
+              <div
+                className="fixed top-0 left-0 w-full h-full bg-black opacity-50 z-20"
+                onClick={handler}
+              ></div>
+            )}
+
+            <div
+              className="category-dropdown absolute left-0 top-[60px] bg-white shadow-md w-full rounded-b-lg overflow-y-auto z-30"
+              style={{
+                height: `${elementsSize}`,
+                maxHeight: '400px', // Giới hạn chiều cao tối đa để tránh che khuất
+              }}
+            >
+              <ul className="categories-list">
+                {categories.map((category) => (
+                  <li key={category.id} className="category-item">
+                    <div
+                      onClick={() => {
+                        navigate(`/all-products?category=${category.name}`);
+                      }}
+                      className="flex justify-between items-center p-4 text-black hover:bg-blue-100 transition-all duration-300 cursor-pointer"
+                    >
+                      <span className="text-sm font-medium">{category.name}</span>
                       <svg
-                        className="fill-current"
-                        width="14"
-                        height="9"
-                        viewBox="0 0 14 9"
-                        fill="none"
+                        className="w-3 h-3 text-gray-600"
+                        viewBox="0 0 6 9"
                         xmlns="http://www.w3.org/2000/svg"
                       >
-                        <rect width="14" height="1" />
-                        <rect y="8" width="14" height="1" />
-                        <rect y="4" width="10" height="1" />
+                        <rect
+                          x="1.49805"
+                          y="0.818359"
+                          width="5.78538"
+                          height="1.28564"
+                          transform="rotate(45 1.49805 0.818359)"
+                          fill="currentColor"
+                        />
+                        <rect
+                          x="5.58984"
+                          y="4.90918"
+                          width="5.78538"
+                          height="1.28564"
+                          transform="rotate(135 5.58984 4.90918)"
+                          fill="currentColor"
+                        />
                       </svg>
-                    </span>
-                    <span className="text-sm font-600 text-qblacktext">
-                      Tất cả danh mục
-                    </span>
-                  </div>
-                  <div>
-                    <Arrow
-                      width="5.78538"
-                      height="1.28564"
-                      className="fill-current text-qblacktext"
-                    />
-                  </div>
-                </button>
-                {categoryToggle && (
-                  <div
-                    className="fixed top-0 left-0 w-full h-full -z-10"
-                    onClick={handler}
-                  ></div>
-                )}
-                <div
-                  className="category-dropdown w-full absolute left-0 top-[53px] overflow-hidden"
-                  style={{ height: `${elementsSize} ` }}
-                >
-                  <ul className="categories-list">
-                    {categories.map((category) => (
-                      <li key={category.id} className="category-item">
-                        <div
-                          onClick={() => {
-                            navigate(`/all-products?category=${category.name}`);
-                          }}
-                          className="flex justify-between items-center px-5 h-10 bg-white hover:bg-qh2-green transition-all duration-300 ease-in-out cursor-pointer text-qblack hover:text-white"
-                        >
-                          <div className="flex items-center space-x-6">
-                            <span className="text-xs font-400">{category.name}</span>
-                          </div>
-                          <div>
-                            <span>
-                              <svg
-                                className="fill-current"
-                                width="6"
-                                height="9"
-                                viewBox="0 0 6 9"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <rect
-                                  x="1.49805"
-                                  y="0.818359"
-                                  width="5.78538"
-                                  height="1.28564"
-                                  transform="rotate(45 1.49805 0.818359)"
-                                  fill="currentColor"
-                                />
-                                <rect
-                                  x="5.58984"
-                                  y="4.90918"
-                                  width="5.78538"
-                                  height="1.28564"
-                                  transform="rotate(135 5.58984 4.90918)"
-                                  fill="currentColor"
-                                />
-                              </svg>
-                            </span>
-                          </div>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-              <div className="nav">
-                <ul className="nav-wrapper flex xl:space-x-10 space-x-5">
-                  <li className="relative">
-                    <Link to="/">
-                      <span className="flex items-center text-sm text-qblack font-600 cursor-pointer ">
-                        <span>Trang Chủ</span>
-                      </span>
-                    </Link>
+                    </div>
                   </li>
-                  
-                  <li className="relative">
-                    <Link to="/all-products">
-                      <span className="flex items-center text-sm text-qblack font-600 cursor-pointer ">
-                        <span>Sản Phẩm</span>
-                      </span>
-                    </Link>
-                  </li>
-                 
-                  <li>
-                    <Link to="/about">
-                      <span className="flex items-center text-sm text-qblack font-600 cursor-pointer ">
-                        <span>Về Chúng tôi</span>
-                      </span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/contact">
-                      <span className="flex items-center text-sm text-qblack font-600 cursor-pointer ">
-                        <span>Liên Hệ</span>
-                      </span>
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-              <div className="become-seller-btn  w-[161px] h-[40px]">
-                <div className="become-seller-btn w-[161px] h-[40px]">
-                  {user && user.role && (  // Kiểm tra nếu user tồn tại và là admin
-                    <Link to="/admin">
-                      <div className="black-btn flex justify-center items-center cursor-pointer h-full">
-                        <div className="flex space-x-2 items-center">
-                          <span className="text-sm font-600">Quản Lý Bán Hàng</span>
-                          <span>
-                            <svg
-                              width="6"
-                              height="10"
-                              viewBox="0 0 6 10"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <rect
-                                x="1.08984"
-                                width="6.94106"
-                                height="1.54246"
-                                transform="rotate(45 1.08984 0)"
-                              />
-                              <rect
-                                x="6"
-                                y="4.9082"
-                                width="6.94106"
-                                height="1.54246"
-                                transform="rotate(135 6 4.9082)"
-                              />
-                            </svg>
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  )}
-                </div>
-              </div>
+                ))}
+              </ul>
             </div>
           </div>
 
+
+          {/* Navigation */}
+          <div className="flex space-x-6">
+            <Link to="/" className="text-black text-sm font-medium hover:text-blue-600 transition-all duration-300">
+              Trang Chủ
+            </Link>
+            <Link to="/all-products" className="text-black text-sm font-medium hover:text-blue-600 transition-all duration-300">
+              Sản Phẩm
+            </Link>
+            <Link to="/about" className="text-black text-sm font-medium hover:text-blue-600 transition-all duration-300">
+              Về Chúng tôi
+            </Link>
+            <Link to="/contact" className="text-black text-sm font-medium hover:text-blue-600 transition-all duration-300">
+              Liên Hệ
+            </Link>
+          </div>
+
+          {/* Quản lý bán hàng */}
+          <div className="flex items-center">
+            {user && user.role && (
+              <Link to="/admin">
+                <button className="flex items-center bg-blue-500 text-white text-sm font-medium py-2 px-4 rounded-lg hover:bg-blue-600 transition-all duration-300">
+                  Quản Lý Bán Hàng
+                  <svg
+                    width="6"
+                    height="10"
+                    viewBox="0 0 6 10"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="ml-2 w-3 h-3"
+                  >
+                    <rect
+                      x="1.08984"
+                      width="6.94106"
+                      height="1.54246"
+                      transform="rotate(45 1.08984 0)"
+                    />
+                    <rect
+                      x="6"
+                      y="4.9082"
+                      width="6.94106"
+                      height="1.54246"
+                      transform="rotate(135 6 4.9082)"
+                    />
+                  </svg>
+                </button>
+              </Link>
+            )}
+          </div>
         </div>
       </div>
     </div>
+
   );
 }

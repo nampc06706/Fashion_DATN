@@ -47,7 +47,7 @@ export default function SingleProductPage() {
   // Fetch dữ liệu đánh giá khi 'id' thay đổi
   useEffect(() => {
     if (!id) return; // Nếu id không tồn tại thì không thực hiện fetch
-  
+
     const fetchRatings = async () => {
       setLoading(true);
       try {
@@ -57,9 +57,9 @@ export default function SingleProductPage() {
             'Content-Type': 'application/json',
           }
         });
-  
+
         console.log("Dữ liệu đánh giá từ API:", response.data);
-  
+
         // Kiểm tra xem dữ liệu trả về có phải là mảng không
         if (Array.isArray(response.data)) {
           setComments(response.data); // Nếu là mảng, gán vào state
@@ -74,11 +74,11 @@ export default function SingleProductPage() {
         setLoading(false);
       }
     };
-  
+
     fetchRatings(); // Gọi hàm fetch khi 'id' thay đổi
   }, [id, token]); // Theo dõi id và token khi thay đổi
-  
-  
+
+
 
 
   // Sử dụng useParams để lấy productId từ URL
@@ -151,37 +151,37 @@ export default function SingleProductPage() {
             <div className="tab-contents w-full min-h-[400px] ">
               <div className="container-x mx-auto">
                 {tab === "des" && (
-                  <div data-aos="fade-up" className="w-full tab-content-item">
-                    <h6 className="text-[18px] font-medium text-qblack mb-2">
+                  <div data-aos="fade-up" className="w-full tab-content-item bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out">
+                    <h6 className="text-2xl font-semibold text-gray-800 mb-4">
                       Hướng dẫn chọn kích cỡ thời trang công sở nam
                     </h6>
-                    <p className="text-[15px] text-qgray text-normal mb-10">
+                    <p className="text-base text-gray-600 mb-6 leading-relaxed">
                       Để luôn tự tin và thoải mái khi mặc đồ công sở, việc chọn kích cỡ phù hợp cho từng loại trang phục là vô cùng quan trọng. Dưới đây là những gợi ý giúp bạn chọn đúng kích cỡ cho từng loại trang phục công sở phổ biến.
                     </p>
                     <div>
-                      <h6 className="text-[18px] text-medium mb-4">
+                      <h6 className="text-xl font-medium text-gray-800 mb-4">
                         Hướng dẫn chi tiết:
                       </h6>
-                      <ul className="list-disc ml-[15px]">
-                        <li className="font-normal text-qgray leading-9">
+                      <ul className="list-inside list-disc space-y-4">
+                        <li className="text-gray-600 text-base leading-relaxed">
                           <strong>Sơ mi:</strong>
                           <br />- Đo vòng ngực ở phần lớn nhất của ngực để tìm kích cỡ sơ mi phù hợp. Nếu số đo nằm giữa hai kích cỡ, hãy chọn kích cỡ lớn hơn để có sự thoải mái.
                           <br />- Đo vòng cổ và chọn sơ mi có vòng cổ không quá rộng hoặc quá chật khi cài cúc trên cùng. Đảm bảo bạn có thể đặt hai ngón tay giữa cổ và cổ áo mà không bị chật.
                           <br />- Độ dài tay áo nên vừa đủ che phần cổ tay và không bị ngắn khi giơ tay.
                         </li>
-                        <li className="font-normal text-qgray leading-9">
+                        <li className="text-gray-600 text-base leading-relaxed">
                           <strong>Quần âu:</strong>
                           <br />- Đo vòng eo ở phần nhỏ nhất của eo và chọn size quần với vòng eo phù hợp. Nếu bạn không chắc chắn, hãy chọn size lớn hơn và điều chỉnh bằng dây nịt.
                           <br />- Độ dài quần lý tưởng nên chạm đến mắt cá chân, với độ rộng vừa phải để khi ngồi không bị bó.
                           <br />- Đảm bảo phần hông và đùi của quần không quá chật hoặc rộng, tạo sự thoải mái khi di chuyển.
                         </li>
-                        <li className="font-normal text-qgray leading-9">
+                        <li className="text-gray-600 text-base leading-relaxed">
                           <strong>Áo vest:</strong>
                           <br />- Đo vòng ngực và vòng eo để chọn áo vest có độ ôm sát vừa vặn. Phần vai áo vest phải khớp với vai bạn, không bị nhô ra hoặc ôm quá sát.
                           <br />- Khi cài nút áo vest, phần ngực và eo không nên bị bó quá chặt, nhưng cũng không nên rộng quá nhiều. Khoảng cách lý tưởng là bạn có thể dễ dàng đặt một nắm tay giữa ngực và áo.
                           <br />- Chiều dài áo vest nên phủ đủ phần thắt lưng và không quá dài xuống dưới mông.
                         </li>
-                        <li className="font-normal text-qgray leading-9">
+                        <li className="text-gray-600 text-base leading-relaxed">
                           <strong>Giày công sở:</strong>
                           <br />- Đo chiều dài và chiều rộng bàn chân để chọn kích cỡ giày đúng chuẩn. Giày không nên quá chật để tránh gây khó chịu khi đi lại cả ngày dài.
                           <br />- Để đảm bảo giày vừa vặn, hãy thử giày vào buổi chiều hoặc tối khi bàn chân hơi nở ra, điều này giúp bạn chọn được size thoải mái nhất.
@@ -190,13 +190,11 @@ export default function SingleProductPage() {
                       </ul>
                     </div>
                   </div>
+
                 )}
 
                 {tab === "review" && (
                   <div data-aos="fade-up" className="w-full tab-content-item">
-                    <h6 className="text-[18px] font-medium text-qblack mb-2">
-                      Đánh giá
-                    </h6>
                     {/* review-comments */}
                     <div className="w-full">
                       <Reviews
@@ -226,15 +224,10 @@ export default function SingleProductPage() {
                     </div>
                   </div>
                 )}
-                {tab === "info" && (
-                  <div data-aos="fade-up" className="w-full tab-content-item">
-                    <SallerInfo products={data.products.slice(0, 8)} />
-                  </div>
-                )}
               </div>
             </div>
           </div>
-          
+
           <div className="related-product w-full bg-white">
             <div className="container-x mx-auto">
               <div className="w-full py-[100px]">

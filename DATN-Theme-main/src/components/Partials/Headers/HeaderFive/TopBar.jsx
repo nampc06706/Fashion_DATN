@@ -1,12 +1,10 @@
 import { Link } from "react-router-dom";
-import Arrow from "../../../Helpers/icons/Arrow";
-import Selectbox from "../../../Helpers/Selectbox";
 
 export default function TopBar({ className }) {
   return (
     <>
       <div
-        className={`w-full bg-gray-900 h-16 shadow-lg border-b border-gray-800 ${
+        className={`w-full bg-gray-900 h-10 shadow-lg border-b border-gray-800 ${
           className || ""
         }`}
       >

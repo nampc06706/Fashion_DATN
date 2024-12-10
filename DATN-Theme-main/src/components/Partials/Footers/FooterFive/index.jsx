@@ -5,94 +5,74 @@ import Youtube from "../../../Helpers/icons/Youtube";
 
 export default function FooterFour() {
   return (
-    <footer
-      className="footer-section-wrapper"
-      style={{
-        backgroundImage: `url(/assets/images/footer-four.png)`,
-      }}
-    >
-      <div className="container-x block mx-auto pt-[83px]">
-        <div className="lg:flex justify-between mb-[95px]">
-          <div className="lg:w-4/10 w-full mb-10 lg:mb-0">
-            {/* logo area */}
-            <div className="mb-14">
-              <a href="/">
-                <img
-                  width="152"
-                  height="36"
-                  src={`/assets/images/logo-8.png`}
-                  alt="logo"
-                />
-              </a>
-            </div>
-            <div>
-              
-            </div>
+    <footer className="bg-gray-900 text-white py-16">
+      <div className="container mx-auto px-6 md:px-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+          {/* Logo Section */}
+          <div className="flex flex-col items-center md:items-start">
+            <a href="/" className="mb-8">
+              <img
+                src="/assets/images/logo-8.png"
+                alt="Logo"
+                className="w-40 h-auto"
+              />
+            </a>
+            <p className="text-sm text-gray-400">© 2024 All rights reserved</p>
           </div>
-          <div className="lg:w-2/10 w-full mb-10 lg:mb-0">
-            <div className="mb-5">
-              <h6 className="text-[18] font-500 text-[white]">VỀ CHÚNG TÔI</h6>
-            </div>
-            <div>
-              <ul className="flex flex-col space-y-5 ">
-                
-                <li>
-                  <Link to="/contact">
-                    <span className="text-white text-[15px] hover:text-[#9a9a9a] hover:underline">
-                    Làm việc với chúng tôi
-                    </span>
-                  </Link>
-                </li>
-                
-              </ul>
-            </div>
+
+          {/* About Us Section */}
+          <div className="flex flex-col items-center md:items-start">
+            <h6 className="text-xl font-semibold mb-4 text-gray-300">VỀ CHÚNG TÔI</h6>
+            <ul className="space-y-4">
+              <li>
+                <Link to="/contact" className="hover:text-indigo-500 transition-all">
+                  Liên hệ chúng tôi
+                </Link>
+              </li>
+              <li>
+                <Link to="/about" className="hover:text-indigo-500 transition-all">
+                  Giới thiệu về chúng tôi
+                </Link>
+              </li>
+            </ul>
           </div>
-          <div className="lg:w-2/10 w-full mb-10 lg:mb-0 ">
-            <div className="mb-5">
-              <h6 className="text-[18] font-500 text-[white]">CỬA HÀNG</h6>
-            </div>
-            <div>
-              <ul className="flex flex-col space-y-5 ">
-                <li>
-                  <Link to="/all-products">
-                    <span className="text-white text-[15px] hover:text-[#9a9a9a] hover:underline">
-                     Tất cả sản phẩm
-                    </span>
-                  </Link>
-                </li>
-                
-              </ul>
-            </div>
+
+          {/* Shop Section */}
+          <div className="flex flex-col items-center md:items-start">
+            <h6 className="text-xl font-semibold mb-4 text-gray-300">CỬA HÀNG</h6>
+            <ul className="space-y-4">
+              <li>
+                <Link to="/all-products" className="hover:text-indigo-500 transition-all">
+                  Tất cả sản phẩm
+                </Link>
+              </li>
+              <li>
+                <Link to="/categories" className="hover:text-indigo-500 transition-all">
+                  Danh mục sản phẩm
+                </Link>
+              </li>
+            </ul>
           </div>
-          
         </div>
-        <div className="bottom-bar border-t border-qgray-border lg:h-[82px] lg:flex justify-between items-center">
-          <div className="flex lg:space-x-5 justify-between items-center mb-3">
-            <div className="flex space-x-5 items-center">
-              <a href="#">
-                <Instagram className="fill-current text-white hover:text-[#9a9a9a]" />
-              </a>
-              <a href="#">
-                <Facebook className="fill-current text-white hover:text-[#9a9a9a]" />
-              </a>
-              <a href="#">
-                <Youtube className="fill-current text-white hover:text-[#9a9a9a]" />
-              </a>
-            </div>
-            <span className="sm:text-base text-[10px] text-white font-300">
-              ©2024
-              <a
-                href="/"
-                target="_blank"
-                rel="noreferrer"
-                className="font-500 text-qh5-bwhite mx-1"
-              >
-              
-              </a>
-              All rights reserved
-            </span>
-          </div>
-          
+
+        {/* Social Links Section */}
+        <div className="flex justify-center md:justify-start space-x-6 mb-8">
+          <a href="#" className="hover:text-indigo-500 transition-all">
+            <Instagram className="w-8 h-8 fill-current" />
+          </a>
+          <a href="#" className="hover:text-indigo-500 transition-all">
+            <Facebook className="w-8 h-8 fill-current" />
+          </a>
+          <a href="#" className="hover:text-indigo-500 transition-all">
+            <Youtube className="w-8 h-8 fill-current" />
+          </a>
+        </div>
+
+        {/* Bottom Section */}
+        <div className="border-t border-gray-700 pt-6">
+          <p className="text-center text-sm text-gray-400">
+            © 2024 <strong>Fashion Office</strong> - All rights reserved.
+          </p>
         </div>
       </div>
     </footer>

@@ -16,72 +16,52 @@ export default function ProductCardStyleOne({ data = {}, type = 1 }) {
     }
   };
 
-  //console.log(data)
   const formatPrice = (price) => {
     if (price) {
-      // Chuyển đổi giá thành số nguyên (loại bỏ phần thập phân) và định dạng với phân cách hàng nghìn
-      const priceInt = Math.floor(price); // Loại bỏ phần thập phân
+      const priceInt = Math.floor(price);
       return priceInt.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' ₫';
     }
     return '0 ₫';
   };
 
   return (
-    <div
-      className="product-card-one w-full group"
-      style={{ boxShadow: "0px 15px 64px 0px rgba(0, 0, 0, 0.05)" }}
-    >
+    <div className="product-card w-full max-w-xs mx-auto bg-white rounded-xl shadow-lg overflow-hidden transform transition duration-300 ">
+      {/* Product Image */}
       <div
-        className="product-card-img w-full h-[300px]"
+        className="relative w-full h-64 bg-center bg-cover group"
         style={{
-          background: `url(${imageUrl}) no-repeat center center/cover`,
+          backgroundImage: `url(${imageUrl})`,
         }}
-      />
+      >
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-50 group-hover:opacity-0 transition-opacity duration-300"></div>
+      </div>
 
-      <div className="product-card-details px-[30px] pb-[30px] relative">
-        <div className="absolute w-full h-10 px-[30px] left-0 top-32  transition-all duration-300 ease-in-out">
+      {/* Product Details */}
+      <div className="product-card-details p-5">
+        {/* Title */}
+        <h4
+          className="text-2xl font-semibold text-gray-900 cursor-pointer group-hover:text-blue-600 transition-all"
+          onClick={handleTitleClick}
+        >
+          {data.name || 'Tên sản phẩm'}
+        </h4>
+
+        {/* Price */}
+        <div className="product-card-price mt-4">
+          <span className="text-lg font-bold text-gray-900">{formatPrice(data.price)}</span>
+        </div>
+
+        {/* Button "View Detail" */}
+        <div className="mt-6">
           <button
             type="button"
-            className={type === 3 ? "blue-btn w-full" : "yellow-btn w-full"}
-            style={{ padding: '12px 0', textAlign: 'center' }}
-            onClick={handleTitleClick} // Gọi hàm điều hướng khi nhấp vào nút
+            className={`w-full py-3 rounded-full text-white font-semibold text-lg uppercase ${type === 3 ? 'bg-blue-600' : 'bg-yellow-500'} hover:bg-opacity-90 transition-all`}
+            onClick={handleTitleClick}
           >
             <div className="flex items-center justify-center space-x-3">
-              <span>
-                <svg
-                  width="14"
-                  height="16"
-                  viewBox="0 0 14 16"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="fill-current"
-                >
-                  {/* SVG path */}
-                </svg>
-              </span>
-              <span>Xem chi tiết</span>
+              <span className="text-sm">Xem chi tiết</span>
             </div>
           </button>
-
-        </div>
-
-        <div className="product-card-title mt-5">
-          <h4 className="font-700 text-lg text-qblack leading-8 cursor-pointer" onClick={handleTitleClick}>
-            {data.name || 'Tên sản phẩm'}
-          </h4>
-          <div className="product-card-rating flex items-center mt-1 space-x-1">
-            <Star />
-            <Star />
-            <Star />
-            <Star />
-            <Star />
-          </div>
-        </div>
-
-        <div className="product-card-price mt-3">
-          <span className="text-xl font-600 text-qblack">
-            {formatPrice(data.price)}
-          </span>
         </div>
       </div>
     </div>

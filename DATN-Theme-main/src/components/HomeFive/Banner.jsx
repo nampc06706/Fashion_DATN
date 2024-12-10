@@ -22,13 +22,144 @@ export default function Banner({ className }) {
   return (
     <>
       <div
-        className={`hero-slider-wrapper w-full xl:h-[733px] h-[500px] hero-slider-wrapper ${
-          className || ""
-        }`}
+        className={`hero-slider-wrapper w-full xl:h-[733px] h-[500px] hero-slider-wrapper ${className || ""
+          }`}
       >
         <div className="main-wrapper w-full h-full">
           <div className=" xl:h-full mb-20 xl:mb-0  w-full relative">
             <SimpleSlider settings={settings} selector={sliderRef}>
+              <div className="item w-full xl:h-[733px] h-[500px]">
+                <div
+                  className="w-full h-full relative md:bg-center"
+                  style={{
+                    backgroundImage: `url('/assets/images/banner-cs1.jpg')`,
+                    backgroundRepeat: "no-repeat",
+                    backgroundSize: "cover",
+                  }}
+                >
+                  <div className="container-x mx-auto flex items-center  h-full">
+                    <div className="w-full h-full xl:flex items-center pt-20 xl:pt-0">
+                      <div className="md:w-[626px] w-full">
+                        <p className="md:text-[34px] text-[20px] font-medium text-white mb-[7px]">
+                          Chuyên nghiệp, thanh lịch.
+                        </p>
+                        <h1 className="md:text-[60px] text-[40px]  font-bold text-white md:leading-[80px] leading-[40px] mb-[44px]">
+                          Công sở phong cách tự tin làm việc.
+                        </h1>
+
+                        <Link to="/all-products" passhref>
+                          <a rel="noopener noreferrer">
+                            <div className="flex justify-center items-center bg-qh5-bwhite w-[160px] h-[52px] group rounded-lg hover:text-white relative transition-all duration-300 ease-in-out overflow-hidden cursor-pointer">
+                              <div className="flex space-x-1 items-center transition-all duration-300 ease-in-out relative z-10">
+                                <span className="text-sm font-600 tracking-wide leading-7 mr-2">
+                                  Mua ngay
+                                </span>
+                                <span>
+                                  <svg
+                                    width="7"
+                                    height="11"
+                                    viewBox="0 0 7 11"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="fill-current"
+                                  >
+                                    <rect
+                                      x="2.08984"
+                                      y="0.636719"
+                                      width="6.94219"
+                                      height="1.54271"
+                                      transform="rotate(45 2.08984 0.636719)"
+                                    ></rect>
+                                    <rect
+                                      x="7"
+                                      y="5.54492"
+                                      width="6.94219"
+                                      height="1.54271"
+                                      transform="rotate(135 7 5.54492)"
+                                    ></rect>
+                                  </svg>
+                                </span>
+                              </div>
+                              <div
+                                style={{
+                                  transition: `transform 0.25s ease-in-out`,
+                                }}
+                                className="w-full h-full bg-black absolute top-0 left-0 right-0 bottom-0 transform scale-x-0 group-hover:scale-x-100 origin-[center_left] group-hover:origin-[center_right]"
+                              ></div>
+                            </div>
+                          </a>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="item w-full xl:h-[733px] h-[500px]">
+                <div
+                  className="w-full h-full relative md:bg-center"
+                  style={{
+                    backgroundImage: `url('/assets/images/banner-cs.png')`,
+                    backgroundRepeat: "no-repeat",
+                    backgroundSize: "cover",
+                  }}
+                >
+                  <div className="container-x mx-auto flex items-center  h-full">
+                    <div className="w-full h-full xl:flex items-center pt-20 xl:pt-0">
+                      <div className="md:w-[626px] w-full">
+                        <p className="md:text-[34px] text-[20px] font-medium text-white mb-[7px]">
+                          Chuyên nghiệp, thanh lịch.
+                        </p>
+                        <h1 className="md:text-[60px] text-[40px]  font-bold text-white md:leading-[80px] leading-[40px] mb-[44px]">
+                          Công sở phong cách tự tin làm việc.
+                        </h1>
+
+                        <Link to="/all-products" passhref>
+                          <a rel="noopener noreferrer">
+                            <div className="flex justify-center items-center bg-qh5-bwhite w-[160px] h-[52px] group rounded-lg hover:text-white relative transition-all duration-300 ease-in-out overflow-hidden cursor-pointer">
+                              <div className="flex space-x-1 items-center transition-all duration-300 ease-in-out relative z-10">
+                                <span className="text-sm font-600 tracking-wide leading-7 mr-2">
+                                  Mua ngay
+                                </span>
+                                <span>
+                                  <svg
+                                    width="7"
+                                    height="11"
+                                    viewBox="0 0 7 11"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="fill-current"
+                                  >
+                                    <rect
+                                      x="2.08984"
+                                      y="0.636719"
+                                      width="6.94219"
+                                      height="1.54271"
+                                      transform="rotate(45 2.08984 0.636719)"
+                                    ></rect>
+                                    <rect
+                                      x="7"
+                                      y="5.54492"
+                                      width="6.94219"
+                                      height="1.54271"
+                                      transform="rotate(135 7 5.54492)"
+                                    ></rect>
+                                  </svg>
+                                </span>
+                              </div>
+                              <div
+                                style={{
+                                  transition: `transform 0.25s ease-in-out`,
+                                }}
+                                className="w-full h-full bg-black absolute top-0 left-0 right-0 bottom-0 transform scale-x-0 group-hover:scale-x-100 origin-[center_left] group-hover:origin-[center_right]"
+                              ></div>
+                            </div>
+                          </a>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
               <div className="item w-full xl:h-[733px] h-[500px]">
                 <div
                   className="w-full h-full relative md:bg-center"
@@ -42,150 +173,18 @@ export default function Banner({ className }) {
                     <div className="w-full h-full xl:flex items-center pt-20 xl:pt-0">
                       <div className="md:w-[626px] w-full">
                         <p className="md:text-[34px] text-[20px] font-medium text-qblack mb-[7px]">
-                        Săn thời trang
+                          Chuyên nghiệp, thanh lịch.
                         </p>
                         <h1 className="md:text-[60px] text-[40px]  font-bold text-qblack md:leading-[80px] leading-[40px] mb-[44px]">
-                        Mua sắm những thương hiệu và thiết kế hấp dẫn nhất tại Shop
+                          Công sở phong cách tự tin làm việc.
                         </h1>
 
-                        <Link to="#" passhref>
+                        <Link to="/all-products" passhref>
                           <a rel="noopener noreferrer">
                             <div className="flex justify-center items-center bg-qh5-bwhite w-[160px] h-[52px] group rounded-lg hover:text-white relative transition-all duration-300 ease-in-out overflow-hidden cursor-pointer">
                               <div className="flex space-x-1 items-center transition-all duration-300 ease-in-out relative z-10">
                                 <span className="text-sm font-600 tracking-wide leading-7 mr-2">
-                                Mua ngay
-                                </span>
-                                <span>
-                                  <svg
-                                    width="7"
-                                    height="11"
-                                    viewBox="0 0 7 11"
-                                    fill="none"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="fill-current"
-                                  >
-                                    <rect
-                                      x="2.08984"
-                                      y="0.636719"
-                                      width="6.94219"
-                                      height="1.54271"
-                                      transform="rotate(45 2.08984 0.636719)"
-                                    ></rect>
-                                    <rect
-                                      x="7"
-                                      y="5.54492"
-                                      width="6.94219"
-                                      height="1.54271"
-                                      transform="rotate(135 7 5.54492)"
-                                    ></rect>
-                                  </svg>
-                                </span>
-                              </div>
-                              <div
-                                style={{
-                                  transition: `transform 0.25s ease-in-out`,
-                                }}
-                                className="w-full h-full bg-black absolute top-0 left-0 right-0 bottom-0 transform scale-x-0 group-hover:scale-x-100 origin-[center_left] group-hover:origin-[center_right]"
-                              ></div>
-                            </div>
-                          </a>
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="item w-full xl:h-[733px] h-[500px]">
-                <div
-                  className="w-full h-full relative md:bg-center"
-                  style={{
-                    backgroundImage: `url('/assets/images/banner6-1.png')`,
-                    backgroundRepeat: "no-repeat",
-                    backgroundSize: "cover",
-                  }}
-                >
-                  <div className="container-x mx-auto flex items-center  h-full">
-                    <div className="w-full h-full xl:flex items-center pt-20 xl:pt-0">
-                      <div className="md:w-[626px] w-full">
-                        <p className="md:text-[34px] text-[20px] font-medium text-qblack mb-[7px]">
-                        Săn thời trang
-                        </p>
-                        <h1 className="md:text-[60px] text-[40px]  font-bold text-qblack md:leading-[80px] leading-[40px] mb-[44px]">
-                        Mua sắm những thương hiệu và thiết kế hấp dẫn nhất tại Shop
-                        </h1>
-
-                        <Link to="#" passhref>
-                          <a rel="noopener noreferrer">
-                            <div className="flex justify-center items-center bg-qh5-bwhite w-[160px] h-[52px] group rounded-lg hover:text-white relative transition-all duration-300 ease-in-out overflow-hidden cursor-pointer">
-                              <div className="flex space-x-1 items-center transition-all duration-300 ease-in-out relative z-10">
-                                <span className="text-sm font-600 tracking-wide leading-7 mr-2">
-                                Mua ngay
-                                </span>
-                                <span>
-                                  <svg
-                                    width="7"
-                                    height="11"
-                                    viewBox="0 0 7 11"
-                                    fill="none"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="fill-current"
-                                  >
-                                    <rect
-                                      x="2.08984"
-                                      y="0.636719"
-                                      width="6.94219"
-                                      height="1.54271"
-                                      transform="rotate(45 2.08984 0.636719)"
-                                    ></rect>
-                                    <rect
-                                      x="7"
-                                      y="5.54492"
-                                      width="6.94219"
-                                      height="1.54271"
-                                      transform="rotate(135 7 5.54492)"
-                                    ></rect>
-                                  </svg>
-                                </span>
-                              </div>
-                              <div
-                                style={{
-                                  transition: `transform 0.25s ease-in-out`,
-                                }}
-                                className="w-full h-full bg-black absolute top-0 left-0 right-0 bottom-0 transform scale-x-0 group-hover:scale-x-100 origin-[center_left] group-hover:origin-[center_right]"
-                              ></div>
-                            </div>
-                          </a>
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="item w-full xl:h-[733px] h-[500px]">
-                <div
-                  className="w-full h-full relative md:bg-center"
-                  style={{
-                    backgroundImage: `url('/assets/images/banner6-3.jpg')`,
-                    backgroundRepeat: "no-repeat",
-                    backgroundSize: "cover",
-                  }}
-                >
-                  <div className="container-x mx-auto flex items-center  h-full">
-                    <div className="w-full h-full xl:flex items-center pt-20 xl:pt-0">
-                      <div className="md:w-[626px] w-full">
-                        <p className="md:text-[34px] text-[20px] font-medium text-qblack mb-[7px]">
-                        Săn thời trang
-                        </p>
-                        <h1 className="md:text-[60px] text-[40px]  font-bold text-qblack md:leading-[80px] leading-[40px] mb-[44px]">
-                        Mua sắm những thương hiệu và thiết kế hấp dẫn nhất tại Shop
-                        </h1>
-
-                        <Link to="#" passhref>
-                          <a rel="noopener noreferrer">
-                            <div className="flex justify-center items-center bg-qh5-bwhite w-[160px] h-[52px] group rounded-lg hover:text-white relative transition-all duration-300 ease-in-out overflow-hidden cursor-pointer">
-                              <div className="flex space-x-1 items-center transition-all duration-300 ease-in-out relative z-10">
-                                <span className="text-sm font-600 tracking-wide leading-7 mr-2">
-                                Mua ngay
+                                  Mua ngay
                                 </span>
                                 <span>
                                   <svg
@@ -235,7 +234,7 @@ export default function Banner({ className }) {
         <div
           data-aos="fade-up"
           style={{
-            backgroundImage: `url(/assets/images/service-bg.png)`,
+            backgroundImage: `url(/assets/images/blog-img-5.jpg)`,
             backgroundRepeat: "no-repeat",
             backgroundSize: "cover",
           }}
@@ -292,10 +291,10 @@ export default function Banner({ className }) {
               </div>
               <div>
                 <p className="text-white text-[15px] font-700 tracking-wide mb-1">
-                Miễn phí vận chuyển
+                  Miễn phí vận chuyển
                 </p>
                 <p className="text-sm text-qgray text-white">
-                Khi đặt hàng trên 500k
+                  Khi đặt hàng trên 500k
                 </p>
               </div>
             </div>
@@ -329,10 +328,10 @@ export default function Banner({ className }) {
               </div>
               <div>
                 <p className="text-white text-[15px] font-700 tracking-wide mb-1">
-                Hoàn trả miễn phí
+                  Hoàn trả miễn phí
                 </p>
                 <p className="text-sm text-qgray text-white">
-                Nhận hoàn trả trong vòng 3 ngày
+                  Nhận hoàn trả trong vòng 3 ngày
                 </p>
               </div>
             </div>
@@ -374,10 +373,10 @@ export default function Banner({ className }) {
               </div>
               <div>
                 <p className="text-white text-[15px] font-700 tracking-wide mb-1">
-                Thanh toán an toàn
+                  Thanh toán an toàn
                 </p>
                 <p className="text-sm text-qgray text-white">
-                Thanh toán trực tuyến an toàn 100%
+                  Thanh toán trực tuyến an toàn 100%
                 </p>
               </div>
             </div>
@@ -430,10 +429,10 @@ export default function Banner({ className }) {
               </div>
               <div>
                 <p className="text-white text-[15px] font-700 tracking-wide mb-1">
-                Chất lượng tốt nhất
+                  Chất lượng tốt nhất
                 </p>
                 <p className="text-sm text-qgray text-white">
-                Đảm bảo sản phẩm chính hãng
+                  Đảm bảo sản phẩm chính hãng
                 </p>
               </div>
             </div>

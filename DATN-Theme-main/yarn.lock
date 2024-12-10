@@ -2704,7 +2704,7 @@ react-lifecycles-compat@^3.0.0:
 
 react-modal@^3.16.1:
   version "3.16.1"
-  resolved "https://registry.npmjs.org/react-modal/-/react-modal-3.16.1.tgz"
+  resolved "https://registry.yarnpkg.com/react-modal/-/react-modal-3.16.1.tgz#34018528fc206561b1a5467fc3beeaddafb39b2b"
   integrity sha512-VStHgI3BVcGo7OXczvnJN7yT2TWHJPDXZWyI/a0ssFNhGZWsPmB8cF0z33ewDXq4VfYMO1vXgiv/g8Nj9NDyWg==
   dependencies:
     exenv "^1.2.0"
@@ -3016,7 +3016,7 @@ shebang-regex@^3.0.0:
     react-table "^7.8.0"
     react-tabs "^6.0.2"
     react-toastify "^10.0.5"
-    shopo "file:C:/Users/ADMIN/AppData/Local/Yarn/Cache/v6/npm-shopo-0.0.0-e489345e-e82c-4573-bb47-7c34c8d63e59-1732198290025/node_modules/shopo"
+    shopo "file:C:/Users/ADMIN/AppData/Local/Yarn/Cache/v6/npm-shopo-0.0.0-c02f4256-8859-47ba-aa6b-591bc74da0d2-1733803135063/node_modules/shopo"
     slick-carousel "^1.8.1"
     sweetalert2 "^11.14.5"
     sweetalert2-react-content "^5.0.7"

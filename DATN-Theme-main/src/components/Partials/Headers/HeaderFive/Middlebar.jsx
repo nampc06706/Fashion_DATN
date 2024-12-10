@@ -6,7 +6,7 @@ import ThinLove from "../../../Helpers/icons/ThinLove";
 import ThinPeople from "../../../Helpers/icons/ThinPeople";
 import SearchBox from "../../../Helpers/SearchBox";
 import { Link, useNavigate } from "react-router-dom";
-import { jwtDecode } from 'jwt-decode'; // Chỉ cần import một lần
+import { jwtDecode } from 'jwt-decode';
 
 export default function Middlebar({ className }) {
   const navigate = useNavigate();
@@ -17,76 +17,80 @@ export default function Middlebar({ className }) {
 
   if (token) {
     try {
-      const decodedToken = jwtDecode(token); // Giải mã token
-      username = decodedToken.sub || ""; // Lấy username từ trường sub (subject)
+      const decodedToken = jwtDecode(token);
+      username = decodedToken.sub || "";
     } catch (error) {
       console.error("Lỗi khi giải mã token:", error);
     }
   }
 
   const handleLogout = () => {
-    Cookies.remove('user'); // Xóa cookie của người dùng khi đăng xuất
+    Cookies.remove('user');
     Cookies.remove('token');
     Cookies.remove('cart');
     navigate("/login");
     window.location.reload();
-
   };
 
-  // Lấy số lượng sản phẩm trong giỏ hàng và danh sách yêu thích từ cookie
-  const cart = Cookies.get('cart') ? JSON.parse(Cookies.get('cart')) : []; // Lấy dữ liệu giỏ hàng
-
-  const cartCount = cart.length; // Số lượng sản phẩm trong giỏ hàng
+  // Lấy số lượng sản phẩm trong giỏ hàng từ cookie
+  const cart = Cookies.get('cart') ? JSON.parse(Cookies.get('cart')) : [];
+  const cartCount = cart.length;
 
   return (
     <div className={`w-full h-[86px] bg-white ${className}`}>
       <div className="container-x mx-auto h-full">
         <div className="relative h-full">
           <div className="flex justify-between items-center h-full">
-            <div>
+
+            {/* Tìm kiếm */}
+            <div className="w-[517px] h-[44px] flex justify-center">
+              <SearchBox className="search-com" />
+            </div>
+
+            {/* Logo - Đặt logo ở giữa và lớn hơn */}
+            <div className="flex-1 flex justify-center">
               <a href="/">
                 <img
-                  width="152"
-                  height="36"
+                  width="220" // Tăng kích thước logo
+                  height="55"
                   src={`/assets/images/logo-8.png`}
                   alt="logo"
+                  className="hover:opacity-80 transition-all duration-300 transform scale-105" // Thêm hiệu ứng zoom khi hover
                 />
               </a>
             </div>
-            <div className="w-[517px] h-[44px]">
-              <SearchBox className="search-com" />
-            </div>
-            <div className="flex space-x-6 items-center">
-              <div className="favorite relative">
-                <a href="/wishlist">
-                  <span>
-                    <ThinLove />
-                  </span>
+
+            {/* Biểu tượng yêu thích, giỏ hàng và thông tin người dùng */}
+            <div className="flex space-x-8 items-center">
+              {/* Biểu tượng yêu thích */}
+              <div className="favorite relative p-2 bg-gradient-to-r from-pink-500 to-red-500 rounded-full shadow-md hover:shadow-2xl hover:scale-110 transform transition-all duration-300 ease-in-out hover:rotate-6">
+                <a href="/wishlist" className="flex items-center justify-center">
+                  <ThinLove className="w-6 h-6 text-white" />
                 </a>
               </div>
-              <div className="cart-wrapper group relative py-4">
+
+              {/* Giỏ hàng */}
+              <div className="cart-wrapper group relative p-2 bg-gradient-to-l from-blue-500 to-teal-400 rounded-full shadow-md hover:shadow-2xl hover:scale-110 transform transition-all duration-300 ease-in-out hover:rotate-6">
                 <div className="cart relative cursor-pointer">
-                  <a href="/cart">
-                    <span>
-                      <ThinBag />
-                    </span>
+                  <a href="/cart" className="flex items-center justify-center">
+                    <ThinBag className="w-6 h-6 text-white" />
                   </a>
                   {cartCount > 0 && (
-                    <span className="w-[18px] h-[18px] rounded-full bg-qh5-bwhite absolute -top-2.5 -right-2.5 flex justify-center items-center text-[9px] text-qblack">
+                    <span className="w-[16px] h-[16px] rounded-full bg-red-600 absolute -top-2.5 -right-2.5 flex justify-center items-center text-[8px] font-bold text-white shadow-md">
                       {cartCount}
                     </span>
                   )}
                 </div>
-                <Cart className="absolute -right-[45px] top-11 z-50 hidden group-hover:block" />
               </div>
 
               {/* Hiển thị thông tin tùy thuộc vào trạng thái đăng nhập */}
               {username ? (
                 <>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-4 text-gray-800">
                     <Link to="/profile" className="flex items-center hover:text-blue-500 transition duration-200">
-                      <ThinPeople className="w-6 h-6 text-gray-700" />
-                      <span className="ml-2 text-sm font-semibold text-gray-800">Xin chào, {username}</span>
+                      {/* Biểu tượng người dùng với hiệu ứng hover và thay đổi màu sắc */}
+                      <ThinPeople className="w-6 h-6 text-gray-700 hover:text-yellow-500 transition-all duration-300 transform hover:scale-110 hover:rotate-6" />
+                      <span className="ml-3 text-sm font-semibold text-gray-900">Xin chào, {username}</span>
                     </Link>
                   </div>
                   <div className="mt-1">
@@ -96,7 +100,7 @@ export default function Middlebar({ className }) {
                   </div>
                 </>
               ) : (
-                <div className="flex space-x-4">
+                <div className="flex space-x-8">
                   <Link to="/login" className="text-sm text-gray-700 hover:text-blue-500 transition duration-200">
                     Đăng nhập
                   </Link>
@@ -105,8 +109,9 @@ export default function Middlebar({ className }) {
                   </Link>
                 </div>
               )}
-
             </div>
+
+
           </div>
         </div>
       </div>

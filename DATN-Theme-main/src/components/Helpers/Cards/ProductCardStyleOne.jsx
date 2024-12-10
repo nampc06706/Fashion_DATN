@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Star from '../icons/Star';
@@ -9,16 +8,15 @@ export default function ProductCardStyleOne({ data = {}, type = 1, productId }) 
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Hàm điều hướng đến trang chi tiết sản phẩm
   const handleTitleClick = (id) => {
     if (id) {
       navigate(`/products/${id}`);
+      window.scrollTo(0, 0); // Cuộn lên đầu trang
     } else {
       console.error('Dữ liệu hoặc productId bị thiếu');
     }
   };
 
-  // Hàm lấy sản phẩm liên quan từ API
   const fetchRelatedProducts = async () => {
     if (productId) {
       try {
@@ -36,12 +34,10 @@ export default function ProductCardStyleOne({ data = {}, type = 1, productId }) 
     }
   };
 
-  // Gọi hàm để lấy sản phẩm liên quan khi component được mount
   useEffect(() => {
     fetchRelatedProducts();
   }, [productId]);
 
-  // Hàm định dạng giá
   const formatPrice = (price) => {
     if (price) {
       const priceInt = Math.floor(price);
@@ -55,62 +51,38 @@ export default function ProductCardStyleOne({ data = {}, type = 1, productId }) 
       {loading ? (
         <p>Đang tải...</p>
       ) : (
-        <div className="flex overflow-x-auto space-x-4 p-4">
+        <div className="flex overflow-x-auto space-x-6 p-6">
           {relatedProducts.length > 0 ? (
             relatedProducts.map((product) => (
-              <div key={product.id} className="product-card-one flex-shrink-0 w-48 h-full bg-white relative group shadow-lg">
-                <div className="product-card">
+              <div key={product.id} className="product-card-one flex-shrink-0 w-60 h-full bg-gray-100 rounded-xl relative shadow-md group">
+                <div className="product-card p-4">
                   <div
-                    className="product-card-img w-full h-48"
+                    className="product-card-img w-full h-56 bg-cover bg-center rounded-xl"
                     style={{
-                      background: `url(${product.firstImage ? `/assets/images/${product.firstImage}` : '/assets/images/sanpham1.jpg'}) no-repeat center center/cover`,
+                      backgroundImage: `url(${product.firstImage ? `/assets/images/${product.firstImage}` : '/assets/images/sanpham1.jpg'})`,
                     }}
                   />
-                  <div className="product-card-title mt-2">
+                  <div className="product-card-info mt-4">
                     <h4
-                      className="font-bold text-lg text-qblack leading-8 cursor-pointer"
+                      className="font-bold text-xl text-gray-800 hover:text-blue-600 cursor-pointer"
                       onClick={() => handleTitleClick(product.id)}
                     >
                       {product.name || 'Tên sản phẩm'}
                     </h4>
-                    <div className="product-card-rating flex items-center mt-1 space-x-1">
-                      <Star />
-                      <Star />
-                      <Star />
-                      <Star />
-                      <Star />
-                    </div>
+
                   </div>
 
-                  <div className="product-card-price mt-3">
-                    <span className="text-xl font-semibold text-qblack">
+                  <div className="product-card-price mt-4">
+                    <span className="text-lg font-semibold text-gray-900">
                       {formatPrice(product.price)}
                     </span>
                   </div>
-                </div>
-                <div className="product-card-details relative">
-                  {/* Nút thụt xuống bình thường */}
-                  <div className="absolute w-full h-10 left-0 top-0 transition-all duration-300 ease-in-out">
-                    <button
-                      type="button"
-                      className={`w-full ${type === 3 ? 'blue-btn' : 'yellow-btn'}`}
-                      style={{ padding: '12px 0', textAlign: 'center' }}
-                      onClick={() => handleTitleClick(product.id)}
-                    >
-                      <div className="flex items-center justify-center space-x-3">
-                        <span>Xem chi tiết</span>
-                      </div>
-                    </button>
-                  </div>
-
-
                 </div>
               </div>
             ))
           ) : (
             <p>Không có sản phẩm liên quan nào.</p>
           )}
-
         </div>
       )}
     </div>

@@ -158,9 +158,9 @@ export default function AllProductPage() {
 
   // Tính toán các sản phẩm cần hiển thị trên trang hiện tại
   // Tính toán các sản phẩm cần hiển thị trên trang hiện tại
-const indexOfLastProduct = currentPage * productsPerPage;
-const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-const currentProducts = sortedProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const currentProducts = sortedProducts.slice(indexOfFirstProduct, indexOfLastProduct);
 
 
   const totalPages = Math.ceil(products.length / productsPerPage);
@@ -169,7 +169,6 @@ const currentProducts = sortedProducts.slice(indexOfFirstProduct, indexOfLastPro
     <Layout>
       <div className="products-page-wrapper w-full">
         <div className="container-x mx-auto">
-          <BreadcrumbCom />
           <div className="w-full lg:flex lg:space-x-[30px]">
             <div className="lg:w-[270px]">
               <ProductsFilter
@@ -184,18 +183,18 @@ const currentProducts = sortedProducts.slice(indexOfFirstProduct, indexOfLastPro
               />
             </div>
             <div className="flex-1">
-              <div className="products-sorting w-full bg-white md:h-[70px] flex md:flex-row flex-col md:space-y-0 space-y-5 md:justify-between md:items-center p-[30px] mb-[40px]">
-                <div>
-                  <p className="font-400 text-[13px]">
-                    <span className="text-qgray">Hiển thị</span> {indexOfFirstProduct + 1}–{Math.min(indexOfLastProduct, sortedProducts.length)} của {sortedProducts.length} Kết quả
+              <div className="products-sorting w-full bg-white md:h-[70px] flex md:flex-row flex-col md:space-y-0 space-y-4 md:justify-between md:items-center p-6 md:p-8 mb-10 border border-gray-200 rounded-lg shadow-sm">
+                <div className="flex justify-center md:justify-start w-full md:w-auto">
+                  <p className="text-sm font-medium text-gray-600">
+                    <span className="text-gray-400">Hiển thị</span> {indexOfFirstProduct + 1}–{Math.min(indexOfLastProduct, sortedProducts.length)} của {sortedProducts.length} Kết quả
                   </p>
                 </div>
-                <div className="flex space-x-3 items-center">
-                  <span className="font-400 text-[13px]">Sắp xếp theo:</span>
+                <div className="flex flex-col md:flex-row md:space-x-6 items-center md:items-center w-full md:w-auto">
+                  <span className="text-sm font-medium text-gray-600">Sắp xếp theo:</span>
                   <select
                     value={sortOrder}
                     onChange={handleSortChange}
-                    className="border-b border-b-qgray text-[13px] outline-none"
+                    className="border-b-2 border-gray-300 text-sm font-medium text-gray-600 bg-transparent focus:outline-none focus:ring-2 focus:ring-gray-400 p-2 rounded-md"
                   >
                     <option value="default">Mặc định</option>
                     <option value="priceAsc">Giá thấp đến cao</option>
@@ -203,6 +202,7 @@ const currentProducts = sortedProducts.slice(indexOfFirstProduct, indexOfLastPro
                   </select>
                 </div>
               </div>
+
 
               {noProductsFound && (
                 <h1 className="text-center">Không tìm thấy sản phẩm phù hợp</h1>
@@ -218,23 +218,63 @@ const currentProducts = sortedProducts.slice(indexOfFirstProduct, indexOfLastPro
                   )}
                 </DataIteration>
               </div>
-              <div className="flex justify-center mb-[40px]">
+              <div className="flex justify-center items-center space-x-2 mb-10">
+                {/* Button Previous */}
                 <button
                   disabled={currentPage === 1}
                   onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                  className="bg-qyellow text-white px-4 py-2 rounded-l-md"
+                  className={`bg-qyellow text-white px-6 py-3 rounded-md flex items-center justify-center 
+      transition-all duration-300 ease-in-out transform hover:scale-105 
+      ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'opacity-100'}`}
                 >
-                  Trước
+                  <span className="mr-2">Trước</span>
+                  <svg
+                    className="w-4 h-4 transform rotate-180"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
                 </button>
-                <span className="px-4 py-2">{currentPage} / {totalPages}</span>
+
+                {/* Current Page */}
+                <span className="text-lg font-semibold text-gray-700">
+                  {currentPage} / {totalPages}
+                </span>
+
+                {/* Button Next */}
                 <button
                   disabled={currentPage === totalPages}
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                  className="bg-qyellow text-white px-4 py-2 rounded-r-md"
+                  className={`bg-qyellow text-white px-6 py-3 rounded-md flex items-center justify-center 
+      transition-all duration-300 ease-in-out transform hover:scale-105 
+      ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : 'opacity-100'}`}
                 >
-                  Tiếp
+                  <svg
+                    className="w-4 h-4 transform"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                  <span className="ml-2">Tiếp</span>
                 </button>
               </div>
+
             </div>
           </div>
         </div>

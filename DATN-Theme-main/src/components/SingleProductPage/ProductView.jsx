@@ -292,136 +292,129 @@ export default function ProductView() {
   // Kiểm tra nếu giá mới và giá cũ bằng nhau
   const isSamePrice = price === originalPrice;
   return (
-    <div className="product-view w-full lg:flex justify-between">
+    <div className="product-view w-full flex justify-center">
       <ToastContainer position="top-right" autoClose={1000} hideProgressBar={false} />
-      <div className="lg:w-1/2 xl:mr-[70px] lg:mr-[50px]">
-        <div className="w-full">
-          <div className="w-full h-[600px] border border-qgray-border flex justify-center items-center overflow-hidden relative mb-3">
-            {src ? (
+
+      <div className="product-image-container lg:w-1/2 xl:mr-16 lg:mr-8">
+        <div className="relative overflow-hidden mb-4 rounded-lg shadow-lg border">
+          {src ? (
+            <img
+              src={`/assets/images/${src}`}
+              alt="Product Image"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="text-center text-qgray">No image available</div>
+          )}
+
+          {/* Hiển thị discount */}
+          {discount && Number(discount) > 0 && (
+            <div className="absolute top-2 right-2 bg-red-600 text-white text-xl font-bold rounded-full py-1 px-3 shadow-md">
+              -{Number(discount).toFixed(0)}%
+            </div>
+          )}
+        </div>
+
+        <div className="thumbnail-images flex gap-2 flex-wrap">
+          {images.length > 0 ? images.map((img, index) => (
+            <div
+              onClick={() => changeImgHandler(img.image)}
+              key={index}
+              className={`w-[90px] h-[90px] border cursor-pointer p-2 rounded-md ${src === img.image ? "border-qred" : "border-gray-300"}`}
+            >
               <img
-                src={`/assets/images/${src}`}
-                alt="Product Image"
-                className="w-full h-full object-contain max-w-full max-h-full"
+                src={`/assets/images/${img.image}`}
+                alt={`Thumbnail ${index}`}
+                className="w-full h-full object-cover"
               />
-            ) : (
-              <div className="text-center text-qgray">No image available</div>
-            )}
-
-            {/* Hiển thị discount ở góc trên bên phải */}
-            {discount && Number(discount) > 0 && (
-              <div className="absolute top-0 right-0 bg-red-600 text-white text-2xl font-bold flex justify-center items-center rounded-full w-28 h-28 shadow-lg transform hover:scale-105 transition-transform duration-300 ease-in-out">
-                -{Number(discount).toFixed(0)}%
-              </div>
-            )}
-
-          </div>
-
-          <div className="flex gap-2 flex-wrap">
-            {images.length > 0 ? images.map((img, index) => (
-              <div
-                onClick={() => changeImgHandler(img.image)}
-                key={index}
-                className={`w-[110px] h-[110px] p-[15px] border border-qgray-border cursor-pointer ${src === img.image ? "border-2 border-qred" : ""}`}
-              >
-                <img
-                  src={`/assets/images/${img.image}`}
-                  alt={`Thumbnail ${index}`}
-                  className="w-full h-full object-contain"
-                />
-              </div>
-            )) : (
-              <div className="text-center text-qgray">No images available</div>
-            )}
-          </div>
+            </div>
+          )) : (
+            <div className="text-center text-qgray">No images available</div>
+          )}
         </div>
       </div>
 
-      <div className="flex-1">
-        <div className="product-details w-full mt-10 lg:mt-0">
-          {/* <span className="text-qgray text-xs font-normal uppercase tracking-wider mb-2 inline-block">
-            {productDetails.category?.name || 'Unknown Category'}
-          </span> */}
-          <p className="text-3xl font-bold mb-4 transition-transform">
-            {productName}
-          </p>
+      <div className="product-details flex-1 p-8">
+        <h2 className="text-3xl font-semibold mb-6">{productName}</h2>
 
+        <div className="rating mb-6 flex">
+          {[...Array(5)].map((_, index) => (
+            <Star key={index} />
+          ))}
+        </div>
 
-          <div className="flex space-x-[10px] items-center mb-6">
-            <div className="flex">
-              {[...Array(5)].map((_, index) => (
-                <Star key={index} />
-              ))}
-            </div>
+        <div className="price mb-6 flex items-center">
+          {!isSamePrice && (
+            <span className="text-lg font-medium text-gray-400 line-through mr-4">
+              {formatOriginalPrice(formattedOriginalPrice)}
+            </span>
+          )}
+          <span className="text-2xl font-semibold text-qred">
+            {formatPrice(formattedPrice)}
+          </span>
+        </div>
+
+        <p className="text-gray-600 text-sm mb-6">{productDescription}</p>
+
+        {/* Color Selection */}
+        <div className="color-selection mb-6">
+          <span className="text-sm font-medium text-gray-500 uppercase mb-2 inline-block">Color</span>
+          <div className="flex gap-3">
+            {availableColors.map((color, index) => (
+              <div
+                key={index}
+                onClick={() => handleColorChange(color)}
+                className={`w-[35px] h-[35px] rounded-full cursor-pointer ${color === selectedColor ? "border-2 border-qred" : "border"}`}
+                style={{ backgroundColor: color }}
+              ></div>
+            ))}
           </div>
+        </div>
 
-          <div className="flex space-x-2 items-center mb-7">
-            {!isSamePrice && (
-              <span className="text-2xl font-500 text-gray line-through">
-                {formatOriginalPrice(formattedOriginalPrice)}
-              </span>
-            )}
-            <span className="text-2xl font-500 text-qred">{formatPrice(formattedPrice)}</span>
+        {/* Size Selection */}
+        <div className="size-selection mb-6">
+          <span className="text-sm font-medium text-gray-500 uppercase mb-2 inline-block">Size</span>
+          <div className="flex gap-3">
+            {availableSizes.map((size, index) => (
+              <div
+                key={index}
+                onClick={() => handleSizeChange(size)}
+                className={`w-[45px] h-[45px] border flex items-center justify-center cursor-pointer rounded-md ${size.name === selectedSize ? "border-qred" : "border-gray-300"}`}
+              >
+                {size.name}
+              </div>
+            ))}
           </div>
+        </div>
 
-          <p className="text-qgray text-sm text-normal mb-[30px] leading-7">
-            {productDescription}
-          </p>
+        {/* Quantity Selection */}
+        <div className="quantity-selection mb-6 flex items-center">
+          <button
+            onClick={decrement}
+            className="w-[35px] h-[35px] border text-xl font-semibold text-gray-800 flex justify-center items-center"
+          >
+            -
+          </button>
+          <span className="w-[50px] h-[35px] flex justify-center items-center text-lg font-medium">{quantity}</span>
+          <button
+            onClick={increment}
+            className="w-[35px] h-[35px] border text-xl font-semibold text-gray-800 flex justify-center items-center"
+          >
+            +
+          </button>
+        </div>
 
-          <div className="colors mb-[30px]">
-            <span className="text-sm font-normal uppercase text-qgray mb-[14px] inline-block">Color</span>
-            <div className="flex space-x-2">
-              {availableColors.map((color, index) => (
-                <div
-                  key={index}
-                  onClick={() => handleColorChange(color)}
-                  className={`w-[30px] h-[30px] rounded-full border ${color === selectedColor ? 'border-qred' : 'border-qgray-border'} cursor-pointer`}
-                  style={{ backgroundColor: color }}
-                ></div>
-              ))}
-            </div>
-          </div>
-
-          <div className="sizes mb-[30px]">
-            <span className="text-sm font-normal uppercase text-qgray mb-[14px] inline-block">Size</span>
-            <div className="flex space-x-2">
-              {availableSizes.map((size, index) => (
-                <div
-                  key={index}
-                  onClick={() => handleSizeChange(size)}
-                  className={`w-[40px] h-[40px] border ${size.name === selectedSize ? 'border-qred' : 'border-qgray-border'} flex items-center justify-center cursor-pointer`}
-                >
-                  {size.name}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="quantity mb-[30px] flex items-center">
-            <button
-              onClick={decrement}
-              className="w-[35px] h-[35px] border border-qgray-border flex items-center justify-center text-xl font-medium text-qblack cursor-pointer"
-            >
-              -
-            </button>
-            <span className="w-[50px] h-[35px] flex items-center justify-center text-lg font-medium text-qblack">{quantity}</span>
-            <button
-              onClick={increment}
-              className="w-[35px] h-[35px] border border-qgray-border flex items-center justify-center text-xl font-medium text-qblack cursor-pointer"
-            >
-              +
-            </button>
-          </div>
-
-          <div className="flex gap-4 mb-[30px]">
-            <button onClick={addToCart} className="w-full h-[50px] bg-qyellow text-qblack text-sm font-semibold flex justify-center items-center">
-              Thêm vào giỏ hàng
-            </button>
-            <button onClick={addFavourite} className="w-full h-[50px] bg-qred text-qwhite text-sm font-semibold flex justify-center items-center">
-              Yêu thích
-            </button>
-          </div>
+        {/* Action Buttons */}
+        <div className="action-buttons flex gap-4 mb-6">
+          <button onClick={addToCart} className="w-full h-[50px] bg-qyellow text-gray-800 text-sm font-semibold rounded-lg shadow-md hover:bg-qyellow-dark">
+            Thêm vào giỏ hàng
+          </button>
+          <button onClick={addFavourite} className="w-full h-[50px] bg-qred text-white text-sm font-semibold rounded-lg shadow-md hover:bg-qred-dark">
+            Yêu thích
+          </button>
         </div>
       </div>
     </div>
+
   );
 }
