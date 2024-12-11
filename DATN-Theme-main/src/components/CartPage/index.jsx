@@ -133,23 +133,6 @@ export default function CardPage({ cart = true }) {
                 className="mb-[30px]"
                 accountId={accountId}
               />
-              <div className="w-full sm:flex justify-between">
-                <div className="discount-code sm:w-[270px] w-full mb-5 sm:mb-0 h-[50px] flex">
-                  {/* Input mã giảm giá */}
-                </div>
-                <div className="flex space-x-2.5 items-center">
-                  <a href="/all-products">
-                    <div className="w-[220px] h-[50px] bg-[#F6F6F6] flex justify-center items-center">
-                      <span className="text-sm font-semibold">Tiếp tục mua sắm</span>
-                    </div>
-                  </a>
-                  <a href="#">
-                    <div className="w-[140px] h-[50px] bg-[#F6F6F6] flex justify-center items-center">
-                      <span className="text-sm font-semibold">Cập nhật giỏ hàng</span>
-                    </div>
-                  </a>
-                </div>
-              </div>
               <div className="w-full mt-[30px] flex sm:justify-end">
                 <div className="sm:w-[370px] w-full border border-[#EDEDED] px-[30px] py-[26px]">
                   <div className="total mb-6">

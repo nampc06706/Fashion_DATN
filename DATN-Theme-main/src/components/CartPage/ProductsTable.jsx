@@ -225,94 +225,101 @@ export default function ProductsTable({ onSelectedTotalChange, accountId }) {
   }
 
   return (
-    <div className="w-full">
-      <div className="relative w-full overflow-x-auto border border-[#EDEDED]">
-        <table className="w-full text-sm text-left text-gray-500">
-          <thead>
-            <tr className="text-[13px] font-medium text-black bg-[#F6F6F6] whitespace-nowrap px-2 border-b default-border-bottom uppercase">
-              <th className="py-4 text-center">Chọn</th>
-              <th className="py-4 pl-10 block whitespace-nowrap min-w-[300px]">Sản phẩm</th>
-              <th className="py-4 whitespace-nowrap text-center">Màu</th>
-              <th className="py-4 whitespace-nowrap text-center">Kích cỡ</th>
-              <th className="py-4 whitespace-nowrap text-center">Số lượng</th>
-              <th className="py-4 whitespace-nowrap text-center">Giá</th>
-              <th className="py-4 whitespace-nowrap text-center">Tạm tính</th>
-              <th className="py-4 whitespace-nowrap text-center"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {cartItems.length > 0 ? (
-              cartItems.map((item) => {
-                const product = products[item.size.productId] || {};
-                return (
-                  <tr key={item.id} className="bg-white border-b hover:bg-gray-50">
-                    <td className="text-center py-4">
-                      <input
-                        type="checkbox"
-                        checked={item.isSelected}
-                        onChange={() => handleSelectionChange(item.id)}
-                        className="cursor-pointer"
-                      />
-                    </td>
-                    <td className="pl-10 py-4 w-[380px]">
-                      <div className="flex space-x-6 items-center">
-                        <div className="w-[80px] h-[80px] overflow-hidden flex justify-center items-center border border-[#EDEDED]">
-                          <img
-                            src={`/assets/images/${product.firstImage}`}
-                            alt="product"
-                            className="w-full h-full object-contain"
-                          />
-                        </div>
-                        <div className="flex-1 flex flex-col">
-                          <p className="font-medium text-[15px] text-qblack">
-                            {product.name || 'Tên sản phẩm'}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="text-center py-4 px-2">
-                      <div className="flex justify-center items-center">
-                        <span
-                          className="w-[20px] h-[20px] block rounded-full border border-gray-400"
-                          style={{ backgroundColor: item.size.color.name }}
-                        ></span>
-                      </div>
-                    </td>
-                    <td className="text-center py-4 px-2">
-                      <span className="text-[15px] font-normal">{item.size.name}</span>
-                    </td>
-                    <td className="text-center py-4 px-2">
-                      <div className="flex space-x-2 items-center justify-center">
-                        <button onClick={() => handleQuantityChange(item.id, -1)} className="bg-gray-200 rounded-full px-2">-</button>
-                        <span>{item.quantity}</span>
-                        <button onClick={() => handleQuantityChange(item.id, 1)} className="bg-gray-200 rounded-full px-2">+</button>
-                      </div>
-                    </td>
-                    <td className="text-center py-4 px-2">
-                      <span className="text-[15px] font-normal">
-                        {formatCurrency(product.price)}
-                      </span>
-                    </td>
-                    <td className="text-center py-4 px-2">
-                      <span className="text-[15px] font-normal">
-                        {formatCurrency(item.quantity * product.price)}
-                      </span>
-                    </td>
-                    <td className="text-center py-4 px-2">
-                      <button onClick={() => handleRemoveItem(item.id)} className="text-red-600">Xóa</button>
-                    </td>
-                  </tr>
-                );
-              })
-            ) : (
-              <tr>
-                <td colSpan="8" className="py-4 text-center">Giỏ hàng của bạn đang trống</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+    <div className="w-full p-6 bg-gray-50">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {cartItems.length > 0 ? (
+          cartItems.map((item) => {
+            const product = products[item.size.productId] || {};
+            return (
+              <div
+                key={item.id}
+                className="relative bg-white border border-gray-200 rounded-lg shadow-md p-4 flex flex-col space-y-4"
+              >
+                {/* Hình ảnh sản phẩm */}
+                <div className="w-full h-48 flex items-center justify-center overflow-hidden rounded-lg bg-gray-100">
+                  <img
+                    src={`/assets/images/${product.firstImage}`}
+                    alt="product"
+                    className="w-auto h-full object-contain"
+                  />
+                </div>
+
+                {/* Thông tin sản phẩm */}
+                <div className="flex flex-col space-y-2">
+                  <h3 className="font-bold text-lg text-gray-800">
+                    {product.name || 'Tên sản phẩm'}
+                  </h3>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm text-gray-500">Màu:</span>
+                    <div
+                      className="w-5 h-5 rounded-full border"
+                      style={{ backgroundColor: item.size.color.name }}
+                    ></div>
+                  </div>
+                  <div className="text-sm text-gray-600">Kích cỡ: {item.size.name}</div>
+                </div>
+
+                {/* Giá và số lượng */}
+                <div className="flex flex-col space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Giá:</span>
+                    <span className="font-medium text-gray-800">
+                      {formatCurrency(product.price)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Tạm tính:</span>
+                    <span className="font-medium text-gray-800">
+                      {formatCurrency(item.quantity * product.price)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Số lượng và hành động */}
+                <div className="flex items-center justify-between mt-2">
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => handleQuantityChange(item.id, -1)}
+                      className="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                    >
+                      -
+                    </button>
+                    <span className="font-medium">{item.quantity}</span>
+                    <button
+                      onClick={() => handleQuantityChange(item.id, 1)}
+                      className="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                    >
+                      +
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => handleRemoveItem(item.id)}
+                    className="text-red-600 font-medium hover:underline"
+                  >
+                    Xóa
+                  </button>
+                </div>
+
+                {/* Checkbox chọn */}
+                <div className="absolute top-4 right-4">
+                  <input
+                    type="checkbox"
+                    checked={item.isSelected}
+                    onChange={() => handleSelectionChange(item.id)}
+                    className="cursor-pointer w-5 h-5 accent-black"
+                  />
+                </div>
+              </div>
+            );
+          })
+        ) : (
+          <div className="col-span-full text-center text-gray-500">
+            Giỏ hàng của bạn đang trống
+          </div>
+        )}
       </div>
       <ToastContainer autoClose={1000} />
     </div>
+
   );
 }

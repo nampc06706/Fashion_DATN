@@ -448,113 +448,141 @@ export default function CheckoutPage() {
           <div className="container-x mx-auto">
             <div className="w-full lg:flex lg:space-x-[30px]">
               <div className="lg:w-1/2 w-full">
-                <h1 className="sm:text-2xl text-xl text-qblack font-medium mb-5">Thông tin thanh toán</h1>
-                <div className="address-wrapper p-5 border border-gray-200 rounded-lg mt-5">
+                <h1 className="sm:text-2xl text-xl text-qblack font-semibold mb-5 border-b pb-2">
+                  Thông tin thanh toán
+                </h1>
+                <div className="address-wrapper bg-white shadow-md rounded-lg p-6 border border-gray-200 mt-6">
                   <div className="form-area">
-                    <h1 className="text-2xl text-qblack font-medium mb-3">Địa chỉ của tôi</h1>
-                    <p className="text-[15px] text-qgray mb-2">Chọn địa chỉ nhận hàng</p>
+                    <h1 className="text-2xl font-bold text-gray-800 mb-4">Địa chỉ của tôi</h1>
+                    <p className="text-sm text-gray-500 mb-6">Bạn có thể chọn hoặc thêm địa chỉ mới để sử dụng.</p>
+
                     <div>
-                      {addressData.length > 0 ? (
-                        addressData.map((address) => (
-                          <div key={address.id} className="address-item mb-4 p-6 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                            <div className="mb-2">
-                              <p className="text-lg font-semibold text-gray-700 mb-1">Thông tin liên hệ:</p>
-                              <p className="text-xl font-medium text-blue-500">Tên người nhận: {address.fullname}</p>
-                              <p className="text-gray-600">Số điện thoại: {address.phone}</p>
+                      <div className="address-list-container">
+                        <div className="overflow-y-auto h-[320px] space-y-4 p-4">
+                          {addressData.length > 0 ? (
+                            addressData.map((address) => (
+                              <div
+                                key={address.id}
+                                className={`address-card p-4 rounded-lg ${address.isdefault
+                                  ? 'border-l-4 border-indigo-500 bg-gradient-to-r from-indigo-50 via-indigo-100 to-indigo-200 shadow-xl'
+                                  : 'border-l-4 border-gray-300 bg-white shadow-sm text-xs'
+                                  } transition-all transform`}
+                              >
+                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
+                                  <div>
+                                    <p className={`font-extrabold text-gray-900 ${address.isdefault ? 'text-lg' : 'text-sm'}`}>{address.fullname}</p>
+                                    <p className={`text-gray-500 mt-1 flex items-center ${address.isdefault ? 'text-sm' : 'text-xs'}`}>
+                                      <i className="fas fa-phone-alt mr-1 text-green-500"></i> {address.phone}
+                                    </p>
+                                  </div>
+                                  <div
+                                    className={`py-1 px-4 mt-2 md:mt-0 rounded-full text-[10px] font-semibold ${address.isdefault
+                                      ? 'bg-indigo-100 text-indigo-600'
+                                      : 'bg-gray-300 text-gray-600'
+                                      }`}
+                                  >
+                                    {address.isdefault ? 'Mặc định' : 'Đặt làm mặc định'}
+                                  </div>
+                                </div>
+
+                                <div className={`text-[10px] text-gray-700 mt-2 ${address.isdefault ? 'text-sm' : 'text-xs'}`}>
+                                  <p className="flex items-center">
+                                    <i className="fas fa-map-marker-alt mr-1 text-red-500"></i>
+                                    {address.note}, {address.ward}, {address.district}, {address.province}
+                                  </p>
+                                </div>
+
+                                <div className="flex justify-between items-center mt-4">
+                                  <button
+                                    onClick={() => handleSetDefaultAddress(address.id)}
+                                    className="py-1 px-3 bg-gradient-to-r from-blue-400 to-blue-600 text-white font-semibold text-xs rounded-lg shadow-sm hover:scale-105 transition-transform duration-300"
+                                    title={address.isdefault ? 'Địa chỉ mặc định' : 'Đặt làm mặc định'}
+                                  >
+                                    {address.isdefault ? 'Mặc định' : 'Đặt làm mặc định'}
+                                  </button>
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="no-address-message text-center p-6 border-2 border-indigo-300 bg-indigo-50 text-indigo-600 rounded-xl shadow-xl">
+                              <p className="text-lg font-semibold">Chưa có địa chỉ nào</p>
+                              <p>Vui lòng thêm địa chỉ mới để tiếp tục.</p>
                             </div>
-                            <div className="mb-2">
-                              <p className="text-lg font-semibold text-gray-700 mb-1">Địa chỉ:</p>
-                              <p className="text-gray-600">Tỉnh {address.province}, Quận/Huyện {address.district}, Xã/Phường {address.ward}</p>
-                            </div>
-                            <p className="text-gray-500">Số nhà, Số đường: {address.note}</p>
-                            <div className="flex items-center mt-4 space-x-3">
-                              <input
-                                type="checkbox"
-                                onChange={() => handleSetDefaultAddress(address.id)}
-                                className="hidden"
-                              />
-                              <label className="relative flex items-center cursor-pointer" onClick={() => handleSetDefaultAddress(address.id)}>
-                                <span className={`block w-10 h-5 rounded-full transition-colors duration-300 ${address.isdefault ? 'bg-blue-500' : 'bg-gray-300'}`}></span>
-                                <span className={`absolute left-1 top-1 w-3.5 h-3.5 bg-white rounded-full transition-transform duration-300 transform ${address.isdefault ? 'translate-x-5' : 'translate-x-0'}`}></span>
-                                <span className="text-gray-600 ml-3">Đặt làm địa chỉ mặc định</span>
-                              </label>
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="no-address-message text-center p-4 border border-red-200 bg-red-50 text-red-600 rounded-lg">
-                          Chưa có địa chỉ nào. Vui lòng thêm địa chỉ mới.
+                          )}
+
                         </div>
-                      )}
+                      </div>
 
 
-                      {/* Nút thêm địa chỉ mới */}
                       <button
                         onClick={toggleNewAddressForm}
-                        className="bg-blue-500 text-white px-4 py-2 rounded"
+                        className="mt-6  bg-gradient-to-r from-indigo-500 to-indigo-700 text-white py-3 px-6 rounded-full shadow-lg  flex items-center justify-center"
                       >
-                        Thêm địa chỉ mới
+                        <i className="fas fa-plus mr-3 text-lg"></i>
+                        <span className="text-lg font-semibold">Thêm địa chỉ mới</span>
                       </button>
 
-                      {/* Hiển thị overlay nếu showNewAddressForm là true */}
+
                       {showNewAddressForm && (
                         <div
-                          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+                          className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50"
                           onClick={toggleNewAddressForm}
                         >
                           <div
-                            className="bg-white p-6 shadow-lg rounded-lg w-96"
+                            className="bg-white p-8 rounded-3xl shadow-xl w-[450px] animate-fade-in"
                             onClick={(e) => e.stopPropagation()}
                           >
-                            <h2 className="text-xl font-medium mb-3">Thêm địa chỉ mới</h2>
-                            <InputCom
-                              label="Họ và tên"
-                              name="fullname"
-                              placeholder="Nhập họ và tên"
-                              value={newAddress.fullname}
-                              inputHandler={handleInputChange}
-                              required
-                            />
-                            <InputCom
-                              label="Số điện thoại"
-                              name="phone"
-                              placeholder="Nhập số điện thoại"
-                              value={newAddress.phone}
-                              inputHandler={handleInputChange}
-                              required
-                            />
-                            <InputCom
-                              label="Tỉnh/Thành phố"
-                              name="province"
-                              placeholder="Nhập tỉnh/thành phố"
-                              value={newAddress.province}
-                              inputHandler={handleInputChange}
-                            />
-                            <InputCom
-                              label="Quận/Huyện"
-                              name="district"
-                              placeholder="Nhập quận/huyện"
-                              value={newAddress.district}
-                              inputHandler={handleInputChange}
-                            />
-                            <InputCom
-                              label="Xã/Phường"
-                              name="ward"
-                              placeholder="Nhập xã/phường"
-                              value={newAddress.ward}
-                              inputHandler={handleInputChange}
-                            />
-                            <InputCom
-                              label="Số nhà, Số đường: "
-                              name="note"
-                              placeholder="Số nhà, Số đường: "
-                              value={newAddress.note}
-                              inputHandler={handleInputChange}
-                            />
+                            <h2 className="text-3xl font-bold text-indigo-700 mb-6 text-center">Thêm địa chỉ mới</h2>
+                            <div className="space-y-6">
+                              <InputCom
+                                label="Họ và tên"
+                                name="fullname"
+                                placeholder="Nhập họ và tên"
+                                value={newAddress.fullname}
+                                inputHandler={handleInputChange}
+                                required
+                              />
+                              <InputCom
+                                label="Số điện thoại"
+                                name="phone"
+                                placeholder="Nhập số điện thoại"
+                                value={newAddress.phone}
+                                inputHandler={handleInputChange}
+                                required
+                              />
+                              <InputCom
+                                label="Tỉnh/Thành phố"
+                                name="province"
+                                placeholder="Nhập tỉnh/thành phố"
+                                value={newAddress.province}
+                                inputHandler={handleInputChange}
+                              />
+                              <InputCom
+                                label="Quận/Huyện"
+                                name="district"
+                                placeholder="Nhập quận/huyện"
+                                value={newAddress.district}
+                                inputHandler={handleInputChange}
+                              />
+                              <InputCom
+                                label="Xã/Phường"
+                                name="ward"
+                                placeholder="Nhập xã/phường"
+                                value={newAddress.ward}
+                                inputHandler={handleInputChange}
+                              />
+                              <InputCom
+                                label="Số nhà, Số đường:"
+                                name="note"
+                                placeholder="Nhập số nhà, số đường"
+                                value={newAddress.note}
+                                inputHandler={handleInputChange}
+                              />
+                            </div>
                             <button
                               onClick={handleAddAddress}
-                              className="bg-green-500 text-white px-4 py-2 rounded mt-2"
-                              type="button" // Ngăn chặn submit mặc định
+                              className="mt-6 w-full bg-gradient-to-r from-teal-500 to-teal-600 text-white py-3 rounded-xl transform transition-all hover:scale-105 hover:shadow-2xl"
+                              type="button"
                             >
                               Lưu địa chỉ
                             </button>
@@ -565,24 +593,27 @@ export default function CheckoutPage() {
                     </div>
                   </div>
                 </div>
-
-                <div className="modal-overlay">
-                  <div className="modal-content">
-                    <form>
-                      <InputCom
-                        value={note}
-                        inputHandler={(e) => setNote(e.target.value)} // Gán hàm này cho inputHandler
-                        label="Ghi chú*"
+                <div className="p-4">
+                  <form>
+                    <div className="mb-4">
+                      <label htmlFor="note" className="block text-sm font-semibold text-gray-700">
+                        Ghi chú*
+                      </label>
+                      <input
+                        id="note"
                         name="note"
-                        placeholder=""
-                        inputClasses="w-full h-[50px]"
+                        type="text"
+                        value={note}
+                        onChange={(e) => setNote(e.target.value)}
+                        placeholder="Nhập ghi chú"
+                        className="w-full h-[50px] p-3 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
-
-                    </form>
-                  </div>
+                    </div>
+                  </form>
                 </div>
 
               </div>
+
 
               <div className="flex-1">
                 <h1 className="sm:text-2xl text-xl text-qblack font-medium mb-5">Tóm tắt đơn hàng</h1>
