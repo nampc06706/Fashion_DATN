@@ -269,67 +269,67 @@ export default function OrderTab({ accountId: initialAccountId }) {
       const quantity = parseInt(detail.quantity, 10) || 0; // Đảm bảo số lượng là số và không bị NaN
       return total + price * quantity; // Nhân giá với số lượng và cộng dồn
     }, 0);
-  
+
     // Tính chi phí vận chuyển
     const shippingCost = parseFloat(shippingMethod?.price) || 0; // Tránh lỗi khi không có shippingMethod
-  
+
     // Trả về tổng tiền (tiền sản phẩm + chi phí vận chuyển)
     return productTotal + shippingCost;
   };
-  
+
 
   return (
     <>
       <ToastContainer position="top-right" autoClose={1000} hideProgressBar={false} />
 
-      <div className="relative w-full overflow-x-auto sm:rounded-lg">
-
-        <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-          <thead>
-            <tr className="text-base text-qgray whitespace-nowrap px-2 border-b default-border-bottom">
-              <th className="py-4 block whitespace-nowrap text-center">Đặt hàng</th>
-              <th className="py-4 whitespace-nowrap text-center">Ngày</th>
-              <th className="py-4 whitespace-nowrap text-center">Trạng thái</th>
-              <th className="py-4 whitespace-nowrap text-center">Tổng tiền</th>
-              <th className="py-4 whitespace-nowrap text-center"></th>
+      <div className="relative w-full overflow-x-auto sm:rounded-lg shadow-lg bg-white">
+        <table className="w-full text-sm text-left text-gray-600">
+          <thead className="bg-gray-100 text-gray-800">
+            <tr>
+              <th className="py-4 text-center">Đặt hàng</th>
+              <th className="py-4 text-center">Ngày</th>
+              <th className="py-4 text-center">Trạng thái</th>
+              <th className="py-4 text-center">Tổng tiền</th>
+              <th className="py-4 text-center">Hành động</th>
             </tr>
           </thead>
           <tbody>
             {orders.length > 0 ? (
               orders.map((order) => (
-                <tr key={order.id} className="bg-white border-b hover:bg-gray-50">
-                  <td className="text-center py-4">
-                    <span className="text-lg text-qgray font-medium">#{order.id}</span>
+                <tr
+                  key={order.id}
+                  className="bg-white border-b hover:bg-gray-50 transition-colors duration-200"
+                >
+                  <td className="text-center py-4 font-semibold text-gray-800">
+                    #{order.id}
                   </td>
-                  <td className="text-center py-4 px-2">
-                    <span className="text-base text-qgray whitespace-nowrap">
-                      {new Date(order.date[0], order.date[1] - 1, order.date[2], order.date[3], order.date[4], order.date[5])
-                        .toLocaleString("vi-VN")}
-                    </span>
+                  <td className="text-center py-4 px-2 text-gray-700">
+                    {new Date(order.date[0], order.date[1] - 1, order.date[2], order.date[3], order.date[4], order.date[5])
+                      .toLocaleString("vi-VN")}
                   </td>
                   <td className="text-center py-4 px-2">
                     <span
-                      className={`text-sm rounded p-2 ${order.status === "5" || order.status === "99"
-                        ? "text-red-500 bg-red-100" // Màu đỏ cho số 5 và 99
-                        : order.status === "4"
-                          ? "text-green-500 bg-green-100" // Màu xanh cho trạng thái 4
-                          : "text-blue-500 bg-blue-100" // Màu khác cho các số khác
+                      className={`px-3 py-1 rounded-full text-sm font-medium ${order.status === "5" || order.status === "99"
+                          ? "bg-red-100 text-red-600"
+                          : order.status === "4"
+                            ? "bg-green-100 text-green-600"
+                            : "bg-blue-100 text-blue-600"
                         }`}
                     >
                       {getOrderStatus(order.status)}
                     </span>
                   </td>
-
-                  <td className="text-center py-4 px-2">
-                    <span className="text-base text-qblack whitespace-nowrap px-2">
-                      {calculateTotalPrice(order.orderDetails, order.shippingMethod).toLocaleString("vi-VN", { style: "currency", currency: "VND" })}
-                    </span>
+                  <td className="text-center py-4 px-2 font-bold text-gray-800">
+                    {calculateTotalPrice(order.orderDetails, order.shippingMethod).toLocaleString(
+                      "vi-VN",
+                      { style: "currency", currency: "VND" }
+                    )}
                   </td>
                   <td className="text-center py-4">
                     <button
                       type="button"
                       onClick={() => handleOpenDetailModal(order)}
-                      className="w-[116px] h-[46px] bg-qyellow text-qblack font-bold"
+                      className="w-[116px] h-[46px] bg-blue-500 text-white font-bold rounded hover:bg-blue-600 transition-all duration-200"
                     >
                       Xem chi tiết
                     </button>
@@ -337,13 +337,16 @@ export default function OrderTab({ accountId: initialAccountId }) {
                 </tr>
               ))
             ) : (
-              <tr className="bg-white border-b">
-                <td colSpan="5" className="text-center py-4">Không có đơn hàng nào</td>
+              <tr>
+                <td colSpan="5" className="text-center py-6 text-gray-500">
+                  Không có đơn hàng nào
+                </td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
+
 
       {isDetailModalOpen && selectedOrder && (
         <>

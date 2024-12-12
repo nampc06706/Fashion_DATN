@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   FaTachometerAlt, FaBox, FaShoppingCart, FaUsers,
-  FaTags, FaRuler, FaPalette, FaSignOutAlt, FaBars, FaTimes, FaHome,FaBolt
+  FaTags, FaRuler, FaSignOutAlt, FaBars, FaTimes, FaHome, FaBolt,
+  FaBell,
+  FaUserCircle
 } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 
 const AdminLayout = ({ children }) => {
-  const location = useLocation(); // Lấy thông tin vị trí hiện tại
+  const location = useLocation();
+  const navigate = useNavigate();
+
   const [activeLink, setActiveLink] = useState(location.pathname);
-  const [navbarTitle, setNavbarTitle] = useState('Thống kê');
-  const [sidebarOpen, setSidebarOpen] = useState(true); // Trạng thái mở/tắt sidebar
-  const navigate = useNavigate(); // Khởi tạo navigate
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   const links = [
     { to: '/admin', label: 'Thống kê', icon: <FaTachometerAlt /> },
     { to: '/admin/products', label: 'Sản phẩm', icon: <FaBox /> },
@@ -21,124 +23,117 @@ const AdminLayout = ({ children }) => {
     { to: '/admin/category', label: 'Loại sản phẩm', icon: <FaTags /> },
     { to: '/admin/size', label: 'Kích thước', icon: <FaRuler /> },
     { to: '/admin/flash-sales', label: 'Flash sales', icon: <FaBolt /> },
-    // Cập nhật mục đăng xuất để gọi hàm logout thay vì link
     { label: 'Đăng xuất', icon: <FaSignOutAlt />, action: 'logout' }
   ];
 
-  const handleSidebarClick = (link) => {
-    setActiveLink(link.to);
-    setNavbarTitle(link.label);
-  };
-
   useEffect(() => {
-    // Cập nhật activeLink và navbarTitle dựa trên đường dẫn hiện tại
     const currentLink = links.find(link => link.to === location.pathname);
-    if (currentLink) {
-      setActiveLink(currentLink.to);
-      setNavbarTitle(currentLink.label);
-    }
-  }, [location.pathname, links]);
+    if (currentLink) setActiveLink(currentLink.to);
+  }, [location.pathname]);
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
-  // Hàm xử lý trở về trang chủ khi nhấn nút
-  const handleClick = () => {
-    
-    navigate('/'); // Điều hướng về trang chủ
-   
-  };
-  // Hàm xử lý đăng xuất
   const handleLogout = () => {
-    // Xóa token trong cookies
     Cookies.remove('token');
-
-    // Điều hướng về trang đăng nhập hoặc trang chủ sau khi đăng xuất
-    navigate('/login');  // Hoặc navigate('/') nếu bạn muốn điều hướng về trang chủ
+    navigate('/login');
     window.location.reload();
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-60' : 'w-16'} bg-gradient-to-b from-blue-900 to-blue-500 text-gray-100 shadow-lg transition-all duration-500 ease-in-out`}>
-        {/* Menubar */}
-        <div className="flex items-center justify-between p-4 bg-blue-800 shadow-md">
-          <h1 className={`${sidebarOpen ? 'block' : 'hidden'} text-xl font-semibold`}>
-            Admin
-          </h1>
-          <button onClick={toggleSidebar} className="text-white">
-            {sidebarOpen ? <FaTimes /> : <FaBars />}
+      <div
+        className={`fixed inset-y-0 left-0 z-30 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          } w-64 px-6 py-4 flex flex-col`}
+      >
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-2xl font-bold text-blue-600">Admin</h1>
+          <button className="text-gray-700" onClick={toggleSidebar}>
+            <FaTimes size={24} />
           </button>
         </div>
 
-        <div className="flex flex-col">
-        {links.map((link, index) => (
+        <nav className="flex-1 space-y-2">
+          {links.map((link, index) => (
             link.action === 'logout' ? (
               <button
                 key={index}
-                onClick={handleLogout}  // Gọi hàm đăng xuất khi nhấn
-                className={`p-4 flex items-center gap-2 text-left rounded-tl-full rounded-bl-full transition duration-300 ease-in-out text-gray-100 hover:bg-white hover:text-black hover:text-xl`}
+                onClick={handleLogout}
+                className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-blue-100 rounded-lg"
               >
                 {link.icon}
-                <span className={`${sidebarOpen ? 'block' : 'hidden'} transition-transform duration-300 ease-in-out transform hover:scale-110`}>
-                  {link.label}
-                </span>
+                <span>{link.label}</span>
               </button>
             ) : (
               <Link
-                key={link.to}
+                key={index}
                 to={link.to}
-                className={`p-4 flex items-center gap-2 text-left rounded-tl-full rounded-bl-full transition duration-300 ease-in-out ${activeLink === link.to
-                  ? 'bg-white text-black text-lg font-semibold'
-                  : 'text-gray-100 hover:bg-white hover:text-black hover:text-xl'
+                onClick={() => setActiveLink(link.to)}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeLink === link.to
+                  ? 'bg-blue-500 text-white'
+                  : 'text-gray-600 hover:bg-blue-100'
                   }`}
-                onClick={() => handleSidebarClick(link)}
-                aria-current={activeLink === link.to ? 'page' : undefined}
               >
                 {link.icon}
-                <span className={`${sidebarOpen ? 'block' : 'hidden'} transition-transform duration-300 ease-in-out transform hover:scale-110`}>{link.label}</span>
+                <span>{link.label}</span>
               </Link>
             )
           ))}
-        </div>
+        </nav>
       </div>
+
+      {/* Overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-20"
+          onClick={toggleSidebar}
+        ></div>
+      )}
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Navbar */}
-        <div className="w-full bg-gradient-to-t from-green-300 to-white shadow-md p-4 flex justify-between items-center">
-          <h1 className="text-xl font-semibold text-gray-800">
-            {navbarTitle === 'Thống kê' ? navbarTitle : `Quản lý ${navbarTitle.toLowerCase()}`}
-          </h1>
-          <button
-            onClick={handleClick}
-            className="relative inline-flex items-center justify-center p-4 px-6 py-3 overflow-hidden font-medium text-blue-600 transition duration-300 ease-out border-2 border-blue-500 rounded-lg shadow-md group">
-            {/* Hiệu ứng nền xanh khi hover */}
-            <span className="absolute inset-0 flex items-center justify-center w-full h-full text-white bg-blue-500 transition-all duration-300 -translate-x-full group-hover:translate-x-0 ease">
-              <FaSignOutAlt className="mr-2" />
-              Trở về
-            </span>
+        <div className="bg-gray-800 shadow-lg py-4 px-8 flex items-center justify-between">
+          {/* Logo hoặc Tiêu đề */}
+          <div className="flex items-center space-x-4">
+            <button className="text-white" onClick={toggleSidebar}>
+              <FaBars size={24} />
+            </button>
+            <h1 className="text-xl font-semibold text-white">Trang Quản Trị</h1>
+          </div>
+          <div className="flex justify-center items-center gap-6">
+            {/* Logo */}
+            <div className="relative z-10">
+              <img
+                src="../assets/images/logo-8.png"
+                alt="Logo"
+                className="w-48 h-10 object-contain"
+              />
+            </div>
+          </div>
 
-            {/* Chỉ hiển thị "Logout" khi không hover */}
-            <span className="absolute flex items-center justify-center w-full h-full text-blue-500 transition-all duration-300 transform group-hover:translate-x-full ease">
-              <FaHome className="mr-2" />
-              Trang chủ
-            </span>
 
-            {/* Ẩn ban đầu */}
-            <span className="relative invisible">
-              Trang chủ
-            </span>
-          </button>
+          {/* Các biểu tượng hoặc các nút khác (nếu có) */}
+          <div className="flex items-center space-x-6">
+            <button className="text-white hover:text-gray-300 transition-colors duration-200"
+              onClick={() => navigate('/')}>
 
+              <FaHome size={20} />
+            </button>
+            <button className="text-white hover:text-gray-300 transition-colors duration-200">
+              <FaBell size={20} />
+            </button>
+            <button className="text-white hover:text-gray-300 transition-colors duration-200">
+              <FaUserCircle size={20} />
+            </button>
+          </div>
         </div>
 
-        {/* Main Content Area */}
-        <div className="p-6 bg-gray-100 flex-1 overflow-y-auto transition-all duration-300 ease-in-out">
+
+        {/* Content Area */}
+        <main className="flex-1 p-6 bg-gray-100 overflow-y-auto">
           {children}
-        </div>
+        </main>
       </div>
     </div>
   );
