@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Modal from "react-modal";
 import QuickViewIco from "../icons/QuickViewIco";
-import ThinLove from "../icons/ThinLove";
-import Compair from "../icons/Compair";
 
 // Cấu hình mặc định cho modal
 Modal.setAppElement("#root");
@@ -44,12 +42,6 @@ function ProductCardStyleThree({ datas }) {
           >
             <QuickViewIco />
           </button>
-          {/* <button className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg">
-            <ThinLove />
-          </button>
-          <button className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg">
-            <Compair />
-          </button> */}
         </div>
       </div>
 

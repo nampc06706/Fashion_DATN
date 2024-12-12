@@ -6,6 +6,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Cookies from 'js-cookie';
 import { jwtDecode } from "jwt-decode";
+import { FaCartPlus, FaHeart } from 'react-icons/fa';
 
 export default function ProductView() {
   const [cartItems, setCartItems] = useState(JSON.parse(Cookies.get('cart') || '[]'));
@@ -110,8 +111,6 @@ export default function ProductView() {
       toast.error(`Số lượng không thể vượt quá số lượng có sẵn trong kho. Chỉ còn ${selectedSizeInfo.quantityInStock - currentQuantityInCart} sản phẩm.`);
     }
   };
-
-
 
   const decrement = () => {
     if (quantity > 1) {
@@ -223,8 +222,6 @@ export default function ProductView() {
     }
   };
 
-
-
   const addFavourite = async () => {
     if (!token || !userInfo) {
       toast.error('Bạn cần đăng nhập để yêu thích sản phẩm này.');
@@ -280,7 +277,6 @@ export default function ProductView() {
   const formattedPrice = price || '0.00';
   const formattedOriginalPrice = originalPrice || '0.00';
   const productDescription = description || 'No description available';
-
   const formatPrice = (price) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
   };
@@ -294,7 +290,6 @@ export default function ProductView() {
   return (
     <div className="product-view w-full flex justify-center">
       <ToastContainer position="top-right" autoClose={1000} hideProgressBar={false} />
-
       <div className="product-image-container lg:w-1/2 xl:mr-16 lg:mr-8">
         <div className="relative overflow-hidden mb-4 rounded-lg shadow-lg border">
           {src ? (
@@ -304,7 +299,7 @@ export default function ProductView() {
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className="text-center text-qgray">No image available</div>
+            <div className="text-center text-qgray">Không có hình ảnh nào</div>
           )}
 
           {/* Hiển thị discount */}
@@ -329,20 +324,13 @@ export default function ProductView() {
               />
             </div>
           )) : (
-            <div className="text-center text-qgray">No images available</div>
+            <div className="text-center text-qgray">Không có hình ảnh nào</div>
           )}
         </div>
       </div>
 
       <div className="product-details flex-1 p-8">
         <h2 className="text-3xl font-semibold mb-6">{productName}</h2>
-
-        <div className="rating mb-6 flex">
-          {[...Array(5)].map((_, index) => (
-            <Star key={index} />
-          ))}
-        </div>
-
         <div className="price mb-6 flex items-center">
           {!isSamePrice && (
             <span className="text-lg font-medium text-gray-400 line-through mr-4">
@@ -358,28 +346,36 @@ export default function ProductView() {
 
         {/* Color Selection */}
         <div className="color-selection mb-6">
-          <span className="text-sm font-medium text-gray-500 uppercase mb-2 inline-block">Color</span>
+          <span className="text-sm font-medium text-gray-500 uppercase mb-2 inline-block">Màu</span>
           <div className="flex gap-3">
             {availableColors.map((color, index) => (
               <div
                 key={index}
                 onClick={() => handleColorChange(color)}
-                className={`w-[35px] h-[35px] rounded-full cursor-pointer ${color === selectedColor ? "border-2 border-qred" : "border"}`}
-                style={{ backgroundColor: color }}
+                className={`w-[35px] h-[35px] rounded-full cursor-pointer transition-all duration-300 ${color === selectedColor
+                  ? "border-4 border-white shadow-lg transform scale-110" // Tạo hiệu ứng khi chọn màu
+                  : "border-2 border-gray-300" // Viền mặc định
+                  }`}
+                style={{
+                  backgroundColor: color,
+                  boxShadow: color === selectedColor ? "0 0 10px rgba(0, 0, 0, 0.4)" : "none", // Tạo bóng đổ khi chọn
+                }}
               ></div>
             ))}
           </div>
         </div>
 
-        {/* Size Selection */}
+
+        {/* Lựa chọn kích thước */}
         <div className="size-selection mb-6">
-          <span className="text-sm font-medium text-gray-500 uppercase mb-2 inline-block">Size</span>
+          <span className="text-sm font-medium text-gray-500 uppercase mb-2 inline-block">Kích thước</span>
           <div className="flex gap-3">
             {availableSizes.map((size, index) => (
               <div
                 key={index}
                 onClick={() => handleSizeChange(size)}
-                className={`w-[45px] h-[45px] border flex items-center justify-center cursor-pointer rounded-md ${size.name === selectedSize ? "border-qred" : "border-gray-300"}`}
+                className={`w-[45px] h-[45px] border flex items-center justify-center cursor-pointer relative transition-all duration-300 ease-in-out
+          ${size.name === selectedSize ? "border-qred animate-borderEffect" : "border-gray-300"}`}
               >
                 {size.name}
               </div>
@@ -387,7 +383,8 @@ export default function ProductView() {
           </div>
         </div>
 
-        {/* Quantity Selection */}
+
+        {/* Lựa chọn số lượng */}
         <div className="quantity-selection mb-6 flex items-center">
           <button
             onClick={decrement}
@@ -404,15 +401,24 @@ export default function ProductView() {
           </button>
         </div>
 
-        {/* Action Buttons */}
+        {/* Nút hành động */}
         <div className="action-buttons flex gap-4 mb-6">
-          <button onClick={addToCart} className="w-full h-[50px] bg-qyellow text-gray-800 text-sm font-semibold rounded-lg shadow-md hover:bg-qyellow-dark">
+          <button
+            onClick={addToCart}
+            className="w-1/2 h-[50px] bg-blue-500 text-white text-sm font-semibold shadow-md hover:bg-blue-700 transition duration-300 ease-in-out flex items-center justify-center gap-2"
+          >
+            <FaCartPlus className="text-white" /> {/* Thêm biểu tượng giỏ hàng */}
             Thêm vào giỏ hàng
           </button>
-          <button onClick={addFavourite} className="w-full h-[50px] bg-qred text-white text-sm font-semibold rounded-lg shadow-md hover:bg-qred-dark">
+          <button
+            onClick={addFavourite}
+            className="w-1/2 h-[50px] bg-gray-600 text-white text-sm font-semibold shadow-md hover:bg-gray-700 transition duration-300 ease-in-out flex items-center justify-center gap-2"
+          >
+            <FaHeart className="text-white" /> {/* Thêm biểu tượng yêu thích */}
             Yêu thích
           </button>
         </div>
+
       </div>
     </div>
 

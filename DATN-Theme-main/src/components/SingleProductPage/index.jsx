@@ -97,16 +97,6 @@ export default function SingleProductPage() {
       <LayoutHomeFive childrenClasses="pt-0 pb-0">
         <div className="single-product-wrapper w-full ">
           <div className="product-view-main-wrapper bg-white pt-[30px] w-full">
-            <div className="breadcrumb-wrapper w-full ">
-              <div className="container-x mx-auto">
-                <BreadcrumbCom
-                  paths={[
-                    { name: "Trang chủ", path: "/" },
-                    { name: "Chi tiết sản phẩm", path: "/product-details" },
-                  ]}
-                />
-              </div>
-            </div>
             <div className="w-full bg-white pb-[60px]">
               <div className="container-x mx-auto">
                 <ProductView id={id} reportHandler={() => setReport(!report)} />
