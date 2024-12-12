@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Arrow from "../../../Helpers/icons/Arrow";
 import Cookies from 'js-cookie';
 import { jwtDecode } from "jwt-decode";
 import axios from 'axios';
+import {
+  FaCogs,
+  FaTachometerAlt
+} from 'react-icons/fa';
 export default function Navbar({ className }) {
   const [categoryToggle, setToggle] = useState(false);
   const [elementsSize, setSize] = useState("0px");
@@ -186,34 +189,16 @@ export default function Navbar({ className }) {
           <div className="flex items-center">
             {user && user.role && (
               <Link to="/admin">
-                <button className="flex items-center bg-blue-500 text-white text-sm font-medium py-2 px-4 rounded-lg hover:bg-blue-600 transition-all duration-300">
-                  Quản Lý Bán Hàng
-                  <svg
-                    width="6"
-                    height="10"
-                    viewBox="0 0 6 10"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="ml-2 w-3 h-3"
-                  >
-                    <rect
-                      x="1.08984"
-                      width="6.94106"
-                      height="1.54246"
-                      transform="rotate(45 1.08984 0)"
-                    />
-                    <rect
-                      x="6"
-                      y="4.9082"
-                      width="6.94106"
-                      height="1.54246"
-                      transform="rotate(135 6 4.9082)"
-                    />
-                  </svg>
+                <button className="flex items-center bg-gray-800 text-white text-sm font-semibold py-3 px-6  shadow-md hover:bg-gray-900 hover:shadow-xl transition-all duration-300 ease-in-out">
+                  <FaCogs className="mr-2 w-4 h-4" /> {/* Biểu tượng cài đặt, phù hợp với quản lý admin */}
+                  <span>Quản Lý Admin</span>
                 </button>
               </Link>
             )}
           </div>
+
+
+
         </div>
       </div>
     </div>

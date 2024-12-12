@@ -464,63 +464,71 @@ export default function CheckoutPage() {
                               <div
                                 key={address.id}
                                 className={`address-card p-4 rounded-lg ${address.isdefault
-                                  ? 'border-l-4 border-indigo-500 bg-gradient-to-r from-indigo-50 via-indigo-100 to-indigo-200 shadow-xl'
-                                  : 'border-l-4 border-gray-300 bg-white shadow-sm text-xs'
-                                  } transition-all transform`}
+                                  ? 'border-l-4 border-indigo-400 bg-indigo-50 shadow-sm'
+                                  : 'border-l-4 border-gray-300 bg-white shadow-sm p-2'} transition-all transform`}
                               >
                                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
+                                  {/* Name and Phone (smaller for non-default) */}
                                   <div>
-                                    <p className={`font-extrabold text-gray-900 ${address.isdefault ? 'text-lg' : 'text-sm'}`}>{address.fullname}</p>
-                                    <p className={`text-gray-500 mt-1 flex items-center ${address.isdefault ? 'text-sm' : 'text-xs'}`}>
+                                    <p className={`font-semibold text-gray-900 ${address.isdefault ? 'text-lg' : 'text-xs'}`}>
+                                      {address.fullname}
+                                    </p>
+                                    <p className={`text-gray-600 mt-1 flex items-center ${address.isdefault ? 'text-sm' : 'text-[10px]'}`}>
                                       <i className="fas fa-phone-alt mr-1 text-green-500"></i> {address.phone}
                                     </p>
                                   </div>
-                                  <div
-                                    className={`py-1 px-4 mt-2 md:mt-0 rounded-full text-[10px] font-semibold ${address.isdefault
-                                      ? 'bg-indigo-100 text-indigo-600'
-                                      : 'bg-gray-300 text-gray-600'
-                                      }`}
-                                  >
-                                    {address.isdefault ? 'Mặc định' : 'Đặt làm mặc định'}
-                                  </div>
+
+                                  {/* Default Address Tag - Hiển thị khi là địa chỉ mặc định */}
+                                  {address.isdefault && (
+                                    <div
+                                      className="py-1 px-4 mt-2 md:mt-0 rounded-full text-[9px] font-semibold bg-indigo-100 text-indigo-600 text-xs"
+                                    >
+                                      Mặc định
+                                    </div>
+                                  )}
                                 </div>
 
-                                <div className={`text-[10px] text-gray-700 mt-2 ${address.isdefault ? 'text-sm' : 'text-xs'}`}>
+                                {/* Address Note (smaller for non-default) */}
+                                <div className={`text-[9px] text-gray-600 mt-2 ${address.isdefault ? 'text-sm' : 'text-[8px]'}`}>
                                   <p className="flex items-center">
                                     <i className="fas fa-map-marker-alt mr-1 text-red-500"></i>
                                     {address.note}, {address.ward}, {address.district}, {address.province}
                                   </p>
                                 </div>
 
-                                <div className="flex justify-between items-center mt-4">
-                                  <button
-                                    onClick={() => handleSetDefaultAddress(address.id)}
-                                    className="py-1 px-3 bg-gradient-to-r from-blue-400 to-blue-600 text-white font-semibold text-xs rounded-lg shadow-sm hover:scale-105 transition-transform duration-300"
-                                    title={address.isdefault ? 'Địa chỉ mặc định' : 'Đặt làm mặc định'}
-                                  >
-                                    {address.isdefault ? 'Mặc định' : 'Đặt làm mặc định'}
-                                  </button>
-                                </div>
+                                {/* Set Default Address Button - Hide if address is default */}
+                                {!address.isdefault && (
+                                  <div className="flex justify-between items-center mt-2">
+                                    <button
+                                      onClick={() => handleSetDefaultAddress(address.id)}
+                                      className="py-1 px-2 bg-gradient-to-r from-blue-400 to-blue-600 text-white font-semibold text-[10px] rounded-lg shadow-sm hover:scale-105 transition-transform duration-300"
+                                      title="Đặt làm mặc định"
+                                    >
+                                      Đặt làm mặc định
+                                    </button>
+                                  </div>
+                                )}
                               </div>
                             ))
                           ) : (
-                            <div className="no-address-message text-center p-6 border-2 border-indigo-300 bg-indigo-50 text-indigo-600 rounded-xl shadow-xl">
+                            <div className="no-address-message text-center p-6 border-2 border-indigo-300 bg-indigo-50 text-indigo-600 rounded-xl shadow-sm">
                               <p className="text-lg font-semibold">Chưa có địa chỉ nào</p>
                               <p>Vui lòng thêm địa chỉ mới để tiếp tục.</p>
                             </div>
                           )}
-
                         </div>
                       </div>
 
 
+
                       <button
                         onClick={toggleNewAddressForm}
-                        className="mt-6  bg-gradient-to-r from-indigo-500 to-indigo-700 text-white py-3 px-6 rounded-full shadow-lg  flex items-center justify-center"
+                        className="mt-6 bg-indigo-600 text-white py-2 px-4 text-sm font-medium shadow-md flex items-center justify-center hover:bg-indigo-700 transition-all duration-200 ease-in-out"
                       >
-                        <i className="fas fa-plus mr-3 text-lg"></i>
-                        <span className="text-lg font-semibold">Thêm địa chỉ mới</span>
+                        <i className="fas fa-plus mr-2 text-lg"></i>
+                        <span>Thêm địa chỉ mới</span>
                       </button>
+
 
 
                       {showNewAddressForm && (
@@ -606,12 +614,11 @@ export default function CheckoutPage() {
                         value={note}
                         onChange={(e) => setNote(e.target.value)}
                         placeholder="Nhập ghi chú"
-                        className="w-full h-[50px] p-3 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full h-[50px] p-3 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:animate-borderRound"
                       />
                     </div>
                   </form>
                 </div>
-
               </div>
 
 
@@ -642,15 +649,15 @@ export default function CheckoutPage() {
                                 <div className="flex-grow ml-3">
                                   <h4 className="text-[15px] text-qblack mb-2.5">
                                     {product.name || 'Tên sản phẩm'}
-                                    <sup className="text-[13px] text-qgray ml-2 mt-2">x{item.quantity}</sup>
+
                                   </h4>
                                   <p className="text-[13px] text-qgray">
                                     <span
                                       className="w-[20px] h-[20px] block rounded-full border border-gray-400"
                                       style={{ backgroundColor: item.size.color.name }}
                                     ></span>
-                                    {item.size.name},
-                                    {formatCurrency(product.price)}
+                                    Size: {item.size.name}
+                                    , Giá:{formatCurrency(product.price)}<span className="text-[13px] text-qgray ml-2 mt-2">x{item.quantity}</span>
                                   </p>
                                 </div>
                                 <div>
